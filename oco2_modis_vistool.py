@@ -10,6 +10,9 @@ GIBS developer documentation:https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+A
 Minimum command line call:
 python oco2_modis_vistool.py
 
+Output:
+Image (.png) named _ in specified output directory (default: code directory)
+
 Requirements:
 
 1) json configuration file (default: oco2_modis_vistool_config.json in code directory)
@@ -28,6 +31,7 @@ Revision history:
 
 import os
 import sys
+from glob import glob
 
 from OCO2FileOps import *
 
@@ -42,8 +46,21 @@ from osgeo import gdal, osr
 from shapely.ops import transform as geom_transform
 
 import xml.etree.ElementTree as ET
+import json
+import argparse
 
 import re
+
+class ConfigFile:
+
+    def __init__(self, json_file):
+        self.cf = json_file
+	
+    def exists(self):
+        return glob(self.cf)
+	
+    def get_contents(self):
+        return(json.load(open(self.cf)))
 
 def update_GIBS_xml(date, xml_file):
 
@@ -73,13 +90,54 @@ def pull_Aqua_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr, xml_file, tif_file, xsize
 
     os.system(cmd)
 
-date = '2015-07-04'
+### Static Defnitions
 code_dir = os.path.dirname(os.path.realpath(__file__))
 xml_file = code_dir+'/GIBS_Aqua_MODIS_truecolor.xml'
 
+
+### Dynamic Definitions: get information from config file ###
+
+parser = argparse.ArgumentParser(description="Get configuration file")
+parser.add_argument('config_file_loc', type=str, default=code_dir+'/oco2_modis_vistool_config.json', nargs='?',
+                    help="Name of config file (default: oco2_modis_vistool_config.json in code directory)")
+args = parser.parse_args()
+config_file = ConfigFile(args.config_file_loc)
+
+if config_file.exists():
+    orbit_info_dict = config_file.get_contents()
+else:
+    print 'The expected configuration file '+ args.config_file_loc + ' DNE in ' + code_dir
+    print 'Exiting'
+    sys.exit()
+
+
+date = orbit_info_dict['date']
+lat_ul = orbit_info_dict['geo_upper_left'][0]
+lon_ul = orbit_info_dict['geo_upper_left'][1]
+lat_lr = orbit_info_dict['geo_lower_right'][0]
+lon_lr = orbit_info_dict['geo_lower_right'][1]
+region = orbit_info_dict['region']
+try:
+    interest_pt = orbit_info_dict['ground_site']
+except:
+    interest_pt = []
+try:
+    output_dir = orbit_info_dict['output_dir']
+except:
+    output_dir = code_dir
+if not output_dir or not glob(output_dir):
+    print "output dir DNE, using code dir instead"
+    output_dir = code_dir
+
+### Pull Aqua-MODIS RGB from GIBS ###
 update_GIBS_xml(date, xml_file)
-#pull_Aqua_RGB_GIBS(43.5, -78.9, 39.6, -77.5,  xml_file, 'testing_python_pull.tif')
-#pull_Aqua_RGB_GIBS(5, -79, -18, -48,  xml_file, 'testing_python_pull.tif')
+
+try:
+    pull_Aqua_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr,  xml_file, code_dir+'/intermediate_RGB.tif')
+except:
+    print "Problem pulling RGB. Check that the geolocation bounds specified in the configuration file are for the upper left hand corner and the lower right hand corner"
+
+
  
 
 
