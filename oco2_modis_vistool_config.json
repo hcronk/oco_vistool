@@ -1,0 +1,15 @@
+{
+	"date": "2016-07-27",
+	"geo_upper_left": [43.5, -78.9],
+	"geo_lower_right": [39.6, -77.5],
+	"region": "Pennsylvania",
+	"oco2_overlay_info": {
+		"file": "/home/codell/OCO2_results/b70/lite_test_20160506/oco2_LtCO2_20160727_B7302b_r01_COoffline.nc4",
+		"variable": "xco2",
+		"orbit": 11016,
+		"lite_QF": "good",
+		"lite_warn_lims": [0, 15]
+	},
+	"ground_site": [-77.86, 40.7934],
+	"output_dir": "/home/hcronk/oco2_modis_vistool/code"
+}
