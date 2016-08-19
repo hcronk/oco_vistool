@@ -129,18 +129,20 @@ if not glob(var_file):
     print var_file+" does not exist."
     print "Exiting"
     sys.exit()
-var = overlay_info_dict['variable']
-orbit = overlay_info_dict['orbit']
+var_name = overlay_info_dict['variable']
+var_lims = overlay_info_dict['variable_plot_lims']
+orbit_int = overlay_info_dict['orbit']
 
 if re.search('oco2_Lt', var_file):
+    lite = True
     print "\nLite overlay file detected. Checking for QF and Warn specs..."
     
     try:
-        lite_qf = overlay_info_dict['lite_QF']
+        lite_quality = overlay_info_dict['lite_QF']
     except:
         print "No quality specifications detected. Output plot will contain all quality soundings"
-	lite_qf = 'all'
-    if not lite_qf:
+	lite_quality = 'all'
+    if not lite_quality:
         print "No quality specifications detected. Output plot will contain all quality soundings"
 	lite_qf = 'all'
     if lite_qf not in ['', 'all', 'good', 'bad']:
@@ -180,8 +182,6 @@ if not output_dir or not glob(output_dir):
     print "Either there was no output location specified or the one specified does not exist. Output will go in the code directory"
     output_dir = code_dir
 
-outfile = output_dir+'/'+region+"_"+straight_up_date+".png"
-
 ### Pull Aqua-MODIS RGB from GIBS ###
 
 update_GIBS_xml(date, xml_file)
@@ -206,22 +206,124 @@ inproj.ImportFromWkt(proj)
 width = ds.RasterXSize
 height = ds.RasterYSize
 
+#Calculate lat/lon lims of RGB
 minx = gt[0]
 miny = gt[3] + width*gt[4] + height*gt[5]
 maxx = gt[0] + width*gt[1] + height*gt[2]
 maxy = gt[3]
 
-# lat/long max/mins
-#print minx, miny, maxx, maxy
 
-# Create a feature for States/Admin 1 regions at 1:50m from Natural Earth
+### Prep OCO-2 Variable ###
+
+h5 = h5py.File(var_file)
+try:
+    oco2_data = h5[var_name][:]
+except:
+    print var_name+" DNE in "+var_file
+    print "Check that the variable name includes any necessary group paths. Ex: /Preprocessors/dp_abp"
+    print "Exiting"
+    sys.exit()
+try:
+    lat_data = h5[lat_name][:]
+except:
+    print lat_name+" DNE in "+var_file
+    print "Check that the variable name includes any necessary group paths. Ex: SoundingGeometry/sounding_latitude"
+    print "Exiting"
+    sys.exit()
+try:
+    lon_data = h5[lon_name][:]
+except:
+    print lon_name+" DNE in "+var_file
+    print "Check that the variable name includes any necessary group paths. Ex: SoundingGeometry/sounding_longitude"
+    print "Exiting"
+    sys.exit()
+h5.close()
+
+if lite:
+    
+    file_tag = "_all_quality"
+
+    lite_file = LiteFile(var_file)
+    lite_file.open_file()
+    lite_lat = lite_file.get_lat()
+    lite_lon = lite_file.get_lon()
+    lite_sid = lite_file.get_sid()
+    lite_xco2 = lite_file.get_xco2()
+    lite_warn = lite_file.get_warn()
+    lite_qf = lite_file.get_qf()
+    lite_orbit = lite_file.get_orbit()
+    lite_file.close_file()
+
+
+    orbit_subset = np.where(lite_orbit == orbit_int)
+    lite_lat = lite_lat[orbit_subset]
+    lite_lon = lite_lon[orbit_subset]
+    lite_sid = lite_sid[orbit_subset]
+    lite_qf = lite_qf[orbit_subset]
+    lite_xco2 = lite_xco2[orbit_subset]
+    lite_deltaP = lite_deltaP[orbit_subset]
+    lite_co2_ratio = lite_co2_ratio[orbit_subset]
+    lite_warn = lite_warn[orbit_subset]
+    
+    lite_lat_subset_mask = set(np.where(np.logical_and(lite_lat <= maxy, lite_lat >= miny))[0])
+    lite_lon_subset_mask = set(np.where(np.logical_and(lite_lon <= maxx, lite_lon >= minx))[0])
+	
+    lite_latlon_subset_mask = list(lite_lat_subset_mask.intersection(lite_lon_subset_mask))
+        
+    lite_lat = lite_lat[lite_latlon_subset_mask]
+    lite_lon = lite_lon[lite_latlon_subset_mask]
+    lite_sid = lite_sid[lite_latlon_subset_mask]
+    lite_qf = lite_qf[lite_latlon_subset_mask]
+    lite_xco2 = lite_xco2[lite_latlon_subset_mask]
+    lite_deltaP = lite_deltaP[lite_latlon_subset_mask]
+    lite_co2_ratio = lite_co2_ratio[lite_latlon_subset_mask]
+    lite_warn = lite_warn[lite_latlon_subset_mask]
+
+    print "Number of Lite soundings:", len(lite_sid)
+    
+    
+    if lite_quality == 'good':
+    
+        quality_mask = np.where(lite_qf == 0)
+	
+	lite_lat = lite_lat[quality_mask]
+	lite_lon = lite_lon[quality_mask]
+	lite_xco2 = lite_xco2[quality_mask]
+	lite_warn = lite_warn[quality_mask]
+	
+	qf_file_tag = "_good_quality"
+	
+    if lite_quality == 'bad':
+    
+        quality_mask = np.where(lite_qf == 1)
+	
+	lite_lat = lite_lat[quality_mask]
+	lite_lon = lite_lon[quality_mask]
+	lite_xco2 = lite_xco2[quality_mask]
+	lite_warn = lite_warn[quality_mask]
+	
+	qf_file_tag = "_bad_quality"
+	
+    warn_mask = np.where(np.logical_and(lite_warn <= lite_warn_lims[1], lite_warn >= lite_warn_lims[0]))[0]
+    
+    lite_lat = lite_lat[warn_mask]
+    lite_lon = lite_lon[warn_mask]
+    lite_xco2 = lite_xco2[warn_mask]
+    lite_warn = lite_warn[warn_mask]
+
+    wl_file_tag = "_WL_"+str(lite_warn_lims[0])+"to"+str(lite_warn_lims[1])
+
+
+### Plot prep ###
 states_provinces = cfeature.NaturalEarthFeature(
     category='cultural',
     name='admin_1_states_provinces_lines',
     scale='50m',
     facecolor='none')
 
-# Map the image.
+outfile = output_dir+'/'+region+"_"+straight_up_date+qf_file_tag+wl_file_tag+".png"
+
+### Plot the image ###
 fig = plt.figure(figsize=(5,10))
 
 img = plt.imread(code_dir+'/intermediate_RGB.tif')
@@ -231,6 +333,14 @@ ax = plt.axes(projection=ccrs.PlateCarree())
 ax.imshow(img, origin='upper', transform=ccrs.PlateCarree(), extent=img_extent)
 ax.coastlines(resolution='10m', color='black', linewidth=1)
 ax.add_feature(states_provinces, edgecolor='black', linewidth=1)
+
+ax.scatter(lite_lon, lite_lat, c=lite_xco2, cmap='jet', edgecolor='none', s=5, vmax=var_lims[1], vmin=var_lims[0])
+
+cb_ax1 = fig.add_axes([.75, .3, .04, .4])
+norm = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
+cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap='jet', orientation = 'vertical', norm = norm)
+cb1_lab = cb1.ax.set_xlabel('XCO2\n(ppm)')
+cb1.ax.xaxis.set_label_position("top")
 
 #print "\nSaving figure. You may see a warning here but it does not affect anything"
 fig.savefig(outfile, dpi=150, bbox_inches='tight')
