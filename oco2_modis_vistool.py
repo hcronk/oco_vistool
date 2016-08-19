@@ -34,6 +34,7 @@ import sys
 from glob import glob
 
 from OCO2FileOps import *
+import h5py
 
 import numpy as np
 
@@ -50,6 +51,9 @@ import json
 import argparse
 
 import re
+
+import warnings
+warnings.filterwarnings("ignore")
 
 class ConfigFile:
 
@@ -91,6 +95,7 @@ def pull_Aqua_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr, xml_file, tif_file, xsize
     os.system(cmd)
 
 ### Static Defnitions
+
 code_dir = os.path.dirname(os.path.realpath(__file__))
 xml_file = code_dir+'/GIBS_Aqua_MODIS_truecolor.xml'
 
@@ -112,11 +117,57 @@ else:
 
 
 date = orbit_info_dict['date']
+straight_up_date = date.replace("-", "")
 lat_ul = orbit_info_dict['geo_upper_left'][0]
 lon_ul = orbit_info_dict['geo_upper_left'][1]
 lat_lr = orbit_info_dict['geo_lower_right'][0]
 lon_lr = orbit_info_dict['geo_lower_right'][1]
 region = orbit_info_dict['region']
+overlay_info_dict = orbit_info_dict['oco2_overlay_info']
+var_file = overlay_info_dict['file']
+if not glob(var_file):
+    print var_file+" does not exist."
+    print "Exiting"
+    sys.exit()
+var = overlay_info_dict['variable']
+orbit = overlay_info_dict['orbit']
+
+if re.search('oco2_Lt', var_file):
+    print "\nLite overlay file detected. Checking for QF and Warn specs..."
+    
+    try:
+        lite_qf = overlay_info_dict['lite_QF']
+    except:
+        print "No quality specifications detected. Output plot will contain all quality soundings"
+	lite_qf = 'all'
+    if not lite_qf:
+        print "No quality specifications detected. Output plot will contain all quality soundings"
+	lite_qf = 'all'
+    if lite_qf not in ['', 'all', 'good', 'bad']:
+        print "Unexpected quality flag specification. Options are '', 'all', 'good', or 'bad'"
+	print "Exiting"
+	sys.exit()
+    
+    try:
+        lite_warn_lims = overlay_info_dict['lite_warn_lims']
+    except:
+        print "No warn specifications detected. Output plot will contain all warn levels"
+	lite_warn_lims = [0, 20]
+    if not lite_warn_lims:
+        print "No warn specifications detected. Output plot will contain all warn levels"
+	lite_warn_lims = [0, 20]
+    if lite_warn_lims[0] > lite_warn_lims[1]:
+        print "Lower warn limit is greater than upper warn limit."
+	print "Exiting"
+	sys.exit()
+    for lim in lite_warn_lims:
+        if lim not in np.arange(21):
+            print "Unexpected warn level specification. Limits must be within [0, 20]."
+	    print "Exiting"
+	    sys.exit()
+    
+print "Output plot will include "+lite_qf+" quality soundings with warn levels within "+str(lite_warn_lims)+"\n"
+
 try:
     interest_pt = orbit_info_dict['ground_site']
 except:
@@ -126,20 +177,63 @@ try:
 except:
     output_dir = code_dir
 if not output_dir or not glob(output_dir):
-    print "output dir DNE, using code dir instead"
+    print "Either there was no output location specified or the one specified does not exist. Output will go in the code directory"
     output_dir = code_dir
 
+outfile = output_dir+'/'+region+"_"+straight_up_date+".png"
+
 ### Pull Aqua-MODIS RGB from GIBS ###
+
 update_GIBS_xml(date, xml_file)
 
+print "Pulling RGB"
 try:
     pull_Aqua_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr,  xml_file, code_dir+'/intermediate_RGB.tif')
 except:
     print "Problem pulling RGB. Check that the geolocation bounds specified in the configuration file are for the upper left hand corner and the lower right hand corner"
 
 
- 
+### Pull in and prep RGB tif file ###
 
+ds = gdal.Open(code_dir+'/intermediate_RGB.tif')
+data = ds.ReadAsArray()
+gt = ds.GetGeoTransform()
+proj = ds.GetProjection()
 
+inproj = osr.SpatialReference()
+inproj.ImportFromWkt(proj)
 
+width = ds.RasterXSize
+height = ds.RasterYSize
 
+minx = gt[0]
+miny = gt[3] + width*gt[4] + height*gt[5]
+maxx = gt[0] + width*gt[1] + height*gt[2]
+maxy = gt[3]
+
+# lat/long max/mins
+#print minx, miny, maxx, maxy
+
+# Create a feature for States/Admin 1 regions at 1:50m from Natural Earth
+states_provinces = cfeature.NaturalEarthFeature(
+    category='cultural',
+    name='admin_1_states_provinces_lines',
+    scale='50m',
+    facecolor='none')
+
+# Map the image.
+fig = plt.figure(figsize=(5,10))
+
+img = plt.imread(code_dir+'/intermediate_RGB.tif')
+img_extent = (minx, maxx, miny, maxy)
+
+ax = plt.axes(projection=ccrs.PlateCarree())
+ax.imshow(img, origin='upper', transform=ccrs.PlateCarree(), extent=img_extent)
+ax.coastlines(resolution='10m', color='black', linewidth=1)
+ax.add_feature(states_provinces, edgecolor='black', linewidth=1)
+
+#print "\nSaving figure. You may see a warning here but it does not affect anything"
+fig.savefig(outfile, dpi=150, bbox_inches='tight')
+print "\nFigure saved at "+outfile
+os.remove(code_dir+'/intermediate_RGB.tif')
+print "All Done!"
