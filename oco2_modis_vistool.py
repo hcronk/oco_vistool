@@ -131,6 +131,8 @@ if not glob(var_file):
     sys.exit()
 var_name = overlay_info_dict['variable']
 var_lims = overlay_info_dict['variable_plot_lims']
+lat_name = overlay_info_dict['lat_name']
+lon_name = overlay_info_dict['lon_name']
 orbit_int = overlay_info_dict['orbit']
 
 if re.search('oco2_Lt', var_file):
@@ -144,8 +146,8 @@ if re.search('oco2_Lt', var_file):
 	lite_quality = 'all'
     if not lite_quality:
         print "No quality specifications detected. Output plot will contain all quality soundings"
-	lite_qf = 'all'
-    if lite_qf not in ['', 'all', 'good', 'bad']:
+	lite_quality = 'all'
+    if lite_quality not in ['', 'all', 'good', 'bad']:
         print "Unexpected quality flag specification. Options are '', 'all', 'good', or 'bad'"
 	print "Exiting"
 	sys.exit()
@@ -168,7 +170,7 @@ if re.search('oco2_Lt', var_file):
 	    print "Exiting"
 	    sys.exit()
     
-print "Output plot will include "+lite_qf+" quality soundings with warn levels within "+str(lite_warn_lims)+"\n"
+print "Output plot will include "+lite_quality+" quality soundings with warn levels within "+str(lite_warn_lims)+"\n"
 
 try:
     interest_pt = orbit_info_dict['ground_site']
@@ -241,7 +243,7 @@ h5.close()
 
 if lite:
     
-    file_tag = "_all_quality"
+    qf_file_tag = "_all_quality"
 
     lite_file = LiteFile(var_file)
     lite_file.open_file()
@@ -261,8 +263,6 @@ if lite:
     lite_sid = lite_sid[orbit_subset]
     lite_qf = lite_qf[orbit_subset]
     lite_xco2 = lite_xco2[orbit_subset]
-    lite_deltaP = lite_deltaP[orbit_subset]
-    lite_co2_ratio = lite_co2_ratio[orbit_subset]
     lite_warn = lite_warn[orbit_subset]
     
     lite_lat_subset_mask = set(np.where(np.logical_and(lite_lat <= maxy, lite_lat >= miny))[0])
@@ -275,8 +275,6 @@ if lite:
     lite_sid = lite_sid[lite_latlon_subset_mask]
     lite_qf = lite_qf[lite_latlon_subset_mask]
     lite_xco2 = lite_xco2[lite_latlon_subset_mask]
-    lite_deltaP = lite_deltaP[lite_latlon_subset_mask]
-    lite_co2_ratio = lite_co2_ratio[lite_latlon_subset_mask]
     lite_warn = lite_warn[lite_latlon_subset_mask]
 
     print "Number of Lite soundings:", len(lite_sid)
