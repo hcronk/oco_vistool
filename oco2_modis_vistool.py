@@ -90,7 +90,7 @@ def pull_Aqua_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr, xml_file, tif_file, xsize
     Pulls the Aqua RGB imagery from WorldView using GIBS and puts it in specified tif file with associated metadata
     """ 
     
-    cmd = "gdal_translate -of GTiff -outsize "+str(xsize)+" "+str(ysize)+" -projwin "+str(lon_ul)+" "+str(lat_ul)+" "+str(lon_lr)+" "+str(lat_lr)+" "+xml_file+" "+tif_file
+    cmd = "/usr/bin/gdal_translate -of GTiff -outsize "+str(xsize)+" "+str(ysize)+" -projwin "+str(lon_ul)+" "+str(lat_ul)+" "+str(lon_lr)+" "+str(lat_lr)+" "+xml_file+" "+tif_file
 
     os.system(cmd)
 
