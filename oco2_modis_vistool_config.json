@@ -6,10 +6,13 @@
 	"oco2_overlay_info": {
 		"file": "/home/codell/OCO2_results/b70/lite_test_20160506/oco2_LtCO2_20160727_B7302b_r01_COoffline.nc4",
 		"variable": "xco2",
+		"variable_plot_lims": [390, 410], 
 		"orbit": 11016,
 		"lite_QF": "good",
-		"lite_warn_lims": [0, 15]
+		"lite_warn_lims": [0, 15],
+		"lat_name": "latitude", 
+		"lon_name": "longitude"
 	},
 	"ground_site": [-77.86, 40.7934],
-	"output_dir": "/home/hcronk/oco2_modis_vistool/code"
+	"output_dir": "/home/merrelli/projects/oco2_modis_vistool"
 }
