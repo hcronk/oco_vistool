@@ -29,6 +29,9 @@ Revision history:
 
 """
 
+import warnings
+warnings.filterwarnings("ignore")
+
 import os
 import sys
 from glob import glob
@@ -51,9 +54,6 @@ import json
 import argparse
 
 import re
-
-import warnings
-warnings.filterwarnings("ignore")
 
 class ConfigFile:
 
@@ -134,6 +134,16 @@ var_lims = overlay_info_dict['variable_plot_lims']
 lat_name = overlay_info_dict['lat_name']
 lon_name = overlay_info_dict['lon_name']
 orbit_int = overlay_info_dict['orbit']
+
+#delta_lat = lat_ul - lat_lr
+#delta_lon = lon_ul - lon_lr
+#if delta_lon > 180:
+#    delta_lon -= 360
+#delta_lon = abs(delta_lon)
+#
+#print delta_lat
+#print delta_lon
+##sys.exit()
 
 if re.search('oco2_Lt', var_file):
     lite = True
@@ -331,14 +341,19 @@ ax = plt.axes(projection=ccrs.PlateCarree())
 ax.imshow(img, origin='upper', transform=ccrs.PlateCarree(), extent=img_extent)
 ax.coastlines(resolution='10m', color='black', linewidth=1)
 ax.add_feature(states_provinces, edgecolor='black', linewidth=1)
+ax.add_feature(cfeature.BORDERS, edgecolor='black', linewidth=1)
+if interest_pt:
+    ax.plot(interest_pt[1], interest_pt[0], 'w*', markersize=10, transform=ccrs.Geodetic())
 
-ax.scatter(lite_lon, lite_lat, c=lite_xco2, cmap='jet', edgecolor='none', s=5, vmax=var_lims[1], vmin=var_lims[0])
+ax.scatter(lite_lon, lite_lat, c=lite_xco2, cmap='jet', edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
 
-cb_ax1 = fig.add_axes([.75, .3, .04, .4])
+cb_ax1 = fig.add_axes([.85, .3, .04, .4])
 norm = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
 cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap='jet', orientation = 'vertical', norm = norm)
 cb1_lab = cb1.ax.set_xlabel('XCO2\n(ppm)')
+cb1_lab.set_fontsize(9)
 cb1.ax.xaxis.set_label_position("top")
+cb1.ax.tick_params(labelsize=8)
 
 #print "\nSaving figure. You may see a warning here but it does not affect anything"
 fig.savefig(outfile, dpi=150, bbox_inches='tight')
