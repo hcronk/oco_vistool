@@ -11,7 +11,7 @@ Minimum command line call:
 python oco2_modis_vistool.py
 
 Output:
-Image (.png) named _ in specified output directory (default: code directory)
+Image (.png) named variable_region_date_quality_warn.png by default in specified output directory (default: code directory)
 
 Requirements:
 
@@ -40,6 +40,7 @@ from OCO2FileOps import *
 import h5py
 
 import numpy as np
+import math
 
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -130,7 +131,7 @@ if not glob(var_file):
     print "Exiting"
     sys.exit()
 var_name = overlay_info_dict['variable']
-var_lims = overlay_info_dict['variable_plot_lims']
+var_plot_name = re.split('/', var_name)[-1]
 lat_name = overlay_info_dict['lat_name']
 lon_name = overlay_info_dict['lon_name']
 orbit_int = overlay_info_dict['orbit']
@@ -186,6 +187,7 @@ try:
     interest_pt = orbit_info_dict['ground_site']
 except:
     interest_pt = []
+
 try:
     output_dir = orbit_info_dict['output_dir']
 except:
@@ -193,6 +195,16 @@ except:
 if not output_dir or not glob(output_dir):
     print "Either there was no output location specified or the one specified does not exist. Output will go in the code directory"
     output_dir = code_dir
+  
+try:
+    outfile_name = orbit_info_dict['outfile']
+except:
+    outfile_name = ""
+
+try:
+    var_lims = overlay_info_dict['variable_plot_lims']
+except:
+    var_lims = []    
 
 ### Pull Aqua-MODIS RGB from GIBS ###
 
@@ -229,7 +241,10 @@ maxy = gt[3]
 
 h5 = h5py.File(var_file)
 try:
+    oco2_data_obj = h5[var_name]
     oco2_data = h5[var_name][:]
+    oco2_data_long_name = oco2_data_obj.attrs.get('long_name')[0]
+    oco2_data_units = oco2_data_obj.attrs.get('units')[0]
 except:
     print var_name+" DNE in "+var_file
     print "Check that the variable name includes any necessary group paths. Ex: /Preprocessors/dp_abp"
@@ -274,6 +289,9 @@ if lite:
     lite_qf = lite_qf[orbit_subset]
     lite_xco2 = lite_xco2[orbit_subset]
     lite_warn = lite_warn[orbit_subset]
+    oco2_data = oco2_data[orbit_subset]
+    lat_data = lat_data[orbit_subset]
+    lon_data = lon_data[orbit_subset]
     
     lite_lat_subset_mask = set(np.where(np.logical_and(lite_lat <= maxy, lite_lat >= miny))[0])
     lite_lon_subset_mask = set(np.where(np.logical_and(lite_lon <= maxx, lite_lon >= minx))[0])
@@ -286,6 +304,9 @@ if lite:
     lite_qf = lite_qf[lite_latlon_subset_mask]
     lite_xco2 = lite_xco2[lite_latlon_subset_mask]
     lite_warn = lite_warn[lite_latlon_subset_mask]
+    oco2_data = oco2_data[lite_latlon_subset_mask]
+    lat_data = lat_data[lite_latlon_subset_mask]
+    lon_data = lon_data[lite_latlon_subset_mask]
 
     print "Number of Lite soundings:", len(lite_sid)
     
@@ -293,24 +314,29 @@ if lite:
     if lite_quality == 'good':
     
         quality_mask = np.where(lite_qf == 0)
+	qf_file_tag = "_good_quality"
 	
 	lite_lat = lite_lat[quality_mask]
 	lite_lon = lite_lon[quality_mask]
 	lite_xco2 = lite_xco2[quality_mask]
 	lite_warn = lite_warn[quality_mask]
-	
-	qf_file_tag = "_good_quality"
+	oco2_data = oco2_data[quality_mask]
+	lat_data = lat_data[quality_mask]
+	lon_data = lon_data[quality_mask]
 	
     if lite_quality == 'bad':
     
         quality_mask = np.where(lite_qf == 1)
+	qf_file_tag = "_bad_quality"
 	
 	lite_lat = lite_lat[quality_mask]
 	lite_lon = lite_lon[quality_mask]
 	lite_xco2 = lite_xco2[quality_mask]
 	lite_warn = lite_warn[quality_mask]
+	oco2_data = oco2_data[quality_mask]
+	lat_data = lat_data[quality_mask]
+	lon_data = lon_data[quality_mask]
 	
-	qf_file_tag = "_bad_quality"
 	
     warn_mask = np.where(np.logical_and(lite_warn <= lite_warn_lims[1], lite_warn >= lite_warn_lims[0]))[0]
     
@@ -318,18 +344,43 @@ if lite:
     lite_lon = lite_lon[warn_mask]
     lite_xco2 = lite_xco2[warn_mask]
     lite_warn = lite_warn[warn_mask]
+    oco2_data = oco2_data[warn_mask]
+    lat_data = lat_data[warn_mask]
+    lon_data = lon_data[warn_mask]
 
     wl_file_tag = "_WL_"+str(lite_warn_lims[0])+"to"+str(lite_warn_lims[1])
 
+if not var_lims:
+    var_lims = [np.min(oco2_data), np.max(oco2_data)]
+vmax = int(math.ceil(var_lims[1]))
+vmin = int(math.floor(var_lims[0]))
 
 ### Plot prep ###
+
+oco2_data_long_name = re.sub("_", " ", oco2_data_long_name)
+cbar_strings = re.split(' ', oco2_data_long_name)
+cbar_cap_strings = ""
+
+for i, s in enumerate(cbar_strings):
+    cap_s = s
+    if not s[0].isupper():
+        cap_s = s.capitalize()
+    if i % 2 != 0:
+        cbar_cap_strings = cbar_cap_strings + cap_s +"\n"
+    else: 
+        cbar_cap_strings = cbar_cap_strings + cap_s +" "
+cbar_cap_strings = cbar_cap_strings[:-1]
+cbar_name = cbar_cap_strings+'\n('+oco2_data_units+')'
+
 states_provinces = cfeature.NaturalEarthFeature(
     category='cultural',
     name='admin_1_states_provinces_lines',
     scale='50m',
     facecolor='none')
 
-outfile = output_dir+'/'+region+"_"+straight_up_date+qf_file_tag+wl_file_tag+".png"
+if not outfile_name:
+    outfile_name = var_plot_name+'_'+region+"_"+straight_up_date+qf_file_tag+wl_file_tag+".png"
+outfile = output_dir+"/"+outfile_name
 
 ### Plot the image ###
 fig = plt.figure(figsize=(5,10))
@@ -345,15 +396,16 @@ ax.add_feature(cfeature.BORDERS, edgecolor='black', linewidth=1)
 if interest_pt:
     ax.plot(interest_pt[1], interest_pt[0], 'w*', markersize=10, transform=ccrs.Geodetic())
 
-ax.scatter(lite_lon, lite_lat, c=lite_xco2, cmap='jet', edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
+ax.scatter(lon_data, lat_data, c=oco2_data, cmap='jet', edgecolor='none', s=2, vmin=vmin, vmax=vmax)
 
-cb_ax1 = fig.add_axes([.85, .3, .04, .4])
-norm = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
+cb_ax1 = fig.add_axes([.88, .3, .04, .4])
+norm = mpl.colors.Normalize(vmin = vmin, vmax = vmax)
 cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap='jet', orientation = 'vertical', norm = norm)
-cb1_lab = cb1.ax.set_xlabel('XCO2\n(ppm)')
-cb1_lab.set_fontsize(9)
+cb1_lab = cb1.ax.set_xlabel(cbar_name, labelpad=8)
+#cb1.ax.xticklabel_format(style
+cb1_lab.set_fontsize(7)
 cb1.ax.xaxis.set_label_position("top")
-cb1.ax.tick_params(labelsize=8)
+cb1.ax.tick_params(labelsize=6)
 
 #print "\nSaving figure. You may see a warning here but it does not affect anything"
 fig.savefig(outfile, dpi=150, bbox_inches='tight')
