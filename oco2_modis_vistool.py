@@ -205,6 +205,13 @@ try:
 except:
     var_lims = []
 
+try:
+    cmap = overlay_info_dict['cmap']
+except:
+    cmap = ""
+if not cmap:
+    cmap = "jet"
+    
 try:    
     region = orbit_info_dict['region']
 except:
@@ -403,7 +410,7 @@ ax.add_feature(cfeature.BORDERS, edgecolor='black', linewidth=1)
 if interest_pt:
     ax.plot(interest_pt[1], interest_pt[0], 'w*', markersize=10, transform=ccrs.Geodetic())
 
-ax.scatter(lon_data, lat_data, c=oco2_data, cmap='jet', edgecolor='none', s=2, vmin=vmin, vmax=vmax)
+ax.scatter(lon_data, lat_data, c=oco2_data, cmap=cmap, edgecolor='none', s=2, vmin=vmin, vmax=vmax)
 
 cb_ax1 = fig.add_axes([.88, .3, .04, .4])
 norm = mpl.colors.Normalize(vmin = vmin, vmax = vmax)
