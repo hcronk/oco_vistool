@@ -123,7 +123,6 @@ lat_ul = orbit_info_dict['geo_upper_left'][0]
 lon_ul = orbit_info_dict['geo_upper_left'][1]
 lat_lr = orbit_info_dict['geo_lower_right'][0]
 lon_lr = orbit_info_dict['geo_lower_right'][1]
-region = orbit_info_dict['region']
 overlay_info_dict = orbit_info_dict['oco2_overlay_info']
 var_file = overlay_info_dict['file']
 if not glob(var_file):
@@ -204,7 +203,12 @@ except:
 try:
     var_lims = overlay_info_dict['variable_plot_lims']
 except:
-    var_lims = []    
+    var_lims = []
+
+try:    
+    region = orbit_info_dict['region']
+except:
+    region = ""
 
 ### Pull Aqua-MODIS RGB from GIBS ###
 
@@ -379,7 +383,10 @@ states_provinces = cfeature.NaturalEarthFeature(
     facecolor='none')
 
 if not outfile_name:
-    outfile_name = var_plot_name+'_'+region+"_"+straight_up_date+qf_file_tag+wl_file_tag+".png"
+    if region:
+        outfile_name = var_plot_name+"_"+region+"_"+straight_up_date+qf_file_tag+wl_file_tag+".png"
+    else:
+        outfile_name = var_plot_name+"_"+straight_up_date+qf_file_tag+wl_file_tag+".png"
 outfile = output_dir+"/"+outfile_name
 
 ### Plot the image ###
