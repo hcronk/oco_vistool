@@ -2,16 +2,17 @@
 	"date": "2016-07-27",
 	"geo_upper_left": [43.5, -78.9],
 	"geo_lower_right": [39.6, -77.5],
-	"region": "Pennsylvania",
+	"region": "",
 	"oco2_overlay_info": {
 		"file": "/home/codell/OCO2_results/b70/lite_test_20160506/oco2_LtCO2_20160727_B7302b_r01_COoffline.nc4",
-		"variable": "/Preprocessors/dp_abp",
-		"variable_plot_lims":[],
+		"variable": "xco2",
+		"variable_plot_lims":[395, 405],
 		"lat_name": "latitude",
 		"lon_name": "longitude",
 		"orbit": 11016,
 		"lite_QF": "all",
-		"lite_warn_lims": [0, 20]
+		"lite_warn_lims": [0, 20],
+		"cmap": "Reds"
 	},
 	"ground_site": [40.7934, -77.86],
 	"output_dir": "/home/hcronk/oco2_modis_vistool/code",
