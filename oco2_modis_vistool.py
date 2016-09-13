@@ -155,6 +155,12 @@ def do_modis_overlay_plot(
         name='admin_1_states_provinces_lines',
         scale='50m',
         facecolor='none')
+    
+    populated_places = cfeature.NaturalEarthFeature(
+        category='cultural',
+	name='populated_places',
+	scale='50m',
+	facecolor='white')
 
     ### Plot the image ###
     fig = plt.figure(figsize=(5,10))
@@ -167,6 +173,8 @@ def do_modis_overlay_plot(
     ax.coastlines(resolution='10m', color='black', linewidth=1)
     ax.add_feature(states_provinces, edgecolor='black', linewidth=1)
     ax.add_feature(cfeature.BORDERS, edgecolor='black', linewidth=1)
+    ax.add_feature(populated_places, linewidth=5, edgecolor='white')
+
     if interest_pt is not None:
         ax.plot(interest_pt[1], interest_pt[0], 'w*', markersize=10, transform=ccrs.Geodetic())
 
@@ -292,8 +300,10 @@ if __name__ == "__main__":
 
     try:
         interest_pt = orbit_info_dict['ground_site']
+	if not interest_pt:
+	    interest_pt = None
     except:
-        interest_pt = []
+        interest_pt = None
     try:
 	output_dir = orbit_info_dict['output_dir']
     except:
