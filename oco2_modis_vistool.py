@@ -156,11 +156,11 @@ def do_modis_overlay_plot(
         scale='50m',
         facecolor='none')
     
-    populated_places = cfeature.NaturalEarthFeature(
-        category='cultural',
-	name='populated_places',
-	scale='50m',
-	facecolor='white')
+#    populated_places = cfeature.NaturalEarthFeature(
+#        category='cultural',
+#	name='populated_places',
+#	scale='50m',
+#	facecolor='black')
 
     ### Plot the image ###
     fig = plt.figure(figsize=(5,10))
@@ -173,7 +173,7 @@ def do_modis_overlay_plot(
     ax.coastlines(resolution='10m', color='black', linewidth=1)
     ax.add_feature(states_provinces, edgecolor='black', linewidth=1)
     ax.add_feature(cfeature.BORDERS, edgecolor='black', linewidth=1)
-    ax.add_feature(populated_places, linewidth=5, edgecolor='white')
+    #ax.add_feature(populated_places)
 
     if interest_pt is not None:
         ax.plot(interest_pt[1], interest_pt[0], 'w*', markersize=10, transform=ccrs.Geodetic())
@@ -435,11 +435,14 @@ if __name__ == "__main__":
 	lon_data = lon_data[warn_mask]
 
 	wl_file_tag = "_WL_"+str(lite_warn_lims[0])+"to"+str(lite_warn_lims[1])
-
+	
     if not var_lims:
 	var_lims = [np.min(oco2_data), np.max(oco2_data)]
-    vmax = int(math.ceil(var_lims[1]))
-    vmin = int(math.floor(var_lims[0]))
+        vmax = int(math.ceil(var_lims[1]))
+        vmin = int(math.floor(var_lims[0]))
+    
+    vmax = var_lims[1]
+    vmin = var_lims[0]
 
     ### Plot prep ###
 
