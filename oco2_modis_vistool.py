@@ -41,9 +41,13 @@ import h5py
 
 import numpy as np
 import math
+import pandas as pd
 
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+#import cartopy.io.shapereader as shapereader
+import shapefile
+from shapely.geometry import LineString, Point, Polygon
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
@@ -93,10 +97,57 @@ def pull_Aqua_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr, xml_file, tif_file, xsize
     cmd = "/usr/bin/gdal_translate -of GTiff -outsize "+str(xsize)+" "+str(ysize)+" -projwin "+str(lon_ul)+" "+str(lat_ul)+" "+str(lon_lr)+" "+str(lat_lr)+" "+xml_file+" "+tif_file
     os.system(cmd)
 
+def read_shp(filename):
+    """Read shapefile to dataframe w/ geometry.
+    
+    Args:
+        filename: ESRI shapefile name to be read  (without .shp extension)
+        
+    Returns:
+        pandas DataFrame with column geometry, containing individual shapely
+        Geometry objects (i.e. Point, LineString, Polygon) depending on 
+        the shapefiles original shape type
+	
+    Credit: https://github.com/ojdo/python-tools/blob/master/pandashp.py
+    
+    """
+    sr = shapefile.Reader(filename)
+    
+    cols = sr.fields[:] # [:] = duplicate field list
+    if cols[0][0] == 'DeletionFlag':
+        cols.pop(0)
+    cols = [col[0] for col in cols] # extract field name only
+    cols.append('geometry')
+    
+    records = [row for row in sr.iterRecords()]
+    
+    if sr.shapeType == shapefile.POLYGON:
+        geometries = [Polygon(shape.points)
+                      if len(shape.points) > 2 else np.NaN  # invalid geometry
+                      for shape in sr.iterShapes()]
+    elif sr.shapeType == shapefile.POLYLINE:
+        geometries = [LineString(shape.points) for shape in sr.iterShapes()]
+    elif sr.shapeType == shapefile.POINT:
+        geometries = [Point(*shape.points[0]) for shape in sr.iterShapes()]
+    else:
+        raise NotImplementedError
+    
+    data = [r+[g] for r,g in zip(records, geometries)]
+    
+    df = pd.DataFrame(data, columns=cols)
+    df = df.convert_objects(convert_numeric=True)
+    
+    if np.NaN in geometries:
+        # drop invalid geometries
+        df = df.dropna(subset=['geometry'])
+        num_skipped = len(geometries) - len(df)
+        warnings.warn('Skipped {} invalid geometrie(s).'.format(num_skipped))
+    return df
+
 def do_modis_overlay_plot(
     geo_lower_right, geo_upper_left, date, 
     var_lat, var_lon, var_vals, var_lims=None, interest_pt=None, cmap='jet', 
-    outfile=None, var_label=None):
+    outfile=None, var_label=None, cities=None):
 
     if var_lims is None:
         var_lims = var_vals.min(), var_vals.max()
@@ -129,6 +180,9 @@ def do_modis_overlay_plot(
 
     width = ds.RasterXSize
     height = ds.RasterYSize
+    
+#    print ds.GetMetadata()
+#    print ds.GetGeoTransform()
 
     #Calculate lat/lon lims of RGB
     minx = gt[0]
@@ -144,10 +198,24 @@ def do_modis_overlay_plot(
     #lat_subset_idx = set(np.where(np.logical_and(var_lat <= maxy, var_lat >= miny))[0])
     #lon_subset_idx = set(np.where(np.logical_and(var_lon <= maxx, var_lon >= minx))[0])
     #latlon_subset_idx = list(lat_subset_idx.intersection(lon_subset_idx))
-
+    
     var_lon_subset = var_lon[latlon_subset_mask]
     var_lat_subset = var_lat[latlon_subset_mask]
     var_vals_subset = var_vals[latlon_subset_mask]
+    
+    if var_lon_subset.size == 0 or var_lat_subset.size == 0:
+        lat_subset_idx = set(np.where(np.logical_and(var_lat <= maxy, var_lat >= miny))[0])
+	lon_subset_idx = set(np.where(np.logical_and(var_lon <= maxx, var_lon >= minx))[0])
+	latlon_subset_idx = list(lat_subset_idx.intersection(lon_subset_idx))
+        print "The latitude and longitude ranges given have no common points for the OCO-2 ground track"
+	#print "Indices where the latitude is between " + str(miny) + " and " + str(maxy) +": " + str(min(lat_subset_idx)) + "-" + str(max(lat_subset_idx))
+        print "Indices where the longitude is between " + str(minx) + " and " + str(maxx) +": " + str(min(lon_subset_idx)) + "-" + str(max(lon_subset_idx))
+	print "Latitude range for those indices: " + str(var_lat[min(lon_subset_idx)]) + "-" + str(var_lat[max(lon_subset_idx)])
+        print "Latitude range given: " + str(miny) + "-" + str(maxy)
+	print "Indices of intersection:", latlon_subset_idx
+	print "Exiting"
+	os.remove(code_dir+'/intermediate_RGB.tif')
+	sys.exit()
 
     ### Plot prep ###
     states_provinces = cfeature.NaturalEarthFeature(
@@ -156,12 +224,16 @@ def do_modis_overlay_plot(
         scale='50m',
         facecolor='none')
     
-#    populated_places = cfeature.NaturalEarthFeature(
-#        category='cultural',
-#	name='populated_places',
-#	scale='50m',
-#	facecolor='black')
-
+    populated_places_filename = code_dir+'/ne_10m_populated_places.shp'
+    
+    df = read_shp(populated_places_filename)
+    
+    relevant_places = df[(df['LATITUDE'] <= maxy) & 
+                          (df['LATITUDE']>= miny) & 
+			  (df['LONGITUDE']<= maxx) & 
+			  (df['LONGITUDE']>= minx)]
+			  
+				 
     ### Plot the image ###
     fig = plt.figure(figsize=(5,10))
 
@@ -174,9 +246,16 @@ def do_modis_overlay_plot(
     ax.add_feature(states_provinces, edgecolor='black', linewidth=1)
     ax.add_feature(cfeature.BORDERS, edgecolor='black', linewidth=1)
     #ax.add_feature(populated_places)
+    
+    if cities is not None:
+        for idx, p in relevant_places.iterrows():
+	
+            #print p['NAME'], p['LATITUDE'], p['LONGITUDE']
+	    ax.text(p['LONGITUDE'], p['LATITUDE'], p['NAME'], fontsize=6, color='White', va='bottom', ha='center', transform=ccrs.Geodetic())
 
     if interest_pt is not None:
         ax.plot(interest_pt[1], interest_pt[0], 'w*', markersize=10, transform=ccrs.Geodetic())
+
 
     ax.scatter(var_lon_subset, var_lat_subset, c=var_vals_subset, 
                cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
@@ -259,7 +338,11 @@ if __name__ == "__main__":
     var_lims = overlay_info_dict['variable_plot_lims']
     lat_name = overlay_info_dict['lat_name']
     lon_name = overlay_info_dict['lon_name']
-    orbit_int = overlay_info_dict['orbit']
+    
+    try: 
+        orbit_int = overlay_info_dict['orbit']
+    except: 
+        orbit_int = False
 
     if re.search('oco2_Lt', var_file):
         lite = True
@@ -304,6 +387,16 @@ if __name__ == "__main__":
 	    interest_pt = None
     except:
         interest_pt = None
+    try:
+        cities = orbit_info_dict['cities']
+	if cities == "true" or cities == "True":
+	    cities = True
+	else:
+	    cities = None
+	if not cities:
+	    cities = None
+    except:
+        cities = None
     try:
 	output_dir = orbit_info_dict['output_dir']
     except:
@@ -377,20 +470,26 @@ if __name__ == "__main__":
 	lite_qf = lite_file.get_qf()
 	lite_orbit = lite_file.get_orbit()
 	lite_file.close_file()
-
-
-	orbit_subset = np.where(lite_orbit == orbit_int)
-	lite_lat = lite_lat[orbit_subset]
-	lite_lon = lite_lon[orbit_subset]
-	lite_sid = lite_sid[orbit_subset]
-	lite_qf = lite_qf[orbit_subset]
-	lite_xco2 = lite_xco2[orbit_subset]
-	lite_warn = lite_warn[orbit_subset]
-	oco2_data = oco2_data[orbit_subset]
-	lat_data = lat_data[orbit_subset]
-	lon_data = lon_data[orbit_subset]
+        
+	print lite_lat.shape
+	
+        if orbit_int:
+	    orbit_subset = np.where(lite_orbit == orbit_int)
+	    lite_lat = lite_lat[orbit_subset]
+	    lite_lon = lite_lon[orbit_subset]
+	    lite_sid = lite_sid[orbit_subset]
+	    lite_qf = lite_qf[orbit_subset]
+	    lite_xco2 = lite_xco2[orbit_subset]
+	    lite_warn = lite_warn[orbit_subset]
+	    oco2_data = oco2_data[orbit_subset]
+	    lat_data = lat_data[orbit_subset]
+	    lon_data = lon_data[orbit_subset]
     
-        # the subset mask part is now 
+        print lite_lat.shape
+	
+	#sys.exit()
+	
+	# the subset mask part is now 
         # pushed into the do_modis_overlay_plot()
         #lite_lat_subset_mask = set(np.where(np.logical_and(lite_lat <= maxy, lite_lat >= miny))[0])
         #lite_lon_subset_mask = set(np.where(np.logical_and(lite_lon <= maxx, lite_lon >= minx))[0])
@@ -472,4 +571,4 @@ if __name__ == "__main__":
                           orbit_info_dict['geo_upper_left'],
                           date, lat_data, lon_data, oco2_data, 
                           var_lims=[vmin,vmax], interest_pt=interest_pt, cmap=cmap,
-			  outfile=outfile, var_label=cbar_name)
+			  outfile=outfile, var_label=cbar_name, cities=cities)
