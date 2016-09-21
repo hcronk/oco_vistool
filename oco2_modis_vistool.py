@@ -223,15 +223,6 @@ def do_modis_overlay_plot(
         name='admin_1_states_provinces_lines',
         scale='50m',
         facecolor='none')
-    
-    populated_places_filename = code_dir+'/ne_10m_populated_places.shp'
-    
-    df = read_shp(populated_places_filename)
-    
-    relevant_places = df[(df['LATITUDE'] <= maxy) & 
-                          (df['LATITUDE']>= miny) & 
-			  (df['LONGITUDE']<= maxx) & 
-			  (df['LONGITUDE']>= minx)]
 			  
 				 
     ### Plot the image ###
@@ -248,10 +239,20 @@ def do_modis_overlay_plot(
     #ax.add_feature(populated_places)
     
     if cities is not None:
+    
+        populated_places_filename = '/home/hcronk/natural_earth/ne_10m_populated_places.shp'
+    
+        df = read_shp(populated_places_filename)
+    
+        relevant_places = df[(df['LATITUDE'] <= maxy) & 
+                          (df['LATITUDE']>= miny) & 
+			  (df['LONGITUDE']<= maxx) & 
+			  (df['LONGITUDE']>= minx)]
+			  
         for idx, p in relevant_places.iterrows():
 	
             #print p['NAME'], p['LATITUDE'], p['LONGITUDE']
-	    ax.text(p['LONGITUDE'], p['LATITUDE'], p['NAME'], fontsize=6, color='White', va='bottom', ha='center', transform=ccrs.Geodetic())
+	    ax.text(p['LONGITUDE'], p['LATITUDE'], p['NAME'], fontsize=6, color='red', va='bottom', ha='center', transform=ccrs.Geodetic())
 
     if interest_pt is not None:
         ax.plot(interest_pt[1], interest_pt[0], 'w*', markersize=10, transform=ccrs.Geodetic())
@@ -470,8 +471,6 @@ if __name__ == "__main__":
 	lite_qf = lite_file.get_qf()
 	lite_orbit = lite_file.get_orbit()
 	lite_file.close_file()
-        
-	print lite_lat.shape
 	
         if orbit_int:
 	    orbit_subset = np.where(lite_orbit == orbit_int)
@@ -484,10 +483,6 @@ if __name__ == "__main__":
 	    oco2_data = oco2_data[orbit_subset]
 	    lat_data = lat_data[orbit_subset]
 	    lon_data = lon_data[orbit_subset]
-    
-        print lite_lat.shape
-	
-	#sys.exit()
 	
 	# the subset mask part is now 
         # pushed into the do_modis_overlay_plot()
