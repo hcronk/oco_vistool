@@ -240,7 +240,7 @@ def do_modis_overlay_plot(
     
     if cities is not None:
     
-        populated_places_filename = '/home/hcronk/natural_earth/ne_10m_populated_places.shp'
+        populated_places_filename = code_dir+'/natural_earth/ne_10m_populated_places'
     
         df = read_shp(populated_places_filename)
     
@@ -252,7 +252,7 @@ def do_modis_overlay_plot(
         for idx, p in relevant_places.iterrows():
 	
             #print p['NAME'], p['LATITUDE'], p['LONGITUDE']
-	    ax.text(p['LONGITUDE'], p['LATITUDE'], p['NAME'], fontsize=6, color='red', va='bottom', ha='center', transform=ccrs.Geodetic())
+	    ax.text(p['LONGITUDE'], p['LATITUDE'], p['NAME'], fontsize=7, color='red', va='bottom', ha='center', transform=ccrs.Geodetic())
 
     if interest_pt is not None:
         ax.plot(interest_pt[1], interest_pt[0], 'w*', markersize=10, transform=ccrs.Geodetic())
