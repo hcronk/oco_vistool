@@ -45,6 +45,7 @@ import pandas as pd
 
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 #import cartopy.io.shapereader as shapereader
 import shapefile
 from shapely.geometry import LineString, Point, Polygon
@@ -256,7 +257,14 @@ def do_modis_overlay_plot(
 
     if interest_pt is not None:
         ax.plot(interest_pt[1], interest_pt[0], 'w*', markersize=10, transform=ccrs.Geodetic())
-
+    
+    g1 = ax.gridlines(draw_labels=True, alpha = 0.5)
+    g1.xlabels_top = False
+    g1.ylabels_right = False
+    g1.xlabel_style = {'size': 5}
+    g1.ylabel_style = {'size': 5}
+    g1.xformatter = LONGITUDE_FORMATTER
+    g1.yformatter = LATITUDE_FORMATTER
 
     ax.scatter(var_lon_subset, var_lat_subset, c=var_vals_subset, 
                cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
