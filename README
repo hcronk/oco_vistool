@@ -39,10 +39,11 @@ Optional:
 			    minimum or maximum color, respectively.
         lat_name (string, "latitude"): This is required for a variable overlay. The name of the latitude array associated with the variable. Used for subsetting and plotting.
 	lon_name (string, "longitude"): This is required for a variable overlay. The name of the longitude array associated with the variable. Used for subsetting and plotting.
-	orbit (integer, 11016): This is required for a variable overlay if the variable is contained in a lite file. Used for subsetting.
+	orbit (integer, 11016): This is optional for a variable overlay if the variable is contained in a lite file. Used for subsetting.
 	lite_QF (string, "good", default: "all"): The quality flag applied to your variable. Used for filtering. Options: "good", "bad", "all"
 	lite_warn_lims (list, [0,15], default: [0,20]): The range of acceptable warn levels applied to your variable. Used for filtering. Options: integers from 0 to 20
     ground_site (list, [lat lon], default: none): The latitude and longitude coordinates of a ground site of interest. It will show up as a white star on the output plot.
+    cities (string, default: none): This is optional to display city locations on the output plot. Options: "True", "False", ""
     output_dir (string, default: the directory that you are running the code in): The full output directory path where you would like the output plot to be generated
     outfile (string, default: variable_region_date_quality_warn.png, default example: xco2_Amazon_20150701_all_quality_WL_0to20.png): The name of the output plot
     
