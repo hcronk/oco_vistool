@@ -208,7 +208,7 @@ def do_modis_overlay_plot(
         lat_subset_idx = set(np.where(np.logical_and(var_lat <= maxy, var_lat >= miny))[0])
 	lon_subset_idx = set(np.where(np.logical_and(var_lon <= maxx, var_lon >= minx))[0])
 	latlon_subset_idx = list(lat_subset_idx.intersection(lon_subset_idx))
-        print "The latitude and longitude ranges given have no common points for the OCO-2 ground track"
+        print "\nThe lat/lon ranges given have no common points for the OCO-2 ground track"
 	#print "Indices where the latitude is between " + str(miny) + " and " + str(maxy) +": " + str(min(lat_subset_idx)) + "-" + str(max(lat_subset_idx))
         print "Indices where the longitude is between " + str(minx) + " and " + str(maxx) +": " + str(min(lon_subset_idx)) + "-" + str(max(lon_subset_idx))
 	print "Latitude range for those indices: " + str(var_lat[min(lon_subset_idx)]) + "-" + str(var_lat[max(lon_subset_idx)])
@@ -309,10 +309,10 @@ if __name__ == "__main__":
 
     date = orbit_info_dict['date']
     straight_up_date = date.replace("-", "")
-    #lat_ul = orbit_info_dict['geo_upper_left'][0]
-    #lon_ul = orbit_info_dict['geo_upper_left'][1]
-    #lat_lr = orbit_info_dict['geo_lower_right'][0]
-    #lon_lr = orbit_info_dict['geo_lower_right'][1]
+    lat_ul = orbit_info_dict['geo_upper_left'][0]
+    lon_ul = orbit_info_dict['geo_upper_left'][1]
+    lat_lr = orbit_info_dict['geo_lower_right'][0]
+    lon_lr = orbit_info_dict['geo_lower_right'][1]
     overlay_info_dict = orbit_info_dict['oco2_overlay_info']
     var_file = overlay_info_dict['file']
     if not glob(var_file):
@@ -394,6 +394,9 @@ if __name__ == "__main__":
         interest_pt = orbit_info_dict['ground_site']
 	if not interest_pt:
 	    interest_pt = None
+	if (interest_pt[0] > lat_ul or interest_pt[0] < lat_lr or interest_pt[1] > lon_lr or interest_pt[1] < lon_ul):
+	    interest_pt = None
+	    print "The ground site is outside the given lat/lon range and will not be included in the output plot.\n"
     except:
         interest_pt = None
     try:
@@ -411,7 +414,7 @@ if __name__ == "__main__":
     except:
 	output_dir = code_dir
     if not output_dir or not glob(output_dir):
-	print "Either there was no output location specified or the one specified does not exist. Output will go in the code directory"
+	print "Either there was no output location specified or the one specified does not exist. Output will go in the code directory. \n"
 	output_dir = code_dir
 
     try:
