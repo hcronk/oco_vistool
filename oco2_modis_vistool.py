@@ -275,12 +275,12 @@ def do_modis_overlay_plot(
     
     #print test_ax
     
-    print ax.get_position()
+    #print ax.get_position()
     
     #sys.exit()
     
-    #cb_ax1 = fig.add_axes([.88, .3, .04, .4])
-    cb_ax1 = fig.add_axes(test_ax)
+    cb_ax1 = fig.add_axes([.88, .3, .04, .4])
+    #cb_ax1 = fig.add_axes(test_ax)
     norm = mpl.colors.Normalize(vmin = vmin, vmax = vmax)
     cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap, orientation = 'vertical', norm = norm)
     cb1_lab = cb1.ax.set_xlabel(cbar_name, labelpad=8)
