@@ -51,6 +51,7 @@ import shapefile
 from shapely.geometry import LineString, Point, Polygon
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from osgeo import gdal, osr
 from shapely.ops import transform as geom_transform
@@ -151,7 +152,7 @@ def do_modis_overlay_plot(
     outfile=None, var_label=None, cities=None):
 
     if var_lims is None:
-        var_lims = var_vals.min(), var_vals.max()
+        var_lims = [var_vals.min(), var_vals.max()]
 
     lat_ul = geo_upper_left[0]
     lon_ul = geo_upper_left[1]
@@ -269,7 +270,17 @@ def do_modis_overlay_plot(
     ax.scatter(var_lon_subset, var_lat_subset, c=var_vals_subset, 
                cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
 
-    cb_ax1 = fig.add_axes([.88, .3, .04, .4])
+    #divider = make_axes_locatable(ax)
+    #test_ax = divider.new_vertical(size="5%", pad=0.05)
+    
+    #print test_ax
+    
+    print ax.get_position()
+    
+    #sys.exit()
+    
+    #cb_ax1 = fig.add_axes([.88, .3, .04, .4])
+    cb_ax1 = fig.add_axes(test_ax)
     norm = mpl.colors.Normalize(vmin = vmin, vmax = vmax)
     cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap, orientation = 'vertical', norm = norm)
     cb1_lab = cb1.ax.set_xlabel(cbar_name, labelpad=8)
@@ -278,7 +289,7 @@ def do_modis_overlay_plot(
     cb1.ax.tick_params(labelsize=6)
 
 
-    fig.savefig(outfile, dpi=150, bbox_inches='tight')
+    fig.savefig(outfile, dpi=150)
     print "\nFigure saved at "+outfile
     print "code directory in subroutine:", code_dir
     os.remove(code_dir+'/intermediate_RGB.tif')
