@@ -42,6 +42,12 @@ class LiteFile:
 
     def get_co2_ratio(self):
         return self.lf['/Preprocessors/co2_ratio'][:]
+	
+    def get_co2_ratio(self):
+        return self.lf['/Preprocessors/co2_ratio'][:]
+
+    def get_sfc_type(self):
+        return self.lf['/Retrieval/surface_type'][:]
     
     def close_file(self):
         self.lf.close()
@@ -102,6 +108,9 @@ class L2File:
     def get_aerosol_4_aod(self):
         return self.l2f['/AerosolResults/aerosol_4_aod'][:]
 	
+    def get_total_aod(self):
+        return self.l2f['/AerosolResults/aerosol_total_aod'][:]
+	
     def get_albedo_o2_fph(self):
         return self.l2f['/AlbedoResults/albedo_o2_fph'][:]
 	
@@ -122,6 +131,27 @@ class L2File:
 
     def get_co2_vertical_gradient_delta(self):
         return self.l2f['/RetrievalResults/co2_vertical_gradient_delta'][:]
+	
+    def get_sfc_type(self):
+        return self.l2f['/RetrievalResults/surface_type'][:]
+    
+    def get_solar_zenith(self):
+        return self.l2f['/RetrievalGeometry/retrieval_solar_zenith'][:]
+    
+    def get_sensor_zenith(self):
+        return self.l2f['/RetrievalGeometry/retrieval_zenith'][:]
+	
+    def get_lat(self):
+        return self.l2f['/RetrievalGeometry/retrieval_latitude'][:]
+    
+    def get_lon(self):
+        return self.l2f['/RetrievalGeometry/retrieval_longitude'][:]
+	
+    def get_sfc_rough(self):
+        return self.l2f['/RetrievalGeometry/retrieval_surface_roughness'][:]
+    
+    def get_rel_resid_mean_sq_strongCO2(self):
+        return self.l2f['/SpectralParameters/relative_residual_mean_square_strong_co2'][:]
     
     def close_file(self):
         self.l2f.close()
