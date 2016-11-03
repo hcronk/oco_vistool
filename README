@@ -73,7 +73,7 @@ Optional:
     region (string, default: none): The region of your case study. This is used to build the default output filename in the command line execution.
     cmap (string, default: "jet"): The desired colormap or color for the overlay data. 
                                    Built-in colormap options can be found here: http://matplotlib.org/examples/color/colormaps_reference.html
-				   Built-n single color options can be found here: http://matplotlib.org/examples/color/named_colors.html
+				   Built-in single color options can be found here: http://matplotlib.org/examples/color/named_colors.html
     oco2_overlay_info (dict, default: none): The information for the OCO-2 variable to overlay on the MODIS RGB
         file (string): This is required for a variable overlay. The full path to the file that contains the variable to overlay.
 	variable (string, format:"Preprocessors/dp_adp"): This is required for a variable overlay. The full path to the variable within the file specified. 
@@ -95,7 +95,8 @@ Optional:
 
 
 Corresponding author:
-Heather Cronk <heather.cronk@colostate.edu>
+Heather Cronk
+heather.cronk@colostate.edu
 
 Revision history:
 08/2016 (H.Q. Cronk; N.D. Tourville): Initial version
