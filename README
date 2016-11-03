@@ -15,11 +15,10 @@ python oco2_modis_vistool.py
 Function call:
 from oco2_modis_vistool import do_modis_overlay_plot
 
-do_modis_overlay_plot(orbit_info_dict['geo_lower_right'], 
-                       orbit_info_dict['geo_upper_left'],
-                       date, lat_data, lon_data, oco2_data, 
-                       var_lims=[vmin,vmax], interest_pt=interest_pt, cmap=cmap,
-		       outfile=outfile, var_label=cbar_name, cities=cities)
+do_modis_overlay_plot([minlat, maxlon], [maxlat, minlon], yyyy + "-" + mm + "-" + dd, 
+                      lat_data, lon_data, oco2_data, 
+                      var_lims=[vmin,vmax], interest_pt=interest_pt, cmap=cmap,
+		      outfile=outfile, var_label=cbar_name, cities=cities)
 
 
 Output:
@@ -91,7 +90,7 @@ Optional:
     city_labels (string, default: none): This is optional to display city names on the output plot in the color specified in this string. Python built-in named colors are
                                          available here: http://matplotlib.org/examples/color/named_colors.html
     output_dir (string, default: the directory that you are running the code in): The full output directory path where you would like the output plot to be generated
-    outfile (string, default: variable_region_date_quality_warn.png, default example: xco2_Amazon_20150701_all_quality_WL_0to20.png): The name of the output plot
+    outfile (string, default example: xco2_Amazon_20150701_all_quality_WL_0to20.png): The name of the output plot
 
 
 Corresponding author:
