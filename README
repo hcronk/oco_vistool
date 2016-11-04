@@ -87,8 +87,9 @@ Optional:
 	lite_QF (string, format:"good", default: "all"): The quality flag applied to your variable. Used for filtering. Options: "good", "bad", "all"
 	lite_warn_lims (list, format:[0,15], default: [0,20]): The range of acceptable warn levels applied to your variable. Used for filtering. Options: integers from 0 to 20
     ground_site (list, format:[lat lon], default: none): The latitude and longitude coordinates of a ground site of interest. It will show up as a white star on the output plot.
-    city_labels (string, default: none): This is optional to display city names on the output plot in the color specified in this string. Python built-in named colors are
-                                         available here: http://matplotlib.org/examples/color/named_colors.html
+    city_labels (string, default: none): This is optional to display city names on the output plot in the color specified in this string.
+                                         They are on a 10m scale, so it works best if you are displaying a small area.
+					 Python built-in named colors are available here: http://matplotlib.org/examples/color/named_colors.html
     output_dir (string, default: the directory that you are running the code in): The full output directory path where you would like the output plot to be generated
     outfile (string, default example: xco2_Amazon_20150701_all_quality_WL_0to20.png): The name of the output plot
 
