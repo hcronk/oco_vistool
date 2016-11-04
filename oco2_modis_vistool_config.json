@@ -15,7 +15,7 @@
 		"cmap": "seismic"
 	},
 	"ground_site": [],
-	"cities": "", 
+	"city_labels": "", 
 	"output_dir": "/home/hcronk/oco2_modis_vistool/code",
 	"outfile": ""
 }
