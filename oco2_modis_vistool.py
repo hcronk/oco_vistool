@@ -170,8 +170,7 @@ def do_modis_overlay_plot(
     ### Pull in and prep RGB tif file ###
 
     ds = gdal.Open(code_dir+'/intermediate_RGB.tif')
-    print ds
-    #sys.exit()
+
     data = ds.ReadAsArray()
     gt = ds.GetGeoTransform()
     proj = ds.GetProjection()
@@ -191,23 +190,40 @@ def do_modis_overlay_plot(
     maxx = gt[0] + width*gt[1] + height*gt[2]
     maxy = gt[3]
 
-    print minx, maxx
-    print miny, maxy
-    print width
-    print height
-    print gt
     
-    #sys.exit()
+    #Check if color is single or map
+    
+    if cmap in plt.cm.datad.keys():
+        color_or_cmap = "cmap"
+    elif cmap in mpl.colors.cnames.keys():
+        color_or_cmap = "color"
+    else:
+        print(cmap + " is not a recognized color or colormap. Data will be displayed in red")
+	cmap = 'red'
+	color_or_cmap = "color"
+    
+    fig_x = abs(gt[1])
+    fig_y = abs(gt[5])
+    
+    while fig_x < 1 and fig_y < 1:
+        fig_x *= 10
+	fig_y *= 10
+    
+    while fig_x < 5 or fig_y < 5:
+    	if fig_x < 10 and fig_y < 10:
+	    fig_x *= 1.1
+	    fig_y *= 1.1
+	else:
+	    break    
+    
+    if color_or_cmap == "cmap":
+        fig_x += 2
     
     
     # get subset of var values etc.
     latlon_subset_mask = np.logical_and(
         np.logical_and(var_lat <= maxy, var_lat >= miny), 
         np.logical_and(var_lon <= maxx, var_lon >= minx) )
-
-    #lat_subset_idx = set(np.where(np.logical_and(var_lat <= maxy, var_lat >= miny))[0])
-    #lon_subset_idx = set(np.where(np.logical_and(var_lon <= maxx, var_lon >= minx))[0])
-    #latlon_subset_idx = list(lat_subset_idx.intersection(lon_subset_idx))
     
     var_lon_subset = var_lon[latlon_subset_mask]
     var_lat_subset = var_lat[latlon_subset_mask]
@@ -236,7 +252,7 @@ def do_modis_overlay_plot(
 			  
 				 
     ### Plot the image ###
-    fig = plt.figure(figsize=(5,10))
+    fig = plt.figure(figsize=(fig_x,fig_y))
 
     img = plt.imread(code_dir+'/intermediate_RGB.tif')
     img_extent = (minx, maxx, miny, maxy)
@@ -246,7 +262,6 @@ def do_modis_overlay_plot(
     ax.coastlines(resolution='10m', color='black', linewidth=1)
     ax.add_feature(states_provinces, edgecolor='black', linewidth=1)
     ax.add_feature(cfeature.BORDERS, edgecolor='black', linewidth=1)
-    #ax.add_feature(populated_places)
     
     if cities is not None:
     
@@ -275,33 +290,16 @@ def do_modis_overlay_plot(
     g1.xformatter = LONGITUDE_FORMATTER
     g1.yformatter = LATITUDE_FORMATTER
     
-    #Check if color is single or map
-    
-    if cmap in plt.cm.datad.keys():
-        color_or_cmap = "cmap"
-    elif cmap in mpl.colors.cnames.keys():
-        color_or_cmap = "color"
-    else:
-        print(cmap + " is not a recognized color or colormap. Data will be displayed in red")
-	cmap = 'red'
-	color_or_cmap = "color"
-    
     if color_or_cmap == "cmap":
 	ax.scatter(var_lon_subset, var_lat_subset, c=var_vals_subset, 
         	   cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
     if color_or_cmap == "color":
     	ax.scatter(var_lon_subset, var_lat_subset, c=cmap, edgecolor='none', s=2)
-
-    #divider = make_axes_locatable(ax)
-    #test_ax = divider.new_vertical(size="5%", pad=0.05)
     
-    #print test_ax
+    ax_pos = ax.get_position()
     
-    #print ax.get_position()
-    
-    #sys.exit()
     if color_or_cmap == "cmap":
-	cb_ax1 = fig.add_axes([.88, .3, .04, .4])
+	cb_ax1 = fig.add_axes([ax_pos.x1, ax_pos.y0 + .2, .04, .4])
 	#cb_ax1 = fig.add_axes(test_ax)
 	norm = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
 	cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap, orientation = 'vertical', norm = norm)
@@ -357,16 +355,6 @@ if __name__ == "__main__":
     lat_name = overlay_info_dict['lat_name']
     lon_name = overlay_info_dict['lon_name']
     orbit_int = overlay_info_dict['orbit']
-
-    #delta_lat = lat_ul - lat_lr
-    #delta_lon = lon_ul - lon_lr
-    #if delta_lon > 180:
-    #    delta_lon -= 360
-    #delta_lon = abs(delta_lon)
-    #
-    #print delta_lat
-    #print delta_lon
-    ##sys.exit()
 
     
     region = orbit_info_dict['region']
