@@ -16,13 +16,10 @@ Image (.png) named variable_region_date_quality_warn.png by default in specified
 Requirements:
 
 1) json configuration file (default: oco2_modis_vistool_config.json in code directory)
-2) This script is meant to run on ocomaster at Colorado State University. 
-   To run it elsewhere, the data locations will need to be updated 
-   and modules will need to be verified.
 
 Authors:
-Natalie Tourville <natalie.tourville@colostate.edu>
 Heather Cronk <heather.cronk@colostate.edu>
+Natalie Tourville <natalie.tourville@colostate.edu>
 
 Revision history:
 08/2016 (N.D. Tourville; H.Q. Cronk): Initial version
@@ -46,7 +43,6 @@ import pandas as pd
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-#import cartopy.io.shapereader as shapereader
 import shapefile
 from shapely.geometry import LineString, Point, Polygon
 import matplotlib as mpl
@@ -96,7 +92,8 @@ def pull_Aqua_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr, xml_file, tif_file, xsize
     """
     Pulls the Aqua RGB imagery from WorldView using GIBS and puts it in specified tif file with associated metadata
     """ 
-    cmd = "/usr/bin/gdal_translate -of GTiff -outsize "+str(xsize)+" "+str(ysize)+" -projwin "+str(lon_ul)+" "+str(lat_ul)+" "+str(lon_lr)+" "+str(lat_lr)+" "+xml_file+" "+tif_file
+    gdal_path = os.popen("which gdal_translate").read().strip()
+    cmd = gdal_path + " -of GTiff -outsize "+str(xsize)+" "+str(ysize)+" -projwin "+str(lon_ul)+" "+str(lat_ul)+" "+str(lon_lr)+" "+str(lat_lr)+" "+xml_file+" "+tif_file
     os.system(cmd)
 
 def read_shp(filename):
@@ -163,16 +160,18 @@ def do_modis_overlay_plot(
 
     update_GIBS_xml(date, xml_file)
 
-    print "Pulling RGB"
+    print("Pulling RGB")
     try:
         pull_Aqua_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr,  xml_file, code_dir+'/intermediate_RGB.tif')
     except:
-        print "Problem pulling RGB. Check that the geolocation bounds specified in the configuration file are for the upper left hand corner and the lower right hand corner"
+        print("Problem pulling RGB. Check that the geolocation bounds specified in the configuration file are for the upper left hand corner and the lower right hand corner")
 
 
     ### Pull in and prep RGB tif file ###
 
     ds = gdal.Open(code_dir+'/intermediate_RGB.tif')
+    print ds
+    #sys.exit()
     data = ds.ReadAsArray()
     gt = ds.GetGeoTransform()
     proj = ds.GetProjection()
@@ -192,6 +191,15 @@ def do_modis_overlay_plot(
     maxx = gt[0] + width*gt[1] + height*gt[2]
     maxy = gt[3]
 
+    print minx, maxx
+    print miny, maxy
+    print width
+    print height
+    print gt
+    
+    #sys.exit()
+    
+    
     # get subset of var values etc.
     latlon_subset_mask = np.logical_and(
         np.logical_and(var_lat <= maxy, var_lat >= miny), 
@@ -209,13 +217,13 @@ def do_modis_overlay_plot(
         lat_subset_idx = set(np.where(np.logical_and(var_lat <= maxy, var_lat >= miny))[0])
 	lon_subset_idx = set(np.where(np.logical_and(var_lon <= maxx, var_lon >= minx))[0])
 	latlon_subset_idx = list(lat_subset_idx.intersection(lon_subset_idx))
-        print "\nThe lat/lon ranges given have no common points for the OCO-2 ground track"
-	#print "Indices where the latitude is between " + str(miny) + " and " + str(maxy) +": " + str(min(lat_subset_idx)) + "-" + str(max(lat_subset_idx))
-        print "Indices where the longitude is between " + str(minx) + " and " + str(maxx) +": " + str(min(lon_subset_idx)) + "-" + str(max(lon_subset_idx))
-	print "Latitude range for those indices: " + str(var_lat[min(lon_subset_idx)]) + "-" + str(var_lat[max(lon_subset_idx)])
-        print "Latitude range given: " + str(miny) + "-" + str(maxy)
-	print "Indices of intersection:", latlon_subset_idx
-	print "Exiting"
+        print("\nThe lat/lon ranges given have no common points for the OCO-2 ground track")
+	#print("Indices where the latitude is between " + str(miny) + " and " + str(maxy) +": " + str(min(lat_subset_idx)) + "-" + str(max(lat_subset_idx)))
+        print("Indices where the longitude is between " + str(minx) + " and " + str(maxx) +": " + str(min(lon_subset_idx)) + "-" + str(max(lon_subset_idx)))
+	print("Latitude range for those indices: " + str(var_lat[min(lon_subset_idx)]) + "-" + str(var_lat[max(lon_subset_idx)]))
+        print("Latitude range given: " + str(miny) + "-" + str(maxy))
+	print("Indices of intersection:", latlon_subset_idx)
+	print("Exiting")
 	os.remove(code_dir+'/intermediate_RGB.tif')
 	sys.exit()
 
@@ -254,7 +262,7 @@ def do_modis_overlay_plot(
         for idx, p in relevant_places.iterrows():
 	
             #print p['NAME'], p['LATITUDE'], p['LONGITUDE']
-	    ax.text(p['LONGITUDE'], p['LATITUDE'], p['NAME'], fontsize=7, color='red', va='bottom', ha='center', transform=ccrs.Geodetic())
+	    ax.text(p['LONGITUDE'], p['LATITUDE'], p['NAME'], fontsize=7, color=cities, va='bottom', ha='center', transform=ccrs.Geodetic())
 
     if interest_pt is not None:
         ax.plot(interest_pt[1], interest_pt[0], 'w*', markersize=10, transform=ccrs.Geodetic())
@@ -262,13 +270,27 @@ def do_modis_overlay_plot(
     g1 = ax.gridlines(draw_labels=True, alpha = 0.5)
     g1.xlabels_top = False
     g1.ylabels_right = False
-    g1.xlabel_style = {'size': 5}
-    g1.ylabel_style = {'size': 5}
+    g1.xlabel_style = {'size': 7}
+    g1.ylabel_style = {'size': 7}
     g1.xformatter = LONGITUDE_FORMATTER
     g1.yformatter = LATITUDE_FORMATTER
-
-    ax.scatter(var_lon_subset, var_lat_subset, c=var_vals_subset, 
-               cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
+    
+    #Check if color is single or map
+    
+    if cmap in plt.cm.datad.keys():
+        color_or_cmap = "cmap"
+    elif cmap in mpl.colors.cnames.keys():
+        color_or_cmap = "color"
+    else:
+        print(cmap + " is not a recognized color or colormap. Data will be displayed in red")
+	cmap = 'red'
+	color_or_cmap = "color"
+    
+    if color_or_cmap == "cmap":
+	ax.scatter(var_lon_subset, var_lat_subset, c=var_vals_subset, 
+        	   cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
+    if color_or_cmap == "color":
+    	ax.scatter(var_lon_subset, var_lat_subset, c=cmap, edgecolor='none', s=2)
 
     #divider = make_axes_locatable(ax)
     #test_ax = divider.new_vertical(size="5%", pad=0.05)
@@ -278,20 +300,20 @@ def do_modis_overlay_plot(
     #print ax.get_position()
     
     #sys.exit()
-    
-    cb_ax1 = fig.add_axes([.88, .3, .04, .4])
-    #cb_ax1 = fig.add_axes(test_ax)
-    norm = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
-    cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap, orientation = 'vertical', norm = norm)
-    cb1_lab = cb1.ax.set_xlabel(var_label, labelpad=8)
-    cb1_lab.set_fontsize(7)
-    cb1.ax.xaxis.set_label_position("top")
-    cb1.ax.tick_params(labelsize=6)
+    if color_or_cmap == "cmap":
+	cb_ax1 = fig.add_axes([.88, .3, .04, .4])
+	#cb_ax1 = fig.add_axes(test_ax)
+	norm = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
+	cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap, orientation = 'vertical', norm = norm)
+	cb1_lab = cb1.ax.set_xlabel(var_label, labelpad=8)
+	cb1_lab.set_fontsize(7)
+	cb1.ax.xaxis.set_label_position("top")
+	cb1.ax.tick_params(labelsize=6)
 
 
     fig.savefig(outfile, dpi=150)
-    print "\nFigure saved at "+outfile
-    print "code directory in subroutine:", code_dir
+    print("\nFigure saved at "+outfile)
+    #print("code directory in subroutine:", code_dir)
     os.remove(code_dir+'/intermediate_RGB.tif')
 
 
@@ -313,8 +335,8 @@ if __name__ == "__main__":
     if config_file.exists():
 	orbit_info_dict = config_file.get_contents()
     else:
-	print 'The expected configuration file '+ args.config_file_loc + ' DNE in ' + code_dir
-	print 'Exiting'
+	print('The expected configuration file '+ args.config_file_loc + ' DNE in ' + code_dir)
+	print('Exiting')
 	sys.exit()
 
 
@@ -327,8 +349,8 @@ if __name__ == "__main__":
     overlay_info_dict = orbit_info_dict['oco2_overlay_info']
     var_file = overlay_info_dict['file']
     if not glob(var_file):
-	print var_file+" does not exist."
-	print "Exiting"
+	print(var_file+" does not exist.")
+	print("Exiting")
 	sys.exit()
     var_name = overlay_info_dict['variable']
     var_plot_name = re.split('/', var_name)[-1]
@@ -351,8 +373,8 @@ if __name__ == "__main__":
     overlay_info_dict = orbit_info_dict['oco2_overlay_info']
     var_file = overlay_info_dict['file']
     if not glob(var_file):
-        print var_file+" does not exist."
-        print "Exiting"
+        print(var_file+" does not exist.")
+        print("Exiting")
         sys.exit()
     var_name = overlay_info_dict['variable']
     var_lims = overlay_info_dict['variable_plot_lims']
@@ -366,40 +388,40 @@ if __name__ == "__main__":
 
     if re.search('oco2_Lt', var_file):
         lite = True
-        print "\nLite overlay file detected. Checking for QF and Warn specs..."
+        #print("\nLite overlay file detected. Checking for QF and Warn specs...")
     
         try:
             lite_quality = overlay_info_dict['lite_QF']
         except:
-            print "No quality specifications detected. Output plot will contain all quality soundings"
+            print("No quality specifications detected. Output plot will contain all quality soundings")
             lite_quality = 'all'
         if not lite_quality:
-            print "No quality specifications detected. Output plot will contain all quality soundings"
+            print("No quality specifications detected. Output plot will contain all quality soundings")
             lite_quality = 'all'
         if lite_quality not in ['', 'all', 'good', 'bad']:
-            print "Unexpected quality flag specification. Options are '', 'all', 'good', or 'bad'"
-            print "Exiting"
+            print("Unexpected quality flag specification. Options are: '', 'all', 'good', or 'bad'")
+            print("Exiting")
             sys.exit()
     
         try:
             lite_warn_lims = overlay_info_dict['lite_warn_lims']
         except:
-            print "No warn specifications detected. Output plot will contain all warn levels"
+            print("No warn specifications detected. Output plot will contain all warn levels")
             lite_warn_lims = [0, 20]
         if not lite_warn_lims:
-            print "No warn specifications detected. Output plot will contain all warn levels"
+            print("No warn specifications detected. Output plot will contain all warn levels")
             lite_warn_lims = [0, 20]
         if lite_warn_lims[0] > lite_warn_lims[1]:
-            print "Lower warn limit is greater than upper warn limit."
-            print "Exiting"
+            print("Lower warn limit is greater than upper warn limit.")
+            print("Exiting")
             sys.exit()
         for lim in lite_warn_lims:
             if lim not in np.arange(21):
-                print "Unexpected warn level specification. Limits must be within [0, 20]."
-                print "Exiting"
+                print("Unexpected warn level specification. Limits must be within [0, 20].")
+                print("Exiting")
                 sys.exit()
         
-    print "Output plot will include "+lite_quality+" quality soundings with warn levels within "+str(lite_warn_lims)+"\n"
+    print("Output plot will include "+lite_quality+" quality soundings with warn levels within "+str(lite_warn_lims)+"\n")
 
     try:
         interest_pt = orbit_info_dict['ground_site']
@@ -407,14 +429,13 @@ if __name__ == "__main__":
 	    interest_pt = None
 	if (interest_pt[0] > lat_ul or interest_pt[0] < lat_lr or interest_pt[1] > lon_lr or interest_pt[1] < lon_ul):
 	    interest_pt = None
-	    print "The ground site is outside the given lat/lon range and will not be included in the output plot.\n"
+	    print("The ground site is outside the given lat/lon range and will not be included in the output plot.\n")
     except:
         interest_pt = None
     try:
-        cities = orbit_info_dict['cities']
-	if cities == "true" or cities == "True":
-	    cities = True
-	else:
+        cities = orbit_info_dict['city_labels']
+	if cities and cities not in mpl.colors.cnames.keys():
+	    print(cities + " is not an available matplotlib color. City labels will not be included on the output plot")
 	    cities = None
 	if not cities:
 	    cities = None
@@ -425,7 +446,7 @@ if __name__ == "__main__":
     except:
 	output_dir = code_dir
     if not output_dir or not glob(output_dir):
-	print "Either there was no output location specified or the one specified does not exist. Output will go in the code directory. \n"
+	print("Either there was no output location specified or the one specified does not exist. Output will go in the code directory. \n")
 	output_dir = code_dir
 
     try:
@@ -459,23 +480,23 @@ if __name__ == "__main__":
 	oco2_data_long_name = oco2_data_obj.attrs.get('long_name')[0]
 	oco2_data_units = oco2_data_obj.attrs.get('units')[0]
     except:
-	print var_name+" DNE in "+var_file
-	print "Check that the variable name includes any necessary group paths. Ex: /Preprocessors/dp_abp"
-	print "Exiting"
+	print(var_name+" DNE in "+var_file)
+	print("Check that the variable name includes any necessary group paths. Ex: /Preprocessors/dp_abp")
+	print("Exiting")
 	sys.exit()
     try:
 	lat_data = h5[lat_name][:]
     except:
-	print lat_name+" DNE in "+var_file
-	print "Check that the variable name includes any necessary group paths. Ex: SoundingGeometry/sounding_latitude"
-	print "Exiting"
+	print(lat_name+" DNE in "+var_file)
+	print("Check that the variable name includes any necessary group paths. Ex: SoundingGeometry/sounding_latitude")
+	print("Exiting")
 	sys.exit()
     try:
 	lon_data = h5[lon_name][:]
     except:
-	print lon_name+" DNE in "+var_file
-	print "Check that the variable name includes any necessary group paths. Ex: SoundingGeometry/sounding_longitude"
-	print "Exiting"
+	print(lon_name+" DNE in "+var_file)
+	print("Check that the variable name includes any necessary group paths. Ex: SoundingGeometry/sounding_longitude")
+	print("Exiting")
 	sys.exit()
     h5.close()
 
@@ -506,14 +527,6 @@ if __name__ == "__main__":
 	    lat_data = lat_data[orbit_subset]
 	    lon_data = lon_data[orbit_subset]
 	
-	# the subset mask part is now 
-        # pushed into the do_modis_overlay_plot()
-        #lite_lat_subset_mask = set(np.where(np.logical_and(lite_lat <= maxy, lite_lat >= miny))[0])
-        #lite_lon_subset_mask = set(np.where(np.logical_and(lite_lon <= maxx, lite_lon >= minx))[0])
-	
-        #lite_latlon_subset_mask = list(lite_lat_subset_mask.intersection(lite_lon_subset_mask))
-    
-    
         if lite_quality == 'good':
     
             quality_mask = np.where(lite_qf == 0)
