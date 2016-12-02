@@ -16,6 +16,12 @@ class LiteFile:
     def get_lon(self):
         return self.lf['longitude'][:]
 
+    def get_vertex_lat(self):
+        return self.lf['vertex_latitude'][:]
+	
+    def get_vertex_lon(self):
+        return self.lf['vertex_longitude'][:]
+
     def get_xco2(self):
         return self.lf['xco2'][:]
 	
