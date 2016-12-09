@@ -5,17 +5,18 @@
 	"region": "",
 	"oco2_overlay_info": {
 		"file": "/home/codell/OCO2_results/b70/lite_test_20160506/oco2_LtCO2_20160727_B7302b_r01_COoffline.nc4",
-		"variable": "/Preprocessors/dp_abp",
-		"variable_plot_lims":[-20, 20],
+		"variable": "xco2",
+		"variable_plot_lims":[],
 		"lat_name": "latitude",
 		"lon_name": "longitude",
 		"orbit": 11016,
 		"lite_QF": "all",
-		"lite_warn_lims": [0, 20],
-		"cmap": "seismic"
+		"lite_warn_lims": [0, 15],
+		"cmap": "jet",
+		"transparency":
 	},
-	"ground_site": [],
-	"city_labels": "", 
+	"ground_site": [40.7934, -77.86],
+	"city_labels": "red", 
 	"output_dir": "/home/hcronk/oco2_modis_vistool/code",
 	"outfile": ""
 }
