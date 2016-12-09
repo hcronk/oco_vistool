@@ -48,6 +48,8 @@ from shapely.geometry import LineString, Point, Polygon
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import matplotlib.path as mpath
+import matplotlib.patches as mpatches
 
 from osgeo import gdal, osr
 from shapely.ops import transform as geom_transform
@@ -145,7 +147,8 @@ def read_shp(filename):
 
 def do_modis_overlay_plot(
     geo_lower_right, geo_upper_left, date, 
-    var_lat, var_lon, var_vals, var_lims=None, interest_pt=None, cmap='jet', 
+    var_lat, var_lon, var_vals, var_lims=None, interest_pt=None, 
+    cmap='jet', alpha=1,
     outfile=None, var_label=None, cities=None):
 
     if var_lims is None:
@@ -180,9 +183,6 @@ def do_modis_overlay_plot(
 
     width = ds.RasterXSize
     height = ds.RasterYSize
-    
-#    print ds.GetMetadata()
-#    print ds.GetGeoTransform()
 
     #Calculate lat/lon lims of RGB
     minx = gt[0]
@@ -224,24 +224,32 @@ def do_modis_overlay_plot(
 	latlon_subset_mask = np.logical_and(
             np.logical_and(var_lat <= maxy, var_lat >= miny), 
             np.logical_and(var_lon <= maxx, var_lon >= minx) )
+        
+	#Ensure that if any of the vertices are outside the lat/lon limits, all are masked
+	latlon_subset_mask_1d = np.all(latlon_subset_mask, axis=1)
+	latlon_subset_mask_2d = np.dstack([latlon_subset_mask_1d, latlon_subset_mask_1d, latlon_subset_mask_1d, latlon_subset_mask_1d])[0,:,:]
+    
+	var_lon_subset = np.ma.masked_where(latlon_subset_mask_2d == False, var_lon)
+	var_lat_subset = np.ma.masked_where(latlon_subset_mask_2d == False, var_lat)
+	var_vals_subset = np.ma.masked_where(latlon_subset_mask_1d == False, var_vals)
+	
+	zip_it = np.ma.dstack([var_lon_subset, var_lat_subset])
 
-	var_lon_subset = var_lon[latlon_subset_mask]
-	var_lat_subset = var_lat[latlon_subset_mask]
-	var_vals_subset = var_vals[latlon_subset_mask]
-
-	if var_lon_subset.size == 0 or var_lat_subset.size == 0:
-            lat_subset_idx = set(np.where(np.logical_and(var_lat <= maxy, var_lat >= miny))[0])
-	    lon_subset_idx = set(np.where(np.logical_and(var_lon <= maxx, var_lon >= minx))[0])
-	    latlon_subset_idx = list(lat_subset_idx.intersection(lon_subset_idx))
-            print("\nThe lat/lon ranges given have no common points for the OCO-2 ground track")
-	    #print("Indices where the latitude is between " + str(miny) + " and " + str(maxy) +": " + str(min(lat_subset_idx)) + "-" + str(max(lat_subset_idx)))
-            print("Indices where the longitude is between " + str(minx) + " and " + str(maxx) +": " + str(min(lon_subset_idx)) + "-" + str(max(lon_subset_idx)))
-	    print("Latitude range for those indices: " + str(var_lat[min(lon_subset_idx)]) + "-" + str(var_lat[max(lon_subset_idx)]))
-            print("Latitude range given: " + str(miny) + "-" + str(maxy))
-	    print("Indices of intersection:", latlon_subset_idx)
-	    print("Exiting")
-	    os.remove(code_dir+'/intermediate_RGB.tif')
-	    sys.exit()
+	
+#This is for 1D lat/lon. Update this to give the appropriate info for the 2D lat/lon arrays!
+#	if var_lon_subset.size == 0 or var_lat_subset.size == 0:
+#            lat_subset_idx = set(np.where(np.logical_and(var_lat <= maxy, var_lat >= miny))[0])
+#	    lon_subset_idx = set(np.where(np.logical_and(var_lon <= maxx, var_lon >= minx))[0])
+#	    latlon_subset_idx = list(lat_subset_idx.intersection(lon_subset_idx))
+#            print("\nThe lat/lon ranges given have no common points for the OCO-2 ground track")
+#	    #print("Indices where the latitude is between " + str(miny) + " and " + str(maxy) +": " + str(min(lat_subset_idx)) + "-" + str(max(lat_subset_idx)))
+#            print("Indices where the longitude is between " + str(minx) + " and " + str(maxx) +": " + str(min(lon_subset_idx)) + "-" + str(max(lon_subset_idx)))
+#	    print("Latitude range for those indices: " + str(var_lat[min(lon_subset_idx)]) + "-" + str(var_lat[max(lon_subset_idx)]))
+#            print("Latitude range given: " + str(miny) + "-" + str(maxy))
+#	    print("Indices of intersection:", latlon_subset_idx)
+#	    print("Exiting")
+#	    os.remove(code_dir+'/intermediate_RGB.tif')
+#	    sys.exit()
 
     ### Plot prep ###
     states_provinces = cfeature.NaturalEarthFeature(
@@ -291,12 +299,23 @@ def do_modis_overlay_plot(
 	g1.ylabel_style = {'size': 7}
 	g1.xformatter = LONGITUDE_FORMATTER
 	g1.yformatter = LATITUDE_FORMATTER
-	
+    
+        patches = []
+
 	if color_or_cmap == "cmap":
-	    ax.scatter(var_lon_subset, var_lat_subset, c=var_vals_subset, 
-        	       cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
+	    for row in xrange(zip_it.shape[0]):
+	        polygon = mpatches.Polygon(zip_it[row,:,:]) 
+	        patches.append(polygon)
+	
+#	    ax.scatter(var_lon_subset, var_lat_subset, c=var_vals_subset, 
+#        	       cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
 		       
-            cb_ax1 = fig.add_axes([ax_pos.x1, ax_pos.y0 + .2, .04, .4])
+            p = mpl.collections.PatchCollection(patches, cmap=cmap, alpha=alpha, edgecolor='none')
+	    p.set_array(var_vals_subset)
+	    p.set_clim(var_lims[0], var_lims[1])
+	    ax.add_collection(p)
+	    
+	    cb_ax1 = fig.add_axes([ax_pos.x1, ax_pos.y0 + .2, .04, .4])
 	    norm = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
 	    cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap, orientation = 'vertical', norm = norm)
 	    cb1_lab = cb1.ax.set_xlabel(var_label, labelpad=8)
@@ -304,7 +323,13 @@ def do_modis_overlay_plot(
 	    cb1.ax.xaxis.set_label_position("top")
 	    cb1.ax.tick_params(labelsize=6)
 	if color_or_cmap == "color":
-    	    ax.scatter(var_lon_subset, var_lat_subset, c=cmap, edgecolor='none', s=2)
+#    	    ax.scatter(var_lon_subset, var_lat_subset, c=cmap, edgecolor='none', s=2)
+            for row in xrange(zip_it.shape[0]):
+	        polygon = mpatches.Polygon(zip_it[row,:,:], color=cmap) 
+	        patches.append(polygon)
+	    p = mpl.collections.PatchCollection(patches, alpha=alpha, edgecolor='none', match_original=True)
+	    ax.add_collection(p)
+		
 
     fig.savefig(outfile, dpi=150)
     print("\nFigure saved at "+outfile)
@@ -408,6 +433,16 @@ if __name__ == "__main__":
 	    cmap = ""
 	if not cmap:
 	    cmap = "jet"
+	
+	try:
+	    alpha = overlay_info_dict['transparency']
+	except:
+	    alpha = ""
+	if not alpha:
+	    alpha = 1
+	if alpha < 0 or alpha > 1:
+	    print("Unexpected transparency specification. Value must be within [0, 1]. Output plot will contain full-color.\n")
+	    alpha = 1
     try:
         interest_pt = orbit_info_dict['ground_site']
 	if not interest_pt:
@@ -494,6 +529,8 @@ if __name__ == "__main__":
 	lite_file.open_file()
 	lite_lat = lite_file.get_lat()
 	lite_lon = lite_file.get_lon()
+	lite_vert_lat = lite_file.get_vertex_lat()
+	lite_vert_lon = lite_file.get_vertex_lon()
 	lite_sid = lite_file.get_sid()
 	lite_xco2 = lite_file.get_xco2()
 	lite_warn = lite_file.get_warn()
@@ -505,6 +542,8 @@ if __name__ == "__main__":
 	    orbit_subset = np.where(lite_orbit == orbit_int)
 	    lite_lat = lite_lat[orbit_subset]
 	    lite_lon = lite_lon[orbit_subset]
+	    lite_vert_lat = lite_vert_lat[orbit_subset, :]
+	    lite_vert_lon = lite_vert_lon[orbit_subset, :]
 	    lite_sid = lite_sid[orbit_subset]
 	    lite_qf = lite_qf[orbit_subset]
 	    lite_xco2 = lite_xco2[orbit_subset]
@@ -512,7 +551,7 @@ if __name__ == "__main__":
 	    oco2_data = oco2_data[orbit_subset]
 	    lat_data = lat_data[orbit_subset]
 	    lon_data = lon_data[orbit_subset]
-	
+	    
         if lite_quality == 'good':
     
             quality_mask = np.where(lite_qf == 0)
@@ -520,6 +559,8 @@ if __name__ == "__main__":
 
 	    lite_lat = lite_lat[quality_mask]
 	    lite_lon = lite_lon[quality_mask]
+	    lite_vert_lat = lite_vert_lat[0, quality_mask, :]
+	    lite_vert_lon = lite_vert_lon[0, quality_mask, :]
 	    lite_xco2 = lite_xco2[quality_mask]
 	    lite_warn = lite_warn[quality_mask]
 	    oco2_data = oco2_data[quality_mask]
@@ -533,6 +574,8 @@ if __name__ == "__main__":
 
 	    lite_lat = lite_lat[quality_mask]
 	    lite_lon = lite_lon[quality_mask]
+	    lite_vert_lat = lite_vert_lat[0, quality_mask, :]
+	    lite_vert_lon = lite_vert_lon[0, quality_mask, :]
 	    lite_xco2 = lite_xco2[quality_mask]
 	    lite_warn = lite_warn[quality_mask]
 	    oco2_data = oco2_data[quality_mask]
@@ -543,11 +586,14 @@ if __name__ == "__main__":
 
 	lite_lat = lite_lat[warn_mask]
 	lite_lon = lite_lon[warn_mask]
+	lite_vert_lat = lite_vert_lat[0, warn_mask, :]
+	lite_vert_lon = lite_vert_lon[0, warn_mask, :]
 	lite_xco2 = lite_xco2[warn_mask]
 	lite_warn = lite_warn[warn_mask]
 	oco2_data = oco2_data[warn_mask]
 	lat_data = lat_data[warn_mask]
 	lon_data = lon_data[warn_mask]
+	
 
 	wl_file_tag = "_WL_"+str(lite_warn_lims[0])+"to"+str(lite_warn_lims[1])
 	
@@ -583,8 +629,15 @@ if __name__ == "__main__":
             outfile_name = var_plot_name+"_"+straight_up_date+qf_file_tag+wl_file_tag+".png"
     outfile = output_dir+"/"+outfile_name
 
+#    do_modis_overlay_plot(orbit_info_dict['geo_lower_right'], 
+#                          orbit_info_dict['geo_upper_left'],
+#                          date, lat_data, lon_data, oco2_data, 
+#                          var_lims=[vmin,vmax], interest_pt=interest_pt, cmap=cmap,
+#			  outfile=outfile, var_label=cbar_name, cities=cities)
+
     do_modis_overlay_plot(orbit_info_dict['geo_lower_right'], 
                           orbit_info_dict['geo_upper_left'],
-                          date, lat_data, lon_data, oco2_data, 
-                          var_lims=[vmin,vmax], interest_pt=interest_pt, cmap=cmap,
+                          date, lite_vert_lat, lite_vert_lon, oco2_data, 
+                          var_lims=[vmin,vmax], interest_pt=interest_pt, 
+			  cmap=cmap, alpha=alpha,
 			  outfile=outfile, var_label=cbar_name, cities=cities)
