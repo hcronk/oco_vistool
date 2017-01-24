@@ -234,7 +234,21 @@ def do_modis_overlay_plot(
 	    var_lon_subset = np.ma.masked_where(latlon_subset_mask_2d == False, var_lon)
 	    var_lat_subset = np.ma.masked_where(latlon_subset_mask_2d == False, var_lat)
 	    var_vals_subset = np.ma.masked_where(latlon_subset_mask_1d == False, var_vals)
-
+	    
+	    if var_lon_subset.count() == 0 or var_lat_subset.count() == 0:
+	        lat_subset_idx = set(np.where(np.logical_and(var_lat <= maxy, var_lat >= miny))[0])
+		lon_subset_idx = set(np.where(np.logical_and(var_lon <= maxx, var_lon >= minx))[0])
+		latlon_subset_idx = list(lat_subset_idx.intersection(lon_subset_idx))
+        	print("\nThe lat/lon ranges given have no common points for the OCO-2 ground track")
+		#print("Indices where the latitude is between " + str(miny) + " and " + str(maxy) +": " + str(min(lat_subset_idx)) + "-" + str(max(lat_subset_idx)))
+        	print("Along-track indices where the longitude is between " + str(minx) + " and " + str(maxx) +": " + str(min(lon_subset_idx)) + "-" + str(max(lon_subset_idx)))
+		print("Latitude range for those indices: " + str(min(var_lat[min(lon_subset_idx)])) + "-" + str(min(var_lat[max(lon_subset_idx)])))
+        	print("Latitude range given: " + str(miny) + "-" + str(maxy))
+		print("Along-track indices of intersection:", latlon_subset_idx)
+		print("Exiting")
+		os.remove(code_dir+'/intermediate_RGB.tif')
+		sys.exit()
+	    
 	    zip_it = np.ma.dstack([var_lon_subset, var_lat_subset])
 	    
 	else:
