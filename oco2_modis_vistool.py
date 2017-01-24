@@ -146,7 +146,7 @@ def read_shp(filename):
     return df
 
 def do_modis_overlay_plot(
-    geo_lower_right, geo_upper_left, date, 
+    geo_lower_right, geo_upper_left, orbit_start_idx, date,
     var_lat, var_lon, var_vals, var_lims=None, interest_pt=None, 
     cmap='jet', alpha=1,
     outfile=None, var_label=None, cities=None):
@@ -241,7 +241,7 @@ def do_modis_overlay_plot(
 		latlon_subset_idx = list(lat_subset_idx.intersection(lon_subset_idx))
         	print("\nThe lat/lon ranges given have no common points for the OCO-2 ground track")
 		#print("Indices where the latitude is between " + str(miny) + " and " + str(maxy) +": " + str(min(lat_subset_idx)) + "-" + str(max(lat_subset_idx)))
-        	print("Along-track indices where the longitude is between " + str(minx) + " and " + str(maxx) +": " + str(min(lon_subset_idx)) + "-" + str(max(lon_subset_idx)))
+        	print("Along-track indices where the longitude is between " + str(minx) + " and " + str(maxx) +": " + str(min(lon_subset_idx)+orbit_start_idx) + "-" + str(max(lon_subset_idx)+orbit_start_idx))
 		print("Latitude range for those indices: " + str(min(var_lat[min(lon_subset_idx)])) + "-" + str(min(var_lat[max(lon_subset_idx)])))
         	print("Latitude range given: " + str(miny) + "-" + str(maxy))
 		print("Along-track indices of intersection:", latlon_subset_idx)
@@ -262,7 +262,7 @@ def do_modis_overlay_plot(
 		latlon_subset_idx = list(lat_subset_idx.intersection(lon_subset_idx))
         	print("\nThe lat/lon ranges given have no common points for the OCO-2 ground track")
 		#print("Indices where the latitude is between " + str(miny) + " and " + str(maxy) +": " + str(min(lat_subset_idx)) + "-" + str(max(lat_subset_idx)))
-        	print("Indices where the longitude is between " + str(minx) + " and " + str(maxx) +": " + str(min(lon_subset_idx)) + "-" + str(max(lon_subset_idx)))
+        	print("Indices where the longitude is between " + str(minx) + " and " + str(maxx) +": " + str(min(lon_subset_idx)+orbit_start_idx) + "-" + str(max(lon_subset_idx)+orbit_start_idx))
 		print("Latitude range for those indices: " + str(var_lat[min(lon_subset_idx)]) + "-" + str(var_lat[max(lon_subset_idx)]))
         	print("Latitude range given: " + str(miny) + "-" + str(maxy))
 		print("Indices of intersection:", latlon_subset_idx)
@@ -365,6 +365,8 @@ def do_modis_overlay_plot(
 
 code_dir = os.path.dirname(os.path.realpath(__file__))
 xml_file = code_dir+'/GIBS_Aqua_MODIS_truecolor.xml'
+orbit_start_idx = 0
+orbit_end_idx = 0
 
 if __name__ == "__main__":
 
@@ -571,6 +573,8 @@ if __name__ == "__main__":
 	
         if orbit_int:
 	    orbit_subset = np.where(lite_orbit == orbit_int)
+	    orbit_start_idx = orbit_subset[0][0]
+	    orbit_end_idx = orbit_subset[0][-1]
 	    #lite_lat = lite_lat[orbit_subset]
 	    #lite_lon = lite_lon[orbit_subset]
 	    #lite_vert_lat = lite_vert_lat[orbit_subset, :]
@@ -676,10 +680,10 @@ if __name__ == "__main__":
             outfile_name = var_plot_name+"_"+straight_up_date+qf_file_tag+wl_file_tag+".png"
     outfile = output_dir+"/"+outfile_name
     
-
     do_modis_overlay_plot(orbit_info_dict['geo_lower_right'], 
                           orbit_info_dict['geo_upper_left'],
-                          date, lat_data, lon_data, oco2_data, 
+			  orbit_start_idx, 
+			  date, lat_data, lon_data, oco2_data, 
                           var_lims=[vmin,vmax], interest_pt=interest_pt, 
 			  cmap=cmap, alpha=alpha,
 			  outfile=outfile, var_label=cbar_name, cities=cities)
