@@ -309,17 +309,21 @@ def do_modis_overlay_plot(
         patches = []
 
 	if color_or_cmap == "cmap":
-	    for row in xrange(zip_it.shape[0]):
-	        polygon = mpatches.Polygon(zip_it[row,:,:]) 
-	        patches.append(polygon)
+	    if var_lat.ndim > 1: 
+		for row in xrange(zip_it.shape[0]):
+	            polygon = mpatches.Polygon(zip_it[row,:,:]) 
+	            patches.append(polygon)
+		    
+		p = mpl.collections.PatchCollection(patches, cmap=cmap, alpha=alpha, edgecolor='none')
+		p.set_array(var_vals_subset)
+		p.set_clim(var_lims[0], var_lims[1])
+		ax.add_collection(p)
 	
-#	    ax.scatter(var_lon_subset, var_lat_subset, c=var_vals_subset, 
-#        	       cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
+	    else:
+	        ax.scatter(var_lon_subset, var_lat_subset, c=var_vals_subset, 
+        	       cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
 		       
-            p = mpl.collections.PatchCollection(patches, cmap=cmap, alpha=alpha, edgecolor='none')
-	    p.set_array(var_vals_subset)
-	    p.set_clim(var_lims[0], var_lims[1])
-	    ax.add_collection(p)
+
 	    
 	    cb_ax1 = fig.add_axes([ax_pos.x1, ax_pos.y0 + .2, .04, .4])
 	    norm = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
