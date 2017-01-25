@@ -39,6 +39,7 @@ System Requirements:
        NOTE: This is already a part of the Anaconda distribution of Python. 
              You will likely need to set an environmental variable called GDAL_DATA in your bash profile 
 	     that points to gdal within your anaconda folder but then should be good to go.
+	     (Something like export GDAL_DATA="/local/home/hcronk/anaconda/share/gdal")
 
 Python requirements:
 1) Python 2.7 (untested but likely compatible with minimal updates on Python 3)
