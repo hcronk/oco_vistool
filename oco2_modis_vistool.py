@@ -146,8 +146,9 @@ def read_shp(filename):
     return df
 
 def do_modis_overlay_plot(
-    geo_lower_right, geo_upper_left, orbit_start_idx, date,
-    var_lat, var_lon, var_vals, var_lims=None, interest_pt=None, 
+    geo_upper_left, geo_lower_right, date,
+    var_lat, var_lon, var_vals, 
+    orbit_start_idx=0, var_lims=None, interest_pt=None, 
     cmap='jet', alpha=1,
     outfile=None, var_label=None, cities=None):
 	
@@ -680,10 +681,9 @@ if __name__ == "__main__":
             outfile_name = var_plot_name+"_"+straight_up_date+qf_file_tag+wl_file_tag+".png"
     outfile = output_dir+"/"+outfile_name
     
-    do_modis_overlay_plot(orbit_info_dict['geo_lower_right'], 
-                          orbit_info_dict['geo_upper_left'],
-			  orbit_start_idx, 
+    do_modis_overlay_plot(orbit_info_dict['geo_upper_left'],
+                          orbit_info_dict['geo_lower_right'], 
 			  date, lat_data, lon_data, oco2_data, 
-                          var_lims=[vmin,vmax], interest_pt=interest_pt, 
+                          orbit_start_idx, var_lims=[vmin,vmax], interest_pt=interest_pt, 
 			  cmap=cmap, alpha=alpha,
 			  outfile=outfile, var_label=cbar_name, cities=cities)
