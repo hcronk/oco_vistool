@@ -298,7 +298,10 @@ def do_modis_overlay_plot(
 			  
 				 
     ### Plot the image ###
-    fig = plt.figure(figsize=(fig_x,fig_y))
+    if var_vals.shape:
+        fig = plt.figure(figsize=(fig_x + 1,fig_y))
+    else:
+        fig = plt.figure(figsize=(fig_x,fig_y))
 
     img = plt.imread(code_dir+'/intermediate_RGB.tif')
     img_extent = (minx, maxx, miny, maxy)
@@ -332,8 +335,8 @@ def do_modis_overlay_plot(
     g1 = ax.gridlines(draw_labels=True, alpha = 0.5)
     g1.xlabels_top = False
     g1.ylabels_right = False
-    g1.xlabel_style = {'size': 7, 'fontweight':'bold'}
-    g1.ylabel_style = {'size': 7, 'fontweight':'bold'}
+    g1.xlabel_style = {'size': 10, 'fontweight':'bold'}
+    g1.ylabel_style = {'size': 10, 'fontweight':'bold'}
     g1.xformatter = LONGITUDE_FORMATTER
     g1.yformatter = LATITUDE_FORMATTER
     
@@ -358,15 +361,15 @@ def do_modis_overlay_plot(
 		       
 
 	    
-	    cb_ax1 = fig.add_axes([ax_pos.x1, ax_pos.y0, .04, .8])
+	    cb_ax1 = fig.add_axes([ax_pos.x1 - .05, ax_pos.y0, .04, .8])
 	    norm = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
 	    cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap, orientation = 'vertical', norm = norm)
 	    cb1_lab = cb1.ax.set_xlabel(var_label, labelpad=8, fontweight='bold')
-	    cb1_lab.set_fontsize(8)
+	    cb1_lab.set_fontsize(14)
 	    cb1.ax.xaxis.set_label_position("top")
 	    for t in cb1.ax.yaxis.get_ticklabels():
 	        t.set_weight("bold")
-		t.set_fontsize(7)
+		t.set_fontsize(12)
 	if color_or_cmap == "color":
 #    	    ax.scatter(var_lon_subset, var_lat_subset, c=cmap, edgecolor='none', s=2)
             for row in xrange(zip_it.shape[0]):
