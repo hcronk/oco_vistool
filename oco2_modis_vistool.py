@@ -432,7 +432,16 @@ if __name__ == "__main__":
             sys.exit()
 	var_name = overlay_info_dict['variable']
 	var_plot_name = re.split('/', var_name)[-1]
-        try:
+	try: 
+            band_number = overlay_info_dict['band_number']
+	    band_number = int(band_number)
+	except: 
+	    band_number = False
+        if var_name == "Retrieval/reduced_chi_squared_per_band" and band_number not in [1, 2, 3, False]:
+		print("Unexpected band number specification. Options are 1 (0.76 micron), 2 (1.6 micron), or 3 (2.04 micron)")
+		print(var_name + " is stored per band. Please select an appropriate band number. Exiting")
+        	sys.exit()
+	try:
 	    var_lims = overlay_info_dict['variable_plot_lims']
 	except:
 	    var_lims = []
@@ -441,7 +450,7 @@ if __name__ == "__main__":
 	try: 
             orbit_int = overlay_info_dict['orbit']
 	except: 
-            orbit_int = False    
+            orbit_int = False
 
 	if re.search('oco2_Lt', var_file):
             lite = True
@@ -584,7 +593,14 @@ if __name__ == "__main__":
     if lat_data.ndim != lon_data.ndim:
         print(lat_name+" and "+lon_name+" have different dimensions. Exiting")
         sys.exit()
-
+    
+    if var_name == "Retrieval/reduced_chi_squared_per_band":
+        if not band_number:
+            print(var_name + " is stored per band. Please select a band number (1=0.76 micron, 2=1.6 micron, 3=2.04 micron). Exiting")
+            sys.exit()
+	else:
+	    oco2_data = oco2_data[:,band_number-1]
+    
     if lite:
 
 	qf_file_tag = "_all_quality"
