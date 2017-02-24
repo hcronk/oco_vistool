@@ -298,10 +298,12 @@ def do_modis_overlay_plot(
 			  
 				 
     ### Plot the image ###
-    if var_vals.shape:
-        fig = plt.figure(figsize=(fig_x + 1,fig_y))
-    else:
-        fig = plt.figure(figsize=(fig_x,fig_y))
+#    if var_vals.shape:
+#        fig = plt.figure(figsize=(fig_x + 1,fig_y))
+#    else:
+#        fig = plt.figure(figsize=(fig_x,fig_y))
+	
+    fig = plt.figure(figsize=(fig_x + 1,fig_y))
 
     img = plt.imread(code_dir+'/intermediate_RGB.tif')
     img_extent = (minx, maxx, miny, maxy)
@@ -339,6 +341,15 @@ def do_modis_overlay_plot(
     g1.ylabel_style = {'size': 10, 'fontweight':'bold'}
     g1.xformatter = LONGITUDE_FORMATTER
     g1.yformatter = LATITUDE_FORMATTER
+    
+    ylocs, ylabels = plt.yticks()
+    xlocs, xlabels = plt.xticks()
+    
+    new_xlocs = xlocs[1::2]
+    new_ylocs = ylocs[1::2]
+    
+    g1.xlocator = mpl.ticker.FixedLocator(new_xlocs)
+    g1.ylocator = mpl.ticker.FixedLocator(new_ylocs)
     
     if var_vals.shape:
     
