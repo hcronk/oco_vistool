@@ -18,7 +18,7 @@
 	},
 	"ground_site": [40.7934, -77.86],
 	"city_labels": "red", 
-	"output_dir": "/home/hcronk/oco2_modis_vistool/code",
+	"output_dir": "",
 	"out_plot_name": "",
 	"out_data_name": ""
 }
