@@ -17,12 +17,8 @@ Requirements:
 
 1) json configuration file (default: oco2_modis_vistool_config.json in code directory)
 
-Authors:
+Corresponding author:
 Heather Cronk <heather.cronk@colostate.edu>
-Natalie Tourville <natalie.tourville@colostate.edu>
-
-Revision history:
-08/2016 (N.D. Tourville; H.Q. Cronk): Initial version
 
 """
 
