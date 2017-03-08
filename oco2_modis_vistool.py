@@ -340,22 +340,22 @@ def do_modis_overlay_plot(
     if interest_pt is not None:
         ax.plot(interest_pt[1], interest_pt[0], 'w*', markersize=10, transform=ccrs.Geodetic())
     
-    #g1 = ax.gridlines(draw_labels=True, alpha = 0.5)
-    #g1.xlabels_top = False
-    #g1.ylabels_right = False
-    #g1.xlabel_style = {'size': 10, 'fontweight':'bold'}
-    #g1.ylabel_style = {'size': 10, 'fontweight':'bold'}
-    #g1.xformatter = LONGITUDE_FORMATTER
-    #g1.yformatter = LATITUDE_FORMATTER
+
+    ylocs, ylabels = plt.yticks()
+    xlocs, xlabels = plt.xticks()
     
-    #ylocs, ylabels = plt.yticks()
-    #xlocs, xlabels = plt.xticks()
-    
-    #new_xlocs = xlocs[1::2]
-    #new_ylocs = ylocs[1::2]
-    
-    #g1.xlocator = mpl.ticker.FixedLocator(new_xlocs)
-    #g1.ylocator = mpl.ticker.FixedLocator(new_ylocs)
+    new_xlocs = [xlocs[1], xlocs[-2]]
+    new_ylocs = [ylocs[1], ylocs[-2]]
+
+    g1 = ax.gridlines(draw_labels=True, alpha = 0.5, xlocs = new_xlocs, ylocs = new_ylocs)
+    g1.xlabels_top = False
+    g1.ylabels_right = False
+    g1.xlabel_style = {'size': 10, 'fontweight':'bold'}
+    g1.ylabel_style = {'size': 10, 'fontweight':'bold'}
+    g1.xformatter = LONGITUDE_FORMATTER
+    g1.yformatter = LATITUDE_FORMATTER
+    #ax.xlim(new_xlocs)
+    #ax.ylim(new_ylocs)
     
     if var_vals.shape:
     
@@ -391,7 +391,6 @@ def do_modis_overlay_plot(
 	        patches.append(polygon)
 	    p = mpl.collections.PatchCollection(patches, alpha=alpha, edgecolor='none', match_original=True)
 	    ax.add_collection(p)
-		
     
     inset_extent_x = [minx, maxx] 
     inset_extent_y = [miny, maxy]
@@ -407,7 +406,7 @@ def do_modis_overlay_plot(
     inset_extent_x = [x - 360 if x > 180 else x for x in inset_extent_x]
     inset_extent_y = [y - 180 if y > 90 else y for y in inset_extent_y]   
 
-    inset_ax = plt.subplot(gs[14:17, 0:3], projection=ccrs.PlateCarree())
+    inset_ax = plt.subplot(gs[7:9, 0:3], projection=ccrs.PlateCarree())
     inset_ax.set_extent([inset_extent_x[0], inset_extent_x[1], inset_extent_y[0], inset_extent_y[1]])
     
     inset_ax.coastlines()
