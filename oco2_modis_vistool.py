@@ -43,12 +43,15 @@ import shapefile
 from shapely.geometry import LineString, Point, Polygon
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
+#from mpl_toolkits.axes_grid1 import make_axes_locatable
+from mpl_toolkits.axes_grid import inset_locator
 import matplotlib.path as mpath
 import matplotlib.patches as mpatches
+import matplotlib.gridspec as gridspec
 
 from osgeo import gdal, osr
 from shapely.ops import transform as geom_transform
+import shapely.geometry as sgeom
 
 import xml.etree.ElementTree as ET
 import json
@@ -306,13 +309,14 @@ def do_modis_overlay_plot(
 #        fig = plt.figure(figsize=(fig_x,fig_y))
 	
     fig = plt.figure(figsize=(fig_x + 1,fig_y))
-
+    gs =  gridspec.GridSpec(16, 16)  
+    
     img = plt.imread(code_dir+'/intermediate_RGB.tif')
     img_extent = (minx, maxx, miny, maxy)
 
-    ax = plt.axes(projection=ccrs.PlateCarree())
+    ax = plt.subplot(gs[0:, 3:-2], projection=ccrs.PlateCarree())
     ax_pos = ax.get_position()
-    ax.imshow(img, origin='upper', transform=ccrs.PlateCarree(), extent=img_extent)
+    ax.imshow(img, origin='upper', transform=ccrs.PlateCarree(), extent=img_extent, aspect='auto')
     ax.coastlines(resolution='10m', color='black', linewidth=1)
     ax.add_feature(states_provinces, edgecolor='black', linewidth=1)
     ax.add_feature(cfeature.BORDERS, edgecolor='black', linewidth=1)
@@ -336,22 +340,22 @@ def do_modis_overlay_plot(
     if interest_pt is not None:
         ax.plot(interest_pt[1], interest_pt[0], 'w*', markersize=10, transform=ccrs.Geodetic())
     
-    g1 = ax.gridlines(draw_labels=True, alpha = 0.5)
-    g1.xlabels_top = False
-    g1.ylabels_right = False
-    g1.xlabel_style = {'size': 10, 'fontweight':'bold'}
-    g1.ylabel_style = {'size': 10, 'fontweight':'bold'}
-    g1.xformatter = LONGITUDE_FORMATTER
-    g1.yformatter = LATITUDE_FORMATTER
+    #g1 = ax.gridlines(draw_labels=True, alpha = 0.5)
+    #g1.xlabels_top = False
+    #g1.ylabels_right = False
+    #g1.xlabel_style = {'size': 10, 'fontweight':'bold'}
+    #g1.ylabel_style = {'size': 10, 'fontweight':'bold'}
+    #g1.xformatter = LONGITUDE_FORMATTER
+    #g1.yformatter = LATITUDE_FORMATTER
     
-    ylocs, ylabels = plt.yticks()
-    xlocs, xlabels = plt.xticks()
+    #ylocs, ylabels = plt.yticks()
+    #xlocs, xlabels = plt.xticks()
     
-    new_xlocs = xlocs[1::2]
-    new_ylocs = ylocs[1::2]
+    #new_xlocs = xlocs[1::2]
+    #new_ylocs = ylocs[1::2]
     
-    g1.xlocator = mpl.ticker.FixedLocator(new_xlocs)
-    g1.ylocator = mpl.ticker.FixedLocator(new_ylocs)
+    #g1.xlocator = mpl.ticker.FixedLocator(new_xlocs)
+    #g1.ylocator = mpl.ticker.FixedLocator(new_ylocs)
     
     if var_vals.shape:
     
@@ -371,10 +375,8 @@ def do_modis_overlay_plot(
 	    else:
 	        ax.scatter(var_lon_subset, var_lat_subset, c=var_vals_subset, 
         	       cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
-		       
 
-	    
-	    cb_ax1 = fig.add_axes([ax_pos.x1 - .05, ax_pos.y0, .04, .8])
+	    cb_ax1 = plt.subplot(gs[0:, -1])
 	    norm = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
 	    cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap, orientation = 'vertical', norm = norm)
 	    cb1_lab = cb1.ax.set_xlabel(var_label, labelpad=8, fontweight='bold')
@@ -384,15 +386,36 @@ def do_modis_overlay_plot(
 	        t.set_weight("bold")
 		t.set_fontsize(12)
 	if color_or_cmap == "color":
-#    	    ax.scatter(var_lon_subset, var_lat_subset, c=cmap, edgecolor='none', s=2)
             for row in xrange(zip_it.shape[0]):
 	        polygon = mpatches.Polygon(zip_it[row,:,:], color=cmap) 
 	        patches.append(polygon)
 	    p = mpl.collections.PatchCollection(patches, alpha=alpha, edgecolor='none', match_original=True)
 	    ax.add_collection(p)
 		
+    
+    inset_extent_x = [minx, maxx] 
+    inset_extent_y = [miny, maxy]
+    
+    inset_extent_x = [x + 360 if x < 0 else x for x in inset_extent_x]
+    inset_extent_y = [y + 180 if y < 0 else y for y in inset_extent_y]
+    
+    inset_extent_x[0] -= 20
+    inset_extent_y[0] -= 20
+    inset_extent_x[1] += 20
+    inset_extent_y[1] += 20
+    
+    inset_extent_x = [x - 360 if x > 180 else x for x in inset_extent_x]
+    inset_extent_y = [y - 180 if y > 90 else y for y in inset_extent_y]   
 
-    fig.savefig(out_plot, dpi=150)
+    inset_ax = plt.subplot(gs[14:17, 0:3], projection=ccrs.PlateCarree())
+    inset_ax.set_extent([inset_extent_x[0], inset_extent_x[1], inset_extent_y[0], inset_extent_y[1]])
+    
+    inset_ax.coastlines()
+    extent_box = sgeom.box(minx, miny, maxx, maxy)
+    inset_ax.add_geometries([extent_box], ccrs.PlateCarree(), color='none', edgecolor='red')
+    inset_ax.set_aspect('auto') 
+    
+    fig.savefig(out_plot, dpi=150, bbox_inches='tight')
     print("\nFigure saved at "+out_plot)
     #print("code directory in subroutine:", code_dir)
     os.remove(code_dir+'/intermediate_RGB.tif')
