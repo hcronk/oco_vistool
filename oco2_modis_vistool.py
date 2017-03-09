@@ -38,19 +38,14 @@ import pandas as pd
 
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import shapefile
 from shapely.geometry import LineString, Point, Polygon
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-#from mpl_toolkits.axes_grid1 import make_axes_locatable
-from mpl_toolkits.axes_grid import inset_locator
-import matplotlib.path as mpath
 import matplotlib.patches as mpatches
 import matplotlib.gridspec as gridspec
 
 from osgeo import gdal, osr
-from shapely.ops import transform as geom_transform
 import shapely.geometry as sgeom
 
 import xml.etree.ElementTree as ET
