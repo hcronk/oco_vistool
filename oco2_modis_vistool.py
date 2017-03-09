@@ -314,7 +314,7 @@ def do_modis_overlay_plot(
     img = plt.imread(code_dir+'/intermediate_RGB.tif')
     img_extent = (minx, maxx, miny, maxy)
 
-    ax = plt.subplot(gs[0:, 3:-2], projection=ccrs.PlateCarree())
+    ax = plt.subplot(gs[0:-1, 3:-2], projection=ccrs.PlateCarree())
     ax_pos = ax.get_position()
     ax.imshow(img, origin='upper', transform=ccrs.PlateCarree(), extent=img_extent, aspect='auto')
     ax.coastlines(resolution='10m', color='black', linewidth=1)
@@ -343,19 +343,21 @@ def do_modis_overlay_plot(
 
     ylocs, ylabels = plt.yticks()
     xlocs, xlabels = plt.xticks()
-    
-    new_xlocs = [xlocs[1], xlocs[-2]]
-    new_ylocs = [ylocs[1], ylocs[-2]]
 
-    g1 = ax.gridlines(draw_labels=True, alpha = 0.5, xlocs = new_xlocs, ylocs = new_ylocs)
-    g1.xlabels_top = False
-    g1.ylabels_right = False
-    g1.xlabel_style = {'size': 10, 'fontweight':'bold'}
-    g1.ylabel_style = {'size': 10, 'fontweight':'bold'}
-    g1.xformatter = LONGITUDE_FORMATTER
-    g1.yformatter = LATITUDE_FORMATTER
-    #ax.xlim(new_xlocs)
-    #ax.ylim(new_ylocs)
+    ax_minlat = plt.subplot(gs[-1, 1])
+    ax_maxlat = plt.subplot(gs[0, 1])
+    ax_minlon = plt.subplot(gs[-1, 3])
+    ax_maxlon = plt.subplot(gs[-1, -2])
+    
+    ax_minlat.axis('off')
+    ax_maxlat.axis('off')
+    ax_maxlon.axis('off')
+    ax_minlon.axis('off')
+
+    ax_minlat.set_title(str(ylocs[0]), horizontalalignment='left', verticalalignment='bottom', fontsize=10, fontweight='bold')
+    ax_maxlat.set_title(str(ylocs[-1]), horizontalalignment='left', verticalalignment='top', fontsize=10, fontweight='bold')
+    ax_minlon.set_title(str(xlocs[0]), horizontalalignment='center', verticalalignment='top', fontsize=10, fontweight='bold')
+    ax_maxlon.set_title(str(xlocs[-1]), horizontalalignment='right', verticalalignment='top', fontsize=10, fontweight='bold')
     
     if var_vals.shape:
     
@@ -376,7 +378,7 @@ def do_modis_overlay_plot(
 	        ax.scatter(var_lon_subset, var_lat_subset, c=var_vals_subset, 
         	       cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
 
-	    cb_ax1 = plt.subplot(gs[0:, -1])
+	    cb_ax1 = plt.subplot(gs[0:-1, -1])
 	    norm = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
 	    cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap, orientation = 'vertical', norm = norm)
 	    cb1_lab = cb1.ax.set_xlabel(var_label, labelpad=8, fontweight='bold')
