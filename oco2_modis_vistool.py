@@ -578,18 +578,25 @@ if __name__ == "__main__":
         cities = None
     
     try:
-	output_dir = orbit_info_dict['output_dir']
+	out_plot_dir = orbit_info_dict['out_plot_dir']
     except:
-	output_dir = code_dir
-    if not output_dir or not glob(output_dir):
+	out_plot_dir = code_dir
+    if not out_plot_dir or not glob(out_plot_dir):
 	print("Either there was no output location specified or the one specified does not exist. Output will go in the code directory. \n")
-	output_dir = code_dir
-
+	out_plot_dir = code_dir
     try:
 	out_plot_name = orbit_info_dict['out_plot_name']
     except:
 	out_plot_name = ""
     
+    
+    try:
+	out_data_dir = orbit_info_dict['out_data_dir']
+    except:
+	out_data_dir= code_dir
+    if not out_data_dir or not glob(out_data_dir):
+	print("Either there was no output location specified or the one specified does not exist. Output will go in the code directory. \n")
+	out_data_dir = code_dir
     try:
 	out_data_name = orbit_info_dict['out_data_name']
     except:
@@ -603,7 +610,7 @@ if __name__ == "__main__":
         	out_plot_name = "MODISimagery_"+region+"_"+straight_up_date+".png"
 	    else:
         	out_plot_name = "MODISimagery_"+straight_up_date+".png"
-	out_plot_name = output_dir+"/"+out_plot_name
+	out_plot_name = os.path.join(out_plot_dir, out_plot_name)
 	
 	do_modis_overlay_plot(orbit_info_dict['geo_upper_left'], 
                               orbit_info_dict['geo_lower_right'],
@@ -773,7 +780,7 @@ if __name__ == "__main__":
 	    fp_file_tag = "_FP_"+str(footprint_lims[0])+"to"+str(footprint_lims[1]) 
 	else:
 	    footprint_mask = np.where(lite_footprint == footprint_lims)
-	    fp_file_tag = "_FP_"+str(footprint_lims[0])+"to"+str(footprint_lims[1]) 
+	    fp_file_tag = "_FP_"+str(footprint_lims[0])
 
 	#lite_lat = lite_lat[footprint_mask]
 	#lite_lon = lite_lon[footprint_mask]
@@ -824,14 +831,14 @@ if __name__ == "__main__":
             out_plot_name = var_plot_name+"_"+region+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".png"
 	else:
             out_plot_name = var_plot_name+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".png"
-    out_plot_name = output_dir+"/"+out_plot_name
+    out_plot_name = os.path.join(out_plot_dir, out_plot_name)
     
     if not out_data_name:
 	if region:
 	    out_data_name = var_plot_name+"_"+region+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".h5"
 	else:
 	    out_data_name = var_plot_name+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".h5"
-    out_data_name = output_dir+"/"+out_data_name
+    out_data_name = os.path.join(out_data_dir, out_data_name)
     
     do_modis_overlay_plot(orbit_info_dict['geo_upper_left'],
                           orbit_info_dict['geo_lower_right'], 
