@@ -518,7 +518,28 @@ if __name__ == "__main__":
                     print("Unexpected warn level specification. Limits must be within [0, 20].")
                     print("Exiting")
                     sys.exit()
-
+		    
+	    try:
+        	footprint_lims = overlay_info_dict['footprint']
+            except:
+        	print("No footprint specifications detected. Output plot will contain all footprints")
+        	footprint_lims = [1, 8]
+            if not footprint_lims:
+        	print("No footprint specifications detected. Output plot will contain all footprints")
+        	footprint_lims = [1, 8]
+            if footprint_lims == "all":
+	        footprint_lims = [1, 8]
+	    if len(footprint_lims) == 2:
+		if footprint_lims[0] > footprint_lims[1]:
+        	    print("Lower footprint limit is greater than upper footprint limit.")
+        	    print("Exiting")
+        	    sys.exit()
+	    for ft in footprint_lims:
+        	if ft not in np.arange(1, 9):
+                    print("Unexpected footprint specification. Limits must be within [1, 8].")
+                    print("Exiting")
+                    sys.exit()
+	    
 	print("Output plot will include "+lite_quality+" quality soundings with warn levels within "+str(lite_warn_lims)+"\n")
 
 	try:
@@ -555,6 +576,7 @@ if __name__ == "__main__":
 	    cities = None
     except:
         cities = None
+    
     try:
 	output_dir = orbit_info_dict['output_dir']
     except:
@@ -648,6 +670,7 @@ if __name__ == "__main__":
 	lite_warn = lite_file.get_warn()
 	lite_qf = lite_file.get_qf()
 	lite_orbit = lite_file.get_orbit()
+	lite_footprint = lite_file.get_footprint()
 	lite_file.close_file()
 	
         if orbit_int:
@@ -663,9 +686,13 @@ if __name__ == "__main__":
 	    lite_xco2 = lite_xco2[orbit_subset]
 	    lite_warn = lite_warn[orbit_subset]
 	    oco2_data = oco2_data[orbit_subset]
-	    if lat_data.ndim > 1:
-	        lat_data = lat_data[orbit_subset, :]
-	        lon_data = lon_data[orbit_subset, :]
+	    lite_footprint = lite_footprint[orbit_subset]
+#	    if lat_data.ndim == 3:
+#	        lat_data = lat_data[0, orbit_subset, :]
+#	        lon_data = lon_data[0, orbit_subset, :]    
+	    if lat_data.ndim == 2:
+	        lat_data = np.squeeze(lat_data[orbit_subset, :])
+	        lon_data = np.squeeze(lon_data[orbit_subset, :])
 	    else:
 	        lat_data = lat_data[orbit_subset]
 	        lon_data = lon_data[orbit_subset]
@@ -683,9 +710,13 @@ if __name__ == "__main__":
 	    lite_xco2 = lite_xco2[quality_mask]
 	    lite_warn = lite_warn[quality_mask]
 	    oco2_data = oco2_data[quality_mask]
-	    if lat_data.ndim > 1:
-	        lat_data = lat_data[0, quality_mask, :]
-	        lon_data = lon_data[0, quality_mask, :]
+	    lite_footprint = lite_footprint[quality_mask]
+#	    if lat_data.ndim == 3:
+#	        lat_data = lat_data[0, quality_mask, :]
+#	        lon_data = lon_data[0, quality_mask, :]
+	    if lat_data.ndim == 2:
+	        lat_data = np.squeeze(lat_data[quality_mask, :])
+	        lon_data = np.squeeze(lon_data[quality_mask, :])
 	    else:
 	        lat_data = lat_data[quality_mask]
 	        lon_data = lon_data[quality_mask]
@@ -703,9 +734,13 @@ if __name__ == "__main__":
 	    lite_xco2 = lite_xco2[quality_mask]
 	    lite_warn = lite_warn[quality_mask]
 	    oco2_data = oco2_data[quality_mask]
-	    if lat_data.ndim > 1:
-	        lat_data = lat_data[0, quality_mask, :]
-	        lon_data = lon_data[0, quality_mask, :]
+	    lite_footprint = lite_footprint[quality_mask]
+#	    if lat_data.ndim == 3:
+#	        lat_data = lat_data[0, quality_mask, :]
+#	        lon_data = lon_data[0, quality_mask, :]
+	    if lat_data.ndim == 2:
+	        lat_data = np.squeeze(lat_data[quality_mask, :])
+	        lon_data = np.squeeze(lon_data[quality_mask, :])
 	    else:
 	        lat_data = lat_data[quality_mask]
 	        lon_data = lon_data[quality_mask]
@@ -720,16 +755,45 @@ if __name__ == "__main__":
 	lite_xco2 = lite_xco2[warn_mask]
 	lite_warn = lite_warn[warn_mask]
 	oco2_data = oco2_data[warn_mask]
-	if lat_data.ndim > 1:
-	        lat_data = lat_data[0, warn_mask, :]
-	        lon_data = lon_data[0, warn_mask, :]
+	lite_footprint = lite_footprint[warn_mask]
+#	if lat_data.ndim == 3:
+#	    lat_data = lat_data[0, warn_mask, :]
+#	    lon_data = lon_data[0, warn_mask, :]
+	if lat_data.ndim == 2:
+	    lat_data = np.squeeze(lat_data[warn_mask, :])
+	    lon_data = np.squeeze(lon_data[warn_mask, :])
 	else:
 	    lat_data = lat_data[warn_mask]
 	    lon_data = lon_data[warn_mask]
-	
 
 	wl_file_tag = "_WL_"+str(lite_warn_lims[0])+"to"+str(lite_warn_lims[1])
 	
+	if len(footprint_lims) == 2:
+            footprint_mask = np.where(np.logical_and(lite_footprint <= footprint_lims[1], lite_footprint >= footprint_lims[0]))[0]
+	    fp_file_tag = "_FP_"+str(footprint_lims[0])+"to"+str(footprint_lims[1]) 
+	else:
+	    footprint_mask = np.where(lite_footprint == footprint_lims)
+	    fp_file_tag = "_FP_"+str(footprint_lims[0])+"to"+str(footprint_lims[1]) 
+
+	#lite_lat = lite_lat[footprint_mask]
+	#lite_lon = lite_lon[footprint_mask]
+	#lite_vert_lat = lite_vert_lat[0, footprint_mask, :]
+	#lite_vert_lon = lite_vert_lon[0, footprint_mask, :]
+	lite_sid = lite_sid[footprint_mask]
+	lite_xco2 = lite_xco2[footprint_mask]
+	lite_warn = lite_warn[footprint_mask]
+	oco2_data = oco2_data[footprint_mask]
+	lite_footprint = lite_footprint[footprint_mask]
+#	if lat_data.ndim == 3:
+#	    lat_data = lat_data[0, footprint_mask, :]
+#	    lon_data = lon_data[0, footprint_mask, :]
+	if lat_data.ndim == 2:
+	    lat_data = np.squeeze(lat_data[footprint_mask, :])
+	    lon_data = np.squeeze(lon_data[footprint_mask, :])
+	else:
+	    lat_data = lat_data[footprint_mask]
+	    lon_data = lon_data[footprint_mask]   
+    
     if not var_lims:
 	var_lims = [np.min(oco2_data), np.max(oco2_data)]
         vmax = int(math.ceil(var_lims[1]))
@@ -757,16 +821,16 @@ if __name__ == "__main__":
 
     if not out_plot_name:
 	if region:
-            out_plot_name = var_plot_name+"_"+region+"_"+straight_up_date+qf_file_tag+wl_file_tag+".png"
+            out_plot_name = var_plot_name+"_"+region+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".png"
 	else:
-            out_plot_name = var_plot_name+"_"+straight_up_date+qf_file_tag+wl_file_tag+".png"
+            out_plot_name = var_plot_name+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".png"
     out_plot_name = output_dir+"/"+out_plot_name
     
     if not out_data_name:
 	if region:
-	    out_data_name = var_plot_name+"_"+region+"_"+straight_up_date+qf_file_tag+wl_file_tag+".h5"
+	    out_data_name = var_plot_name+"_"+region+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".h5"
 	else:
-	    out_data_name = var_plot_name+"_"+straight_up_date+qf_file_tag+wl_file_tag+".h5"
+	    out_data_name = var_plot_name+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".h5"
     out_data_name = output_dir+"/"+out_data_name
     
     do_modis_overlay_plot(orbit_info_dict['geo_upper_left'],

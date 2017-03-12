@@ -4,21 +4,23 @@
 	"geo_lower_right": [39.6, -77.5],
 	"region": "",
 	"oco2_overlay_info": {
-		"file": "/home/codell/OCO2_results/b70/lite_test_20160506/oco2_LtCO2_20160727_B7302b_r01_COoffline.nc4",
+		"file": "oco2_LtCO2_20160727_B7302b_r01_COoffline.nc4",
 		"variable": "xco2",
-		"band_number":"1",
+		"band_number":"",
 		"variable_plot_lims":[],
 		"lat_name": "vertex_latitude",
 		"lon_name": "vertex_longitude",
 		"orbit": 11016,
 		"lite_QF": "all",
 		"lite_warn_lims": [0, 15],
+		"footprint": [1, 8], 
 		"cmap": "jet",
 		"transparency":""
 	},
 	"ground_site": [40.7934, -77.86],
-	"city_labels": "red", 
-	"output_dir": "",
+	"city_labels": "", 
+	"out_plot_dir": "",
 	"out_plot_name": "",
+	"out_data_dir": "",
 	"out_data_name": ""
 }
