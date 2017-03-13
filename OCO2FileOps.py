@@ -36,6 +36,9 @@ class LiteFile:
 	
     def get_orbit(self):
         return self.lf['/Sounding/orbit'][:]
+	
+    def get_footprint(self):
+        return self.lf['/Sounding/footprint'][:]
 
     def get_sfcP(self):
         return self.lf['/Retrieval/psurf'][:]
