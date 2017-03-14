@@ -281,11 +281,18 @@ def do_modis_overlay_plot(
     ### Write data to hdf5 file ###
     
     if out_data:
+	
+	if var_lat_subset.ndim > 1:
+	    lat_data_to_write = np.ma.compress_rows(var_lat_subset)
+	    lon_data_to_write = np.ma.compress_rows(var_lon_subset)
+	else:
+	    lat_data_to_write = var_lat_subset.compressed()
+	    lon_data_to_write = var_lon_subset.compressed()
         outfile = h5py.File(out_data, "w")
-	write_ds = outfile.create_dataset(lat_name, data = var_lat_subset)
-	write_ds = outfile.create_dataset(lon_name, data = var_lon_subset)
-	write_ds = outfile.create_dataset(var_name, data = var_vals_subset)
-	write_ds = outfile.create_dataset("sounding_id", data = lite_sid_subset)
+	write_ds = outfile.create_dataset(lat_name, data = lat_data_to_write)
+	write_ds = outfile.create_dataset(lon_name, data = lon_data_to_write)
+	write_ds = outfile.create_dataset(var_name, data = var_vals_subset.compressed())
+	write_ds = outfile.create_dataset("sounding_id", data = lite_sid_subset.compressed())
 	outfile.close()
 	print("\nData saved at "+out_data)
 
