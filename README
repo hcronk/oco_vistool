@@ -39,8 +39,8 @@ System Requirements:
        If cURL is enabled you will see information about the WMS format, if not, 
        you will get an error message and you will need to reconfigure GDAL to support cURL.
        NOTE: This is already a part of the Anaconda distribution of Python. 
-             You will likely need to set an environmental variable called GDAL_DATA in your bash profile 
-	     that points to gdal within your anaconda folder but then should be good to go.
+             You will likely need to set an environmental variable called GDAL_DATA in your bash 
+	     profile that points to gdal within your anaconda folder but then should be good to go.
 	     (Something like export GDAL_DATA="/local/home/hcronk/anaconda/share/gdal")
 
 Python requirements:
@@ -66,42 +66,63 @@ Python requirements:
 
 Configurable Parameters:
 Required:
-    date (string, format:"YYYY-MM_DD"): The date of your case study. This is used to get the correct RGB.
-    geo_upper_left (list, format:[lat, lon]): The latitude and longitude coordinates of the upper left hand corner of your area of interest.
-    geo_lower_right (list, format:[lat, lon]): The latitude and longitude coordinates of the lower right hand corner of your area of interest.
+    date (string, format:"YYYY-MM_DD"): The date of your case study. 
+         This is used to get the correct RGB.
+    geo_upper_left (list, format:[lat, lon]): The latitude and longitude coordinates of the upper 
+         left hand corner of your area of interest.
+    geo_lower_right (list, format:[lat, lon]): The latitude and longitude coordinates of the lower 
+         right hand corner of your area of interest.
     
 Optional:
-    region (string, default: none): The region of your case study. This is used to build the default output filename in the command line execution.
+    region (string, default: none): The region of your case study. 
+                                    This is used to build the default output filename 
+				    in the command line execution.
     cmap (string, default: "jet"): The desired colormap or color for the overlay data. 
-                                   Built-in colormap options can be found here: http://matplotlib.org/examples/color/colormaps_reference.html
-				   Built-in single color options can be found here: http://matplotlib.org/examples/color/named_colors.html
-    oco2_overlay_info (dict, default: none): The information for the OCO-2 variable to overlay on the MODIS RGB
-        file (string): This is required for a variable overlay. The full path to the file that contains the variable to overlay.
-	variable (string, format:"Preprocessors/dp_adp"): This is required for a variable overlay. The full path to the variable within the file specified. 
-	band_number (string or integer, format: "1" or 1): This is optional for variables that are stored per-band in the same array.
-	variable_plot_lims (list, format:[min, max], default: [integer floor of variable's minimum value, integer ceiling of variable's maximum value]):
+                                   Built-in colormap options can be found here: 
+				   http://matplotlib.org/examples/color/colormaps_reference.html
+				   Built-in single color options can be found here: 
+				   http://matplotlib.org/examples/color/named_colors.html
+    oco2_overlay_info (dict, default: none): The information for the OCO-2 variable to overlay 
+                                             on the MODIS RGB
+        file (string): This is required for a variable overlay. 
+	      The full path to the file that contains the variable to overlay.
+	variable (string, format:"Preprocessors/dp_adp"): This is required for a variable overlay. 
+	          The full path to the variable within the file specified. 
+	band_number (string or integer, format: "1" or 1): This is optional for variables that are 
+	             stored per-band in the same array.
+	variable_plot_lims (list, format:[min, max], 
+	                    default: [integer floor of variable's minimum value, integer ceiling of variable's maximum value]):
 	                    The maximum and minimum values used for plotting and color assignment. Any data values beyond the min and max will show up on the plot as the
 			    minimum or maximum color, respectively.
         lat_name (string, format:"latitude"): This is required for a variable overlay if running from the command line. 
-	                                        The name of the latitude array associated with the variable. Used for subsetting and plotting.
+	                                      The name of the latitude array associated with the variable. Used for subsetting and plotting.
 	lon_name (string, format:"longitude"): This is required for a variable overlay if running from the command line. 
-	                                         The name of the longitude array associated with the variable. Used for subsetting and plotting.
-	orbit (integer, format:11016): This is optional for a variable overlay if the variable is contained in a lite file. Used for subsetting.
-	lite_QF (string, format:"good", default: "all"): The quality flag applied to your variable. Used for filtering. Options: "good", "bad", "all"
-	lite_warn_lims (list, format:[0,15], default: [0,20]): The range of acceptable warn levels applied to your variable. Used for filtering. Options: integers from 0 to 20
-        footprint (1 or 2 element list, format: [2:4] or [1], default: [1:8]) The footprint number applied to your variable. Used for filtering.
-	transparency (integer between 0 and 1, format: 0, default: 1): The level of transparency for the OCO-2 data where 1 is opaque and 0 is transparent.
+	                                       The name of the longitude array associated with the variable. Used for subsetting and plotting.
+	orbit (integer, format:11016): This is optional for a variable overlay. Used for subsetting.
+	lite_QF (string, format:"good", default: "all"): The quality flag applied to your variable. 
+	         Used for filtering. Options: "good", "bad", "all"
+	lite_warn_lims (list, format:[0,15], default: [0,20]): The range of acceptable warn levels 
+	                applied to your variable. Used for filtering. Options: integers from 0 to 20
+        footprint (1 or 2 element list, format: [2:4] or [1], default: [1:8]) The footprint number 
+	           applied to your variable. Used for filtering.
+	transparency (integer between 0 and 1, format: 0, default: 1): The level of transparency for 
+	              the OCO-2 data where 1 is opaque and 0 is transparent.
     ground_site (list, format:[lat lon], default: none): The latitude and longitude coordinates of a ground site of interest. It will show up as a white star on the output plot.
-    city_labels (string, default: none): This is optional to display city names on the output plot in the color specified in this string.
-                                         They are on a 10m scale, so it works best if you are displaying a small area.
-					 Python built-in named colors are available here: http://matplotlib.org/examples/color/named_colors.html
-    out_plot_dir (string, default: the directory that you are running the code in): The full output directory path where you would like the output plot to be generated
-    out_plot_name (string, default example: xco2_Amazon_20150701_all_quality_WL_0to20.png): The name of the output plot
-    out_data_dir (string, default: the directory that you are running the code in): The full output directory path where you would like the output data file to be generated
-    out_data_name (string, default example: xco2_Amazon_20150701_all_quality_WL_0to20.h5): The name of the output data file
+    city_labels (string, default: none): This is optional to display city names on the output plot 
+                                         in the color specified in this string. They are on a 10m scale, 
+					 so it works best if you are displaying a small area.
+					 Python built-in named colors are available here: 
+					 http://matplotlib.org/examples/color/named_colors.html
+    out_plot_dir (string, default: the directory that you are running the code in): 
+                  The full output directory path where you would like the output plot to be generated
+    out_plot_name (string, default example: xco2_Amazon_20150701_all_quality_WL_0to20.png): 
+                   The name of the output plot
+    out_data_dir (string, default: the directory that you are running the code in): 
+                  The full output directory path where you would like the output data file to be generated
+    out_data_name (string, default example: xco2_Amazon_20150701_all_quality_WL_0to20.h5): 
+                   The name of the output data file
 
 
-Corresponding author:
+Developed and maintained by:
 Heather Cronk
 heather.cronk@colostate.edu
-s
