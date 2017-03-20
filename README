@@ -96,14 +96,12 @@ Optional:
 			    The maximum and minimum values used for plotting and color assignment. 
 			    Any data values beyond the min and max will show up on the plot as 
 			    the minimum or maximum color, respectively.
-        lat_name (string, format:"latitude"): This is required for a variable overlay if running from 
-					      the command line. The name of the latitude array 
-					      associated with the variable. 
-					      Used for subsetting and plotting.
-	lon_name (string, format:"longitude"): This is required for a variable overlay if running from 
-	                                       the command line. The name of the longitude array 
-					       associated with the variable. 
-					       Used for subsetting and plotting.
+        lat_name (string, format:"latitude"): This is required for a variable overlay for command
+                  line execution. The name of the latitude array associated with the variable. 
+		  Used for subsetting and plotting.
+	lon_name (string, format:"longitude"): This is required for a variable overlay for command
+                  line execution. The name of the longitude array associated with the variable. 
+		  Used for subsetting and plotting.
 	orbit (integer, format:11016): This is optional for a variable overlay. 
 	                               Used for subsetting.
 	lite_QF (string, format:"good", default: "all"): The quality flag applied to the variable. 
@@ -119,7 +117,7 @@ Optional:
                  a ground site of interest. It will show up as a white star on the output plot.
     city_labels (string, default: none): This is optional to display city names on the output plot 
                                          in the color specified in this string. They are on a 10m 
-					 scale, so it works best if you are displaying a small area.
+					 scale, and work best if you are displaying a small area.
 					 Python built-in named colors are available here: 
 					 http://matplotlib.org/examples/color/named_colors.html
     out_plot_dir (string, default: the directory that you are running the code in): 
