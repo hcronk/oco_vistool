@@ -401,9 +401,10 @@ def do_modis_overlay_plot(
 	    cb_ax1 = plt.subplot(gs[0:-1, -1])
 	    norm = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
 	    cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap, orientation = 'vertical', norm = norm)
-	    cb1_lab = cb1.ax.set_xlabel(var_label, labelpad=8, fontweight='bold')
-	    cb1_lab.set_fontsize(14)
-	    cb1.ax.xaxis.set_label_position("top")
+	    if var_label:
+	        cb1_lab = cb1.ax.set_xlabel(var_label, labelpad=8, fontweight='bold')
+	        cb1_lab.set_fontsize(14)
+	        cb1.ax.xaxis.set_label_position("top")
 	    for t in cb1.ax.yaxis.get_ticklabels():
 	        t.set_weight("bold")
 		t.set_fontsize(12)
