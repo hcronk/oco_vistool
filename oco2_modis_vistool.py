@@ -141,14 +141,11 @@ def read_shp(filename):
 
 def do_modis_overlay_plot(
     geo_upper_left, geo_lower_right, date,
-    var_lat, var_lon, var_vals, lite_sid,
+    var_lat, var_lon, var_vals, lite_sid=np.empty([]),
     orbit_start_idx=0, var_lims=None, interest_pt=None, 
     cmap='jet', alpha=1, lat_name=None, lon_name=None, var_name=None,
     out_plot=None, out_data=None, var_label=None, cities=None):
-	
-    if var_lims is None:
-        var_lims = [var_vals.min(), var_vals.max()]
-
+    
     lat_ul = geo_upper_left[0]
     lon_ul = geo_upper_left[1]
     lat_lr = geo_lower_right[0]
@@ -220,16 +217,22 @@ def do_modis_overlay_plot(
             np.logical_and(var_lat <= maxy, var_lat >= miny), 
             np.logical_and(var_lon <= maxx, var_lon >= minx) )
 	
-	if var_lat.ndim > 1:
-
+	if var_lat.ndim == 2:
+            
+	    N = var_lat.shape[1]
+	    
 	    #Ensure that if any of the vertices are outside the lat/lon limits, all are masked
 	    latlon_subset_mask_1d = np.all(latlon_subset_mask, axis=1)
-	    latlon_subset_mask_2d = np.dstack([latlon_subset_mask_1d, latlon_subset_mask_1d, latlon_subset_mask_1d, latlon_subset_mask_1d])[0,:,:]
-
+	    latlon_subset_mask_2d = np.dstack([latlon_subset_mask_1d] * N)[0,:,:]
+            
 	    var_lon_subset = np.ma.masked_where(latlon_subset_mask_2d == False, var_lon)
 	    var_lat_subset = np.ma.masked_where(latlon_subset_mask_2d == False, var_lat)
-	    var_vals_subset = np.ma.masked_where(latlon_subset_mask_1d == False, var_vals)
-	    lite_sid_subset = np.ma.masked_where(latlon_subset_mask_1d == False, lite_sid)
+	    if var_vals.ndim == 2:
+	        var_vals_subset = np.ma.masked_where(latlon_subset_mask_2d == False, var_vals)
+	    else: 
+	        var_vals_subset = np.ma.masked_where(latlon_subset_mask_1d == False, var_vals)
+	    if lite_sid.shape:
+	        lite_sid_subset = np.ma.masked_where(latlon_subset_mask_1d == False, lite_sid)
 	    
 	    if var_lon_subset.count() == 0 or var_lat_subset.count() == 0:
 	        print("\nWARNING: The lat/lon ranges given have no common points for the OCO-2 ground track")
@@ -249,16 +252,16 @@ def do_modis_overlay_plot(
 		    pass
 		out_data = False
 		var_vals = np.empty([])
-		
-	    
+		  
 	    zip_it = np.ma.dstack([var_lon_subset, var_lat_subset])
 	    
 	else:
 	    var_lon_subset = var_lon[latlon_subset_mask]
 	    var_lat_subset = var_lat[latlon_subset_mask]
 	    var_vals_subset = var_vals[latlon_subset_mask]
-	    lite_sid_subset = lite_sid[latlon_subset_mask]
-
+	    if lite_sid.shape:
+	        lite_sid_subset = lite_sid[latlon_subset_mask]
+	    
 	    if var_lon_subset.size == 0 or var_lat_subset.size == 0:
 	        print("\nWARNING: The lat/lon ranges given have no common points for the OCO-2 ground track")
 		try:
@@ -277,7 +280,10 @@ def do_modis_overlay_plot(
 		    pass
 		out_data = False
 		var_vals = np.empty([])
-    
+
+    if var_lims is None:
+        var_lims = [var_vals_subset.min(), var_vals_subset.max()]
+		
     ### Write data to hdf5 file ###
     
     if out_data:
@@ -288,11 +294,23 @@ def do_modis_overlay_plot(
 	else:
 	    lat_data_to_write = var_lat_subset.compressed()
 	    lon_data_to_write = var_lon_subset.compressed()
-        outfile = h5py.File(out_data, "w")
+        if var_vals_subset.ndim > 1:
+	    var_data_to_write = np.ma.compress_rows(var_vals_subset)
+	else:
+	    var_data_to_write = var_vals_subset.compressed()
+	outfile = h5py.File(out_data, "w")
+	if not lat_name:
+	    lat_name = "Latitude"
+	if not lon_name:
+	    lon_name = "Longitude"
+	if not var_name:
+	    var_name = "Data"
+	
 	write_ds = outfile.create_dataset(lat_name, data = lat_data_to_write)
 	write_ds = outfile.create_dataset(lon_name, data = lon_data_to_write)
-	write_ds = outfile.create_dataset(var_name, data = var_vals_subset.compressed())
-	write_ds = outfile.create_dataset("sounding_id", data = lite_sid_subset.compressed())
+	write_ds = outfile.create_dataset(var_name, data = var_data_to_write)
+	if lite_sid.shape:
+	    write_ds = outfile.create_dataset("sounding_id", data = lite_sid_subset.compressed())
 	outfile.close()
 	print("\nData saved at "+out_data)
 
@@ -366,7 +384,7 @@ def do_modis_overlay_plot(
         patches = []
 
 	if color_or_cmap == "cmap":
-	    if var_lat.ndim > 1: 
+	    if var_lat.ndim == 2 and var_vals.ndim == 1: 
 		for row in xrange(zip_it.shape[0]):
 	            polygon = mpatches.Polygon(zip_it[row,:,:]) 
 	            patches.append(polygon)
