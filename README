@@ -12,16 +12,12 @@ GIBS developer documentation:https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+A
 Minimum command line call:
 python oco2_modis_vistool.py
 
-Function call:
+Minimum function call:
 from oco2_modis_vistool import do_modis_overlay_plot
 
-do_modis_overlay_plot(orbit_info_dict['geo_upper_left'],
-                      orbit_info_dict['geo_lower_right'], 
-		      date, lat_data, lon_data, oco2_data, lite_sid,
-                      orbit_start_idx, var_lims=[vmin,vmax], interest_pt=interest_pt, 
-		      cmap=cmap, alpha=alpha,lat_name=lat_name, lon_name=lon_name, 
-		      var_name=var_name, out_plot=out_plot_name, 
-		      out_data=out_data_name, var_label=cbar_name, cities=cities)
+do_modis_overlay_plot([lat_of_upper_lefthand_corner, lon_of_upper_lefthand_corner],
+                      [lat_of_lower_righthand_corner, lon_of_lower_righthand_corner], 
+		      date, lat_data, lon_data, variable_data)
 
 
 Output:
@@ -43,9 +39,12 @@ System Requirements:
              You will likely need to set an environmental variable called GDAL_DATA in your bash 
 	     profile that points to gdal within your anaconda folder.
 	     (Something like export GDAL_DATA="/local/home/hcronk/anaconda/share/gdal")
+2) Python 2.7 or higher
+	For those new to Python, it is easiest to get the Anaconda distribution: https://www.continuum.io/download
+	and then use the Anaconda utility conda to fetch and install packages.
 
 Python requirements:
-1) Python 2.7 (untested but likely compatible with minimal updates on Python 3)
+1) Python 2.7 or higher (untested but likely compatible with minimal updates on Python 3)
 2) Modules:
     warnings
     os
