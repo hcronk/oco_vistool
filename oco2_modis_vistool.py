@@ -144,7 +144,7 @@ def do_modis_overlay_plot(
     var_lat, var_lon, var_vals, lite_sid=np.empty([]),
     orbit_start_idx=0, var_lims=None, interest_pt=None, 
     cmap='jet', alpha=1, lat_name=None, lon_name=None, var_name=None,
-    out_plot=None, out_data=None, var_label=None, cities=None):
+    out_plot="vistool_output.png", out_data="vistool_output.h5", var_label=None, cities=None):
     
     lat_ul = geo_upper_left[0]
     lon_ul = geo_upper_left[1]
