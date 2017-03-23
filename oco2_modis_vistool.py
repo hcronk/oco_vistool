@@ -191,128 +191,128 @@ def do_modis_overlay_plot(
         color_or_cmap = "color"
     else:
         print(cmap + " is not a recognized color or colormap. Data will be displayed in red")
-	cmap = 'red'
-	color_or_cmap = "color"
+        cmap = 'red'
+        color_or_cmap = "color"
     
     fig_x = abs(gt[1])
     fig_y = abs(gt[5])
     
     while fig_x < 1 and fig_y < 1:
         fig_x *= 10
-	fig_y *= 10
+        fig_y *= 10
     
     while fig_x < 5 or fig_y < 5:
-    	if fig_x < 10 and fig_y < 10:
-	    fig_x *= 1.1
-	    fig_y *= 1.1
-	else:
-	    break    
+        if fig_x < 10 and fig_y < 10:
+            fig_x *= 1.1
+            fig_y *= 1.1
+        else:
+            break    
     
     if color_or_cmap == "cmap":
         fig_x += 2
     
     if var_vals.shape:
         # get subset of var values etc.
-	latlon_subset_mask = np.logical_and(
+        latlon_subset_mask = np.logical_and(
             np.logical_and(var_lat <= maxy, var_lat >= miny), 
             np.logical_and(var_lon <= maxx, var_lon >= minx) )
-	
-	if var_lat.ndim == 2:
+        
+        if var_lat.ndim == 2:
             
-	    N = var_lat.shape[1]
-	    
-	    #Ensure that if any of the vertices are outside the lat/lon limits, all are masked
-	    latlon_subset_mask_1d = np.all(latlon_subset_mask, axis=1)
-	    latlon_subset_mask_2d = np.dstack([latlon_subset_mask_1d] * N)[0,:,:]
+            N = var_lat.shape[1]
+                
+            #Ensure that if any of the vertices are outside the lat/lon limits, all are masked
+            latlon_subset_mask_1d = np.all(latlon_subset_mask, axis=1)
+            latlon_subset_mask_2d = np.dstack([latlon_subset_mask_1d] * N)[0,:,:]
             
-	    var_lon_subset = np.ma.masked_where(latlon_subset_mask_2d == False, var_lon)
-	    var_lat_subset = np.ma.masked_where(latlon_subset_mask_2d == False, var_lat)
-	    if var_vals.ndim == 2:
-	        var_vals_subset = np.ma.masked_where(latlon_subset_mask_2d == False, var_vals)
-	    else: 
-	        var_vals_subset = np.ma.masked_where(latlon_subset_mask_1d == False, var_vals)
-	    if lite_sid.shape:
-	        lite_sid_subset = np.ma.masked_where(latlon_subset_mask_1d == False, lite_sid)
-	    
-	    if var_lon_subset.count() == 0 or var_lat_subset.count() == 0:
-	        print("\nWARNING: The lat/lon ranges given have no common points for the OCO-2 ground track")
-		try:
-		    lat_subset_idx = set(np.where(np.logical_and(var_lat <= maxy, var_lat >= miny))[0])
-		    lon_subset_idx = set(np.where(np.logical_and(var_lon <= maxx, var_lon >= minx))[0])
-		    latlon_subset_idx = list(lat_subset_idx.intersection(lon_subset_idx))
-		    #print("Indices where the latitude is between " + str(miny) + " and " + str(maxy) +": " + str(min(lat_subset_idx)) + "-" + str(max(lat_subset_idx)))
-        	    print("Along-track indices where the longitude is between " + str(minx) + " and " + str(maxx) +": " + str(min(lon_subset_idx)+orbit_start_idx) + "-" + str(max(lon_subset_idx)+orbit_start_idx))
-		    print("Latitude range for those indices: " + str(min(var_lat[min(lon_subset_idx)])) + "-" + str(min(var_lat[max(lon_subset_idx)])))
-        	    print("Latitude range given: " + str(miny) + "-" + str(maxy))
-		    print("Along-track indices of intersection:", latlon_subset_idx)
-		    #print("Exiting")
-		    #os.remove(code_dir+'/intermediate_RGB.tif')
+            var_lon_subset = np.ma.masked_where(latlon_subset_mask_2d == False, var_lon)
+            var_lat_subset = np.ma.masked_where(latlon_subset_mask_2d == False, var_lat)
+            if var_vals.ndim == 2:
+                var_vals_subset = np.ma.masked_where(latlon_subset_mask_2d == False, var_vals)
+            else: 
+                var_vals_subset = np.ma.masked_where(latlon_subset_mask_1d == False, var_vals)
+            if lite_sid.shape:
+                lite_sid_subset = np.ma.masked_where(latlon_subset_mask_1d == False, lite_sid)
+                
+            if var_lon_subset.count() == 0 or var_lat_subset.count() == 0:
+                print("\nWARNING: The lat/lon ranges given have no common points for the OCO-2 ground track")
+                try:
+                    lat_subset_idx = set(np.where(np.logical_and(var_lat <= maxy, var_lat >= miny))[0])
+                    lon_subset_idx = set(np.where(np.logical_and(var_lon <= maxx, var_lon >= minx))[0])
+                    latlon_subset_idx = list(lat_subset_idx.intersection(lon_subset_idx))
+                    #print("Indices where the latitude is between " + str(miny) + " and " + str(maxy) +": " + str(min(lat_subset_idx)) + "-" + str(max(lat_subset_idx)))
+                    print("Along-track indices where the longitude is between " + str(minx) + " and " + str(maxx) +": " + str(min(lon_subset_idx)+orbit_start_idx) + "-" + str(max(lon_subset_idx)+orbit_start_idx))
+                    print("Latitude range for those indices: " + str(min(var_lat[min(lon_subset_idx)])) + "-" + str(min(var_lat[max(lon_subset_idx)])))
+                    print("Latitude range given: " + str(miny) + "-" + str(maxy))
+                    print("Along-track indices of intersection:", latlon_subset_idx)
+                    #print("Exiting")
+                    #os.remove(code_dir+'/intermediate_RGB.tif')
 		    #sys.exit()
-		except:
-		    pass
-		out_data = False
-		var_vals = np.empty([])
-		  
-	    zip_it = np.ma.dstack([var_lon_subset, var_lat_subset])
-	    
-	else:
-	    var_lon_subset = var_lon[latlon_subset_mask]
-	    var_lat_subset = var_lat[latlon_subset_mask]
-	    var_vals_subset = var_vals[latlon_subset_mask]
-	    if lite_sid.shape:
-	        lite_sid_subset = lite_sid[latlon_subset_mask]
-	    
-	    if var_lon_subset.size == 0 or var_lat_subset.size == 0:
-	        print("\nWARNING: The lat/lon ranges given have no common points for the OCO-2 ground track")
-		try:
-        	    lat_subset_idx = set(np.where(np.logical_and(var_lat <= maxy, var_lat >= miny))[0])
-		    lon_subset_idx = set(np.where(np.logical_and(var_lon <= maxx, var_lon >= minx))[0])
-		    latlon_subset_idx = list(lat_subset_idx.intersection(lon_subset_idx))
-		    #print("Indices where the latitude is between " + str(miny) + " and " + str(maxy) +": " + str(min(lat_subset_idx)) + "-" + str(max(lat_subset_idx)))
-        	    print("Indices where the longitude is between " + str(minx) + " and " + str(maxx) +": " + str(min(lon_subset_idx)+orbit_start_idx) + "-" + str(max(lon_subset_idx)+orbit_start_idx))
-		    print("Latitude range for those indices: " + str(var_lat[min(lon_subset_idx)]) + "-" + str(var_lat[max(lon_subset_idx)]))
-        	    print("Latitude range given: " + str(miny) + "-" + str(maxy))
-		    print("Indices of intersection:", latlon_subset_idx)
-		    #print("Exiting")
-		    #os.remove(code_dir+'/intermediate_RGB.tif')
-		    #sys.exit()
-		except:
-		    pass
-		out_data = False
-		var_vals = np.empty([])
+                except:
+                    pass
+                out_data = False
+                var_vals = np.empty([])
+             
+        zip_it = np.ma.dstack([var_lon_subset, var_lat_subset])
+        
+    else:
+            var_lon_subset = var_lon[latlon_subset_mask]
+            var_lat_subset = var_lat[latlon_subset_mask]
+            var_vals_subset = var_vals[latlon_subset_mask]
+            if lite_sid.shape:
+                lite_sid_subset = lite_sid[latlon_subset_mask]
+                
+            if var_lon_subset.size == 0 or var_lat_subset.size == 0:
+                print("\nWARNING: The lat/lon ranges given have no common points for the OCO-2 ground track")
+                try:
+                    lat_subset_idx = set(np.where(np.logical_and(var_lat <= maxy, var_lat >= miny))[0])
+                    lon_subset_idx = set(np.where(np.logical_and(var_lon <= maxx, var_lon >= minx))[0])
+                    latlon_subset_idx = list(lat_subset_idx.intersection(lon_subset_idx))
+                    #print("Indices where the latitude is between " + str(miny) + " and " + str(maxy) +": " + str(min(lat_subset_idx)) + "-" + str(max(lat_subset_idx)))
+                    print("Indices where the longitude is between " + str(minx) + " and " + str(maxx) +": " + str(min(lon_subset_idx)+orbit_start_idx) + "-" + str(max(lon_subset_idx)+orbit_start_idx))
+                    print("Latitude range for those indices: " + str(var_lat[min(lon_subset_idx)]) + "-" + str(var_lat[max(lon_subset_idx)]))
+                    print("Latitude range given: " + str(miny) + "-" + str(maxy))
+                    print("Indices of intersection:", latlon_subset_idx)
+                    #print("Exiting")
+                    #os.remove(code_dir+'/intermediate_RGB.tif')
+                    #sys.exit()
+                except:
+                    pass
+                out_data = False
+                var_vals = np.empty([])
 
     if var_lims is None:
         var_lims = [var_vals_subset.min(), var_vals_subset.max()]
-		
+    
     ### Write data to hdf5 file ###
     
     if out_data:
-	
-	if var_lat_subset.ndim > 1:
-	    lat_data_to_write = np.ma.compress_rows(var_lat_subset)
-	    lon_data_to_write = np.ma.compress_rows(var_lon_subset)
-	else:
-	    lat_data_to_write = var_lat_subset.compressed()
-	    lon_data_to_write = var_lon_subset.compressed()
+        
+        if var_lat_subset.ndim > 1:
+            lat_data_to_write = np.ma.compress_rows(var_lat_subset)
+            lon_data_to_write = np.ma.compress_rows(var_lon_subset)
+        else:
+            lat_data_to_write = var_lat_subset.compressed()
+            lon_data_to_write = var_lon_subset.compressed()
         if var_vals_subset.ndim > 1:
-	    var_data_to_write = np.ma.compress_rows(var_vals_subset)
-	else:
-	    var_data_to_write = var_vals_subset.compressed()
-	outfile = h5py.File(out_data, "w")
-	if not lat_name:
-	    lat_name = "Latitude"
-	if not lon_name:
-	    lon_name = "Longitude"
-	if not var_name:
-	    var_name = "Data"
-	
-	write_ds = outfile.create_dataset(lat_name, data = lat_data_to_write)
-	write_ds = outfile.create_dataset(lon_name, data = lon_data_to_write)
-	write_ds = outfile.create_dataset(var_name, data = var_data_to_write)
-	if lite_sid.shape:
-	    write_ds = outfile.create_dataset("sounding_id", data = lite_sid_subset.compressed())
-	outfile.close()
-	print("\nData saved at "+out_data)
+            var_data_to_write = np.ma.compress_rows(var_vals_subset)
+        else:
+            var_data_to_write = var_vals_subset.compressed()
+        outfile = h5py.File(out_data, "w")
+        if not lat_name:
+            lat_name = "Latitude"
+        if not lon_name:
+            lon_name = "Longitude"
+        if not var_name:
+            var_name = "Data"
+        
+        write_ds = outfile.create_dataset(lat_name, data = lat_data_to_write)
+        write_ds = outfile.create_dataset(lon_name, data = lon_data_to_write)
+        write_ds = outfile.create_dataset(var_name, data = var_data_to_write)
+        if lite_sid.shape:
+            write_ds = outfile.create_dataset("sounding_id", data = lite_sid_subset.compressed())
+        outfile.close()
+        print("\nData saved at "+out_data)
 
     ### Plot prep ###
     states_provinces = cfeature.NaturalEarthFeature(
@@ -320,14 +320,14 @@ def do_modis_overlay_plot(
         name='admin_1_states_provinces_lines',
         scale='50m',
         facecolor='none')
-			  
-				 
+      
+    			 
     ### Plot the image ###
 #    if var_vals.shape:
 #        fig = plt.figure(figsize=(fig_x + 1,fig_y))
 #    else:
 #        fig = plt.figure(figsize=(fig_x,fig_y))
-	
+    
     fig = plt.figure(figsize=(fig_x + 1,fig_y))
     gs =  gridspec.GridSpec(16, 16)  
     
@@ -349,13 +349,13 @@ def do_modis_overlay_plot(
     
         relevant_places = df[(df['LATITUDE'] <= maxy) & 
                           (df['LATITUDE']>= miny) & 
-			  (df['LONGITUDE']<= maxx) & 
-			  (df['LONGITUDE']>= minx)]
-			  
+                          (df['LONGITUDE']<= maxx) & 
+                          (df['LONGITUDE']>= minx)]
+        
         for idx, p in relevant_places.iterrows():
-	
+        
             #print p['NAME'], p['LATITUDE'], p['LONGITUDE']
-	    ax.text(p['LONGITUDE'], p['LATITUDE'], p['NAME'], fontsize=7, color=cities, va='bottom', ha='center', transform=ccrs.Geodetic())
+            ax.text(p['LONGITUDE'], p['LATITUDE'], p['NAME'], fontsize=7, color=cities, va='bottom', ha='center', transform=ccrs.Geodetic())
 
     if interest_pt is not None:
         ax.plot(interest_pt[1], interest_pt[0], 'w*', markersize=10, transform=ccrs.Geodetic())
@@ -383,37 +383,37 @@ def do_modis_overlay_plot(
     
         patches = []
 
-	if color_or_cmap == "cmap":
-	    if var_lat.ndim == 2 and var_vals.ndim == 1: 
-		for row in xrange(zip_it.shape[0]):
-	            polygon = mpatches.Polygon(zip_it[row,:,:]) 
-	            patches.append(polygon)
-		    
-		p = mpl.collections.PatchCollection(patches, cmap=cmap, alpha=alpha, edgecolor='none')
-		p.set_array(var_vals_subset)
-		p.set_clim(var_lims[0], var_lims[1])
-		ax.add_collection(p)
-	
-	    else:
-	        ax.scatter(var_lon_subset, var_lat_subset, c=var_vals_subset, 
-        	       cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
+        if color_or_cmap == "cmap":
+            if var_lat.ndim == 2 and var_vals.ndim == 1: 
+                for row in xrange(zip_it.shape[0]):
+                    polygon = mpatches.Polygon(zip_it[row,:,:]) 
+                    patches.append(polygon)
+                    
+                p = mpl.collections.PatchCollection(patches, cmap=cmap, alpha=alpha, edgecolor='none')
+                p.set_array(var_vals_subset)
+                p.set_clim(var_lims[0], var_lims[1])
+                ax.add_collection(p)
 
-	    cb_ax1 = plt.subplot(gs[0:-1, -1])
-	    norm = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
-	    cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap, orientation = 'vertical', norm = norm)
-	    if var_label:
-	        cb1_lab = cb1.ax.set_xlabel(var_label, labelpad=8, fontweight='bold')
-	        cb1_lab.set_fontsize(14)
-	        cb1.ax.xaxis.set_label_position("top")
-	    for t in cb1.ax.yaxis.get_ticklabels():
-	        t.set_weight("bold")
-		t.set_fontsize(12)
-	if color_or_cmap == "color":
+            else:
+                ax.scatter(var_lon_subset, var_lat_subset, c=var_vals_subset, 
+                           cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
+
+            cb_ax1 = plt.subplot(gs[0:-1, -1])
+            norm = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
+            cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap, orientation = 'vertical', norm = norm)
+            if var_label:
+                cb1_lab = cb1.ax.set_xlabel(var_label, labelpad=8, fontweight='bold')
+                cb1_lab.set_fontsize(14)
+                cb1.ax.xaxis.set_label_position("top")
+            for t in cb1.ax.yaxis.get_ticklabels():
+                t.set_weight("bold")
+                t.set_fontsize(12)
+        if color_or_cmap == "color":
             for row in xrange(zip_it.shape[0]):
-	        polygon = mpatches.Polygon(zip_it[row,:,:], color=cmap) 
-	        patches.append(polygon)
-	    p = mpl.collections.PatchCollection(patches, alpha=alpha, edgecolor='none', match_original=True)
-	    ax.add_collection(p)
+                polygon = mpatches.Polygon(zip_it[row,:,:], color=cmap) 
+                patches.append(polygon)
+            p = mpl.collections.PatchCollection(patches, alpha=alpha, edgecolor='none', match_original=True)
+            ax.add_collection(p)
     
     inset_extent_x = [minx, maxx] 
     inset_extent_y = [miny, maxy]
