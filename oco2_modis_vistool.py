@@ -58,10 +58,10 @@ class ConfigFile:
 
     def __init__(self, json_file):
         self.cf = json_file
-	
+        
     def exists(self):
         return glob(self.cf)
-	
+        
     def get_contents(self):
         return(json.load(open(self.cf)))
 
@@ -102,7 +102,7 @@ def read_shp(filename):
         pandas DataFrame with column geometry, containing individual shapely
         Geometry objects (i.e. Point, LineString, Polygon) depending on 
         the shapefiles original shape type
-	
+        
     Credit: https://github.com/ojdo/python-tools/blob/master/pandashp.py
     
     """
@@ -247,7 +247,7 @@ def do_modis_overlay_plot(
                     print("Along-track indices of intersection:", latlon_subset_idx)
                     #print("Exiting")
                     #os.remove(code_dir+'/intermediate_RGB.tif')
-		    #sys.exit()
+                    #sys.exit()
                 except:
                     pass
                 out_data = False
@@ -321,7 +321,7 @@ def do_modis_overlay_plot(
         scale='50m',
         facecolor='none')
       
-    			 
+                             
     ### Plot the image ###
 #    if var_vals.shape:
 #        fig = plt.figure(figsize=(fig_x + 1,fig_y))
@@ -456,16 +456,16 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Get configuration file")
     parser.add_argument('config_file_loc', type=str, default=code_dir+'/oco2_modis_vistool_config.json', nargs='?',
-                	help="Name of config file (default: oco2_modis_vistool_config.json in code directory)")
+                        help="Name of config file (default: oco2_modis_vistool_config.json in code directory)")
     args = parser.parse_args()
     config_file = ConfigFile(args.config_file_loc)
 
     if config_file.exists():
-	orbit_info_dict = config_file.get_contents()
+        orbit_info_dict = config_file.get_contents()
     else:
-	print('The expected configuration file '+ args.config_file_loc + ' DNE in ' + code_dir)
-	print('Exiting')
-	sys.exit()
+        print('The expected configuration file '+ args.config_file_loc + ' DNE in ' + code_dir)
+        print('Exiting')
+        sys.exit()
 
 
     date = orbit_info_dict['date']
@@ -475,206 +475,206 @@ if __name__ == "__main__":
     lat_lr = orbit_info_dict['geo_lower_right'][0]
     lon_lr = orbit_info_dict['geo_lower_right'][1]
     try:    
-	region = orbit_info_dict['region']
+        region = orbit_info_dict['region']
     except:
-	region = ""
+        region = ""
     try:
         overlay_info_dict = orbit_info_dict['oco2_overlay_info']
     except:
-	overlay_info_dict = {}
+        overlay_info_dict = {}
     if overlay_info_dict:  
-	var_file = overlay_info_dict['file']
-	if not glob(var_file):
+        var_file = overlay_info_dict['file']
+        if not glob(var_file):
             print(var_file+" does not exist.")
             print("Exiting")
             sys.exit()
-	var_name = overlay_info_dict['variable']
-	var_plot_name = re.split('/', var_name)[-1]
-	try: 
+        var_name = overlay_info_dict['variable']
+        var_plot_name = re.split('/', var_name)[-1]
+        try: 
             band_number = overlay_info_dict['band_number']
-	    band_number = int(band_number)
-	except: 
-	    band_number = False
+            band_number = int(band_number)
+        except: 
+            band_number = False
         if var_name == "Retrieval/reduced_chi_squared_per_band" and band_number not in [1, 2, 3, False]:
-		print("Unexpected band number specification. Options are 1 (0.76 micron), 2 (1.6 micron), or 3 (2.04 micron)")
-		print(var_name + " is stored per band. Please select an appropriate band number. Exiting")
-        	sys.exit()
-	try:
-	    var_lims = overlay_info_dict['variable_plot_lims']
-	except:
-	    var_lims = []
-	lat_name = overlay_info_dict['lat_name']
-	lon_name = overlay_info_dict['lon_name']
-	try: 
+                print("Unexpected band number specification. Options are 1 (0.76 micron), 2 (1.6 micron), or 3 (2.04 micron)")
+                print(var_name + " is stored per band. Please select an appropriate band number. Exiting")
+                sys.exit()
+        try:
+            var_lims = overlay_info_dict['variable_plot_lims']
+        except:
+            var_lims = []
+        lat_name = overlay_info_dict['lat_name']
+        lon_name = overlay_info_dict['lon_name']
+        try: 
             orbit_int = overlay_info_dict['orbit']
-	except: 
+        except: 
             orbit_int = False
 
-	if re.search('oco2_Lt', var_file):
+        if re.search('oco2_Lt', var_file):
             lite = True
             #print("\nLite overlay file detected. Checking for QF and Warn specs...")
 
             try:
-        	lite_quality = overlay_info_dict['lite_QF']
+                lite_quality = overlay_info_dict['lite_QF']
             except:
-        	print("No quality specifications detected. Output plot will contain all quality soundings")
-        	lite_quality = 'all'
+                print("No quality specifications detected. Output plot will contain all quality soundings")
+                lite_quality = 'all'
             if not lite_quality:
-        	print("No quality specifications detected. Output plot will contain all quality soundings")
-        	lite_quality = 'all'
+                print("No quality specifications detected. Output plot will contain all quality soundings")
+                lite_quality = 'all'
             if lite_quality not in ['', 'all', 'good', 'bad']:
-        	print("Unexpected quality flag specification. Options are: '', 'all', 'good', or 'bad'")
-        	print("Exiting")
-        	sys.exit()
+                print("Unexpected quality flag specification. Options are: '', 'all', 'good', or 'bad'")
+                print("Exiting")
+                sys.exit()
 
             try:
-        	lite_warn_lims = overlay_info_dict['lite_warn_lims']
+                lite_warn_lims = overlay_info_dict['lite_warn_lims']
             except:
-        	print("No warn specifications detected. Output plot will contain all warn levels")
-        	lite_warn_lims = [0, 20]
+                print("No warn specifications detected. Output plot will contain all warn levels")
+                lite_warn_lims = [0, 20]
             if not lite_warn_lims:
-        	print("No warn specifications detected. Output plot will contain all warn levels")
-        	lite_warn_lims = [0, 20]
+                print("No warn specifications detected. Output plot will contain all warn levels")
+                lite_warn_lims = [0, 20]
             if lite_warn_lims[0] > lite_warn_lims[1]:
-        	print("Lower warn limit is greater than upper warn limit.")
-        	print("Exiting")
-        	sys.exit()
+                print("Lower warn limit is greater than upper warn limit.")
+                print("Exiting")
+                sys.exit()
             for lim in lite_warn_lims:
-        	if lim not in np.arange(21):
+                if lim not in np.arange(21):
                     print("Unexpected warn level specification. Limits must be within [0, 20].")
                     print("Exiting")
                     sys.exit()
-		    
-	    try:
-        	footprint_lims = overlay_info_dict['footprint']
+            
+            try:
+                footprint_lims = overlay_info_dict['footprint']
             except:
-        	print("No footprint specifications detected. Output plot will contain all footprints")
-        	footprint_lims = [1, 8]
+                print("No footprint specifications detected. Output plot will contain all footprints")
+                footprint_lims = [1, 8]
             if not footprint_lims:
-        	print("No footprint specifications detected. Output plot will contain all footprints")
-        	footprint_lims = [1, 8]
+                print("No footprint specifications detected. Output plot will contain all footprints")
+                footprint_lims = [1, 8]
             if footprint_lims == "all":
-	        footprint_lims = [1, 8]
-	    if len(footprint_lims) == 2:
-		if footprint_lims[0] > footprint_lims[1]:
-        	    print("Lower footprint limit is greater than upper footprint limit.")
-        	    print("Exiting")
-        	    sys.exit()
-	    for ft in footprint_lims:
-        	if ft not in np.arange(1, 9):
+                footprint_lims = [1, 8]
+            if len(footprint_lims) == 2:
+                if footprint_lims[0] > footprint_lims[1]:
+                    print("Lower footprint limit is greater than upper footprint limit.")
+                    print("Exiting")
+                    sys.exit()
+            for ft in footprint_lims:
+                if ft not in np.arange(1, 9):
                     print("Unexpected footprint specification. Limits must be within [1, 8].")
                     print("Exiting")
                     sys.exit()
-	    
-	print("Output plot will include "+lite_quality+" quality soundings with warn levels within "+str(lite_warn_lims)+"\n")
+        
+        print("Output plot will include "+lite_quality+" quality soundings with warn levels within "+str(lite_warn_lims)+"\n")
 
-	try:
-	    cmap = overlay_info_dict['cmap']
-	except:
-	    cmap = ""
-	if not cmap:
-	    cmap = "jet"
-	
-	try:
-	    alpha = overlay_info_dict['transparency']
-	except:
-	    alpha = ""
-	if not alpha:
-	    alpha = 1
-	if alpha < 0 or alpha > 1:
-	    print("Unexpected transparency specification. Value must be within [0, 1]. Output plot will contain full-color.\n")
-	    alpha = 1
+        try:
+            cmap = overlay_info_dict['cmap']
+        except:
+            cmap = ""
+        if not cmap:
+            cmap = "jet"
+
+        try:
+            alpha = overlay_info_dict['transparency']
+        except:
+            alpha = ""
+        if not alpha:
+            alpha = 1
+        if alpha < 0 or alpha > 1:
+            print("Unexpected transparency specification. Value must be within [0, 1]. Output plot will contain full-color.\n")
+            alpha = 1
     try:
         interest_pt = orbit_info_dict['ground_site']
-	if not interest_pt:
-	    interest_pt = None
-	if (interest_pt[0] > lat_ul or interest_pt[0] < lat_lr or interest_pt[1] > lon_lr or interest_pt[1] < lon_ul):
-	    interest_pt = None
-	    print("The ground site is outside the given lat/lon range and will not be included in the output plot.\n")
+        if not interest_pt:
+            interest_pt = None
+        if (interest_pt[0] > lat_ul or interest_pt[0] < lat_lr or interest_pt[1] > lon_lr or interest_pt[1] < lon_ul):
+            interest_pt = None
+            print("The ground site is outside the given lat/lon range and will not be included in the output plot.\n")
     except:
         interest_pt = None
     try:
         cities = orbit_info_dict['city_labels']
-	if cities and cities not in mpl.colors.cnames.keys():
-	    print(cities + " is not an available matplotlib color. City labels will not be included on the output plot. \n")
-	    cities = None
-	if not cities:
-	    cities = None
+        if cities and cities not in mpl.colors.cnames.keys():
+            print(cities + " is not an available matplotlib color. City labels will not be included on the output plot. \n")
+            cities = None
+        if not cities:
+            cities = None
     except:
         cities = None
     
     try:
-	out_plot_dir = orbit_info_dict['out_plot_dir']
+        out_plot_dir = orbit_info_dict['out_plot_dir']
     except:
-	out_plot_dir = code_dir
+        out_plot_dir = code_dir
     if not out_plot_dir or not glob(out_plot_dir):
-	print("Either there was no output location specified or the one specified does not exist. Output will go in the code directory. \n")
-	out_plot_dir = code_dir
+        print("Either there was no output location specified or the one specified does not exist. Output will go in the code directory. \n")
+        out_plot_dir = code_dir
     try:
-	out_plot_name = orbit_info_dict['out_plot_name']
+        out_plot_name = orbit_info_dict['out_plot_name']
     except:
-	out_plot_name = ""
+        out_plot_name = ""
     
     
     try:
-	out_data_dir = orbit_info_dict['out_data_dir']
+        out_data_dir = orbit_info_dict['out_data_dir']
     except:
-	out_data_dir= code_dir
+        out_data_dir= code_dir
     if not out_data_dir or not glob(out_data_dir):
-	print("Either there was no output location specified or the one specified does not exist. Output will go in the code directory. \n")
-	out_data_dir = code_dir
+        print("Either there was no output location specified or the one specified does not exist. Output will go in the code directory. \n")
+        out_data_dir = code_dir
     try:
-	out_data_name = orbit_info_dict['out_data_name']
+        out_data_name = orbit_info_dict['out_data_name']
     except:
-	out_data_name = ""
+        out_data_name = ""
     
     
     if not overlay_info_dict:
         
         if not out_plot_name:
-	    if region:
-        	out_plot_name = "MODISimagery_"+region+"_"+straight_up_date+".png"
-	    else:
-        	out_plot_name = "MODISimagery_"+straight_up_date+".png"
-	out_plot_name = os.path.join(out_plot_dir, out_plot_name)
-	
-	do_modis_overlay_plot(orbit_info_dict['geo_upper_left'], 
+            if region:
+                out_plot_name = "MODISimagery_"+region+"_"+straight_up_date+".png"
+            else:
+                out_plot_name = "MODISimagery_"+straight_up_date+".png"
+        out_plot_name = os.path.join(out_plot_dir, out_plot_name)
+
+        do_modis_overlay_plot(orbit_info_dict['geo_upper_left'], 
                               orbit_info_dict['geo_lower_right'],
                               date, np.array([]), np.empty([]), np.empty([]), np.empty([]),
                               interest_pt=interest_pt, cmap='black',
-			      out_plot=out_plot_name, cities=cities)
-			          
+                              out_plot=out_plot_name, cities=cities)
+                                  
         sys.exit()
-			  
+  
     
 
     ### Prep OCO-2 Variable ###
 
     h5 = h5py.File(var_file)
     try:
-	oco2_data_obj = h5[var_name]
-	oco2_data = h5[var_name][:]
-	oco2_data_long_name = oco2_data_obj.attrs.get('long_name')[0]
-	oco2_data_units = oco2_data_obj.attrs.get('units')[0]
+        oco2_data_obj = h5[var_name]
+        oco2_data = h5[var_name][:]
+        oco2_data_long_name = oco2_data_obj.attrs.get('long_name')[0]
+        oco2_data_units = oco2_data_obj.attrs.get('units')[0]
     except:
-	print(var_name+" DNE in "+var_file)
-	print("Check that the variable name includes any necessary group paths. Ex: /Preprocessors/dp_abp")
-	print("Exiting")
-	sys.exit()
+        print(var_name+" DNE in "+var_file)
+        print("Check that the variable name includes any necessary group paths. Ex: /Preprocessors/dp_abp")
+        print("Exiting")
+        sys.exit()
     try:
-	lat_data = h5[lat_name][:]
+        lat_data = h5[lat_name][:]
     except:
-	print(lat_name+" DNE in "+var_file)
-	print("Check that the variable name includes any necessary group paths. Ex: SoundingGeometry/sounding_latitude")
-	print("Exiting")
-	sys.exit()
+        print(lat_name+" DNE in "+var_file)
+        print("Check that the variable name includes any necessary group paths. Ex: SoundingGeometry/sounding_latitude")
+        print("Exiting")
+        sys.exit()
     try:
-	lon_data = h5[lon_name][:]
+        lon_data = h5[lon_name][:]
     except:
-	print(lon_name+" DNE in "+var_file)
-	print("Check that the variable name includes any necessary group paths. Ex: SoundingGeometry/sounding_longitude")
-	print("Exiting")
-	sys.exit()
+        print(lon_name+" DNE in "+var_file)
+        print("Check that the variable name includes any necessary group paths. Ex: SoundingGeometry/sounding_longitude")
+        print("Exiting")
+        sys.exit()
     h5.close()
     
     if lat_data.ndim != lon_data.ndim:
@@ -685,150 +685,150 @@ if __name__ == "__main__":
         if not band_number:
             print(var_name + " is stored per band. Please select a band number (1=0.76 micron, 2=1.6 micron, 3=2.04 micron). Exiting")
             sys.exit()
-	else:
-	    oco2_data = oco2_data[:,band_number-1]
+        else:
+            oco2_data = oco2_data[:,band_number-1]
     
     if lite:
 
-	qf_file_tag = "_all_quality"
+        qf_file_tag = "_all_quality"
 
-	lite_file = LiteFile(var_file)
-	lite_file.open_file()
-	#lite_lat = lite_file.get_lat()
-	#lite_lon = lite_file.get_lon()
-	#lite_vert_lat = lite_file.get_vertex_lat()
-	#lite_vert_lon = lite_file.get_vertex_lon()
-	lite_sid = lite_file.get_sid()
-	lite_xco2 = lite_file.get_xco2()
-	lite_warn = lite_file.get_warn()
-	lite_qf = lite_file.get_qf()
-	lite_orbit = lite_file.get_orbit()
-	lite_footprint = lite_file.get_footprint()
-	lite_file.close_file()
-	
+        lite_file = LiteFile(var_file)
+        lite_file.open_file()
+        #lite_lat = lite_file.get_lat()
+        #lite_lon = lite_file.get_lon()
+        #lite_vert_lat = lite_file.get_vertex_lat()
+        #lite_vert_lon = lite_file.get_vertex_lon()
+        lite_sid = lite_file.get_sid()
+        lite_xco2 = lite_file.get_xco2()
+        lite_warn = lite_file.get_warn()
+        lite_qf = lite_file.get_qf()
+        lite_orbit = lite_file.get_orbit()
+        lite_footprint = lite_file.get_footprint()
+        lite_file.close_file()
+        
         if orbit_int:
-	    orbit_subset = np.where(lite_orbit == orbit_int)
-	    orbit_start_idx = orbit_subset[0][0]
-	    orbit_end_idx = orbit_subset[0][-1]
-	    #lite_lat = lite_lat[orbit_subset]
-	    #lite_lon = lite_lon[orbit_subset]
-	    #lite_vert_lat = lite_vert_lat[orbit_subset, :]
-	    #lite_vert_lon = lite_vert_lon[orbit_subset, :]
-	    lite_sid = lite_sid[orbit_subset]
-	    lite_qf = lite_qf[orbit_subset]
-	    lite_xco2 = lite_xco2[orbit_subset]
-	    lite_warn = lite_warn[orbit_subset]
-	    oco2_data = oco2_data[orbit_subset]
-	    lite_footprint = lite_footprint[orbit_subset]
-#	    if lat_data.ndim == 3:
-#	        lat_data = lat_data[0, orbit_subset, :]
-#	        lon_data = lon_data[0, orbit_subset, :]    
-	    if lat_data.ndim == 2:
-	        lat_data = np.squeeze(lat_data[orbit_subset, :])
-	        lon_data = np.squeeze(lon_data[orbit_subset, :])
-	    else:
-	        lat_data = lat_data[orbit_subset]
-	        lon_data = lon_data[orbit_subset]
-	    
+            orbit_subset = np.where(lite_orbit == orbit_int)
+            orbit_start_idx = orbit_subset[0][0]
+            orbit_end_idx = orbit_subset[0][-1]
+            #lite_lat = lite_lat[orbit_subset]
+            #lite_lon = lite_lon[orbit_subset]
+            #lite_vert_lat = lite_vert_lat[orbit_subset, :]
+            #lite_vert_lon = lite_vert_lon[orbit_subset, :]
+            lite_sid = lite_sid[orbit_subset]
+            lite_qf = lite_qf[orbit_subset]
+            lite_xco2 = lite_xco2[orbit_subset]
+            lite_warn = lite_warn[orbit_subset]
+            oco2_data = oco2_data[orbit_subset]
+            lite_footprint = lite_footprint[orbit_subset]
+#            if lat_data.ndim == 3:
+#                lat_data = lat_data[0, orbit_subset, :]
+#                lon_data = lon_data[0, orbit_subset, :]    
+            if lat_data.ndim == 2:
+                lat_data = np.squeeze(lat_data[orbit_subset, :])
+                lon_data = np.squeeze(lon_data[orbit_subset, :])
+            else:
+                lat_data = lat_data[orbit_subset]
+                lon_data = lon_data[orbit_subset]
+            
         if lite_quality == 'good':
     
             quality_mask = np.where(lite_qf == 0)
-	    qf_file_tag = "_good_quality"
+            qf_file_tag = "_good_quality"
 
-	    #lite_lat = lite_lat[quality_mask]
-	    #lite_lon = lite_lon[quality_mask]
-	    #lite_vert_lat = lite_vert_lat[0, quality_mask, :]
-	    #lite_vert_lon = lite_vert_lon[0, quality_mask, :]
-	    lite_sid = lite_sid[quality_mask]
-	    lite_xco2 = lite_xco2[quality_mask]
-	    lite_warn = lite_warn[quality_mask]
-	    oco2_data = oco2_data[quality_mask]
-	    lite_footprint = lite_footprint[quality_mask]
-#	    if lat_data.ndim == 3:
-#	        lat_data = lat_data[0, quality_mask, :]
-#	        lon_data = lon_data[0, quality_mask, :]
-	    if lat_data.ndim == 2:
-	        lat_data = np.squeeze(lat_data[quality_mask, :])
-	        lon_data = np.squeeze(lon_data[quality_mask, :])
-	    else:
-	        lat_data = lat_data[quality_mask]
-	        lon_data = lon_data[quality_mask]
-	
+            #lite_lat = lite_lat[quality_mask]
+            #lite_lon = lite_lon[quality_mask]
+            #lite_vert_lat = lite_vert_lat[0, quality_mask, :]
+            #lite_vert_lon = lite_vert_lon[0, quality_mask, :]
+            lite_sid = lite_sid[quality_mask]
+            lite_xco2 = lite_xco2[quality_mask]
+            lite_warn = lite_warn[quality_mask]
+            oco2_data = oco2_data[quality_mask]
+            lite_footprint = lite_footprint[quality_mask]
+#            if lat_data.ndim == 3:
+#                lat_data = lat_data[0, quality_mask, :]
+#                lon_data = lon_data[0, quality_mask, :]
+            if lat_data.ndim == 2:
+                lat_data = np.squeeze(lat_data[quality_mask, :])
+                lon_data = np.squeeze(lon_data[quality_mask, :])
+            else:
+                lat_data = lat_data[quality_mask]
+                lon_data = lon_data[quality_mask]
+        
         if lite_quality == 'bad':
 
             quality_mask = np.where(lite_qf == 1)
-	    qf_file_tag = "_bad_quality"
+            qf_file_tag = "_bad_quality"
 
-	    #lite_lat = lite_lat[quality_mask]
-	    #lite_lon = lite_lon[quality_mask]
-	    #lite_vert_lat = lite_vert_lat[0, quality_mask, :]
-	    #lite_vert_lon = lite_vert_lon[0, quality_mask, :]
-	    lite_sid = lite_sid[quality_mask]
-	    lite_xco2 = lite_xco2[quality_mask]
-	    lite_warn = lite_warn[quality_mask]
-	    oco2_data = oco2_data[quality_mask]
-	    lite_footprint = lite_footprint[quality_mask]
-#	    if lat_data.ndim == 3:
-#	        lat_data = lat_data[0, quality_mask, :]
-#	        lon_data = lon_data[0, quality_mask, :]
-	    if lat_data.ndim == 2:
-	        lat_data = np.squeeze(lat_data[quality_mask, :])
-	        lon_data = np.squeeze(lon_data[quality_mask, :])
-	    else:
-	        lat_data = lat_data[quality_mask]
-	        lon_data = lon_data[quality_mask]
-	
-	warn_mask = np.where(np.logical_and(lite_warn <= lite_warn_lims[1], lite_warn >= lite_warn_lims[0]))[0]
+            #lite_lat = lite_lat[quality_mask]
+            #lite_lon = lite_lon[quality_mask]
+            #lite_vert_lat = lite_vert_lat[0, quality_mask, :]
+            #lite_vert_lon = lite_vert_lon[0, quality_mask, :]
+            lite_sid = lite_sid[quality_mask]
+            lite_xco2 = lite_xco2[quality_mask]
+            lite_warn = lite_warn[quality_mask]
+            oco2_data = oco2_data[quality_mask]
+            lite_footprint = lite_footprint[quality_mask]
+#            if lat_data.ndim == 3:
+#                lat_data = lat_data[0, quality_mask, :]
+#                lon_data = lon_data[0, quality_mask, :]
+            if lat_data.ndim == 2:
+                lat_data = np.squeeze(lat_data[quality_mask, :])
+                lon_data = np.squeeze(lon_data[quality_mask, :])
+            else:
+                lat_data = lat_data[quality_mask]
+                lon_data = lon_data[quality_mask]
+        
+        warn_mask = np.where(np.logical_and(lite_warn <= lite_warn_lims[1], lite_warn >= lite_warn_lims[0]))[0]
 
-	#lite_lat = lite_lat[warn_mask]
-	#lite_lon = lite_lon[warn_mask]
-	#lite_vert_lat = lite_vert_lat[0, warn_mask, :]
-	#lite_vert_lon = lite_vert_lon[0, warn_mask, :]
-	lite_sid = lite_sid[warn_mask]
-	lite_xco2 = lite_xco2[warn_mask]
-	lite_warn = lite_warn[warn_mask]
-	oco2_data = oco2_data[warn_mask]
-	lite_footprint = lite_footprint[warn_mask]
-#	if lat_data.ndim == 3:
-#	    lat_data = lat_data[0, warn_mask, :]
-#	    lon_data = lon_data[0, warn_mask, :]
-	if lat_data.ndim == 2:
-	    lat_data = np.squeeze(lat_data[warn_mask, :])
-	    lon_data = np.squeeze(lon_data[warn_mask, :])
-	else:
-	    lat_data = lat_data[warn_mask]
-	    lon_data = lon_data[warn_mask]
+        #lite_lat = lite_lat[warn_mask]
+        #lite_lon = lite_lon[warn_mask]
+        #lite_vert_lat = lite_vert_lat[0, warn_mask, :]
+        #lite_vert_lon = lite_vert_lon[0, warn_mask, :]
+        lite_sid = lite_sid[warn_mask]
+        lite_xco2 = lite_xco2[warn_mask]
+        lite_warn = lite_warn[warn_mask]
+        oco2_data = oco2_data[warn_mask]
+        lite_footprint = lite_footprint[warn_mask]
+#        if lat_data.ndim == 3:
+#            lat_data = lat_data[0, warn_mask, :]
+#            lon_data = lon_data[0, warn_mask, :]
+        if lat_data.ndim == 2:
+            lat_data = np.squeeze(lat_data[warn_mask, :])
+            lon_data = np.squeeze(lon_data[warn_mask, :])
+        else:
+            lat_data = lat_data[warn_mask]
+            lon_data = lon_data[warn_mask]
 
-	wl_file_tag = "_WL_"+str(lite_warn_lims[0])+"to"+str(lite_warn_lims[1])
-	
-	if len(footprint_lims) == 2:
+        wl_file_tag = "_WL_"+str(lite_warn_lims[0])+"to"+str(lite_warn_lims[1])
+        
+        if len(footprint_lims) == 2:
             footprint_mask = np.where(np.logical_and(lite_footprint <= footprint_lims[1], lite_footprint >= footprint_lims[0]))[0]
-	    fp_file_tag = "_FP_"+str(footprint_lims[0])+"to"+str(footprint_lims[1]) 
-	else:
-	    footprint_mask = np.where(lite_footprint == footprint_lims)
-	    fp_file_tag = "_FP_"+str(footprint_lims[0])
+            fp_file_tag = "_FP_"+str(footprint_lims[0])+"to"+str(footprint_lims[1]) 
+        else:
+            footprint_mask = np.where(lite_footprint == footprint_lims)
+            fp_file_tag = "_FP_"+str(footprint_lims[0])
 
-	#lite_lat = lite_lat[footprint_mask]
-	#lite_lon = lite_lon[footprint_mask]
-	#lite_vert_lat = lite_vert_lat[0, footprint_mask, :]
-	#lite_vert_lon = lite_vert_lon[0, footprint_mask, :]
-	lite_sid = lite_sid[footprint_mask]
-	lite_xco2 = lite_xco2[footprint_mask]
-	lite_warn = lite_warn[footprint_mask]
-	oco2_data = oco2_data[footprint_mask]
-	lite_footprint = lite_footprint[footprint_mask]
-#	if lat_data.ndim == 3:
-#	    lat_data = lat_data[0, footprint_mask, :]
-#	    lon_data = lon_data[0, footprint_mask, :]
-	if lat_data.ndim == 2:
-	    lat_data = np.squeeze(lat_data[footprint_mask, :])
-	    lon_data = np.squeeze(lon_data[footprint_mask, :])
-	else:
-	    lat_data = lat_data[footprint_mask]
-	    lon_data = lon_data[footprint_mask]   
+        #lite_lat = lite_lat[footprint_mask]
+        #lite_lon = lite_lon[footprint_mask]
+        #lite_vert_lat = lite_vert_lat[0, footprint_mask, :]
+        #lite_vert_lon = lite_vert_lon[0, footprint_mask, :]
+        lite_sid = lite_sid[footprint_mask]
+        lite_xco2 = lite_xco2[footprint_mask]
+        lite_warn = lite_warn[footprint_mask]
+        oco2_data = oco2_data[footprint_mask]
+        lite_footprint = lite_footprint[footprint_mask]
+#        if lat_data.ndim == 3:
+#            lat_data = lat_data[0, footprint_mask, :]
+#            lon_data = lon_data[0, footprint_mask, :]
+        if lat_data.ndim == 2:
+            lat_data = np.squeeze(lat_data[footprint_mask, :])
+            lon_data = np.squeeze(lon_data[footprint_mask, :])
+        else:
+            lat_data = lat_data[footprint_mask]
+            lon_data = lon_data[footprint_mask]   
     
     if not var_lims:
-	var_lims = [np.min(oco2_data), np.max(oco2_data)]
+        var_lims = [np.min(oco2_data), np.max(oco2_data)]
         vmax = int(math.ceil(var_lims[1]))
         vmin = int(math.floor(var_lims[0]))
     
@@ -842,33 +842,33 @@ if __name__ == "__main__":
     cbar_cap_strings = ""
 
     for i, s in enumerate(cbar_strings):
-	cap_s = s
-	if not s[0].isupper():
+        cap_s = s
+        if not s[0].isupper():
             cap_s = s.capitalize()
-	if i % 2 != 0:
+        if i % 2 != 0:
             cbar_cap_strings = cbar_cap_strings + cap_s +"\n"
-	else: 
+        else: 
             cbar_cap_strings = cbar_cap_strings + cap_s +" "
     cbar_cap_strings = cbar_cap_strings[:-1]
     cbar_name = cbar_cap_strings+'\n('+oco2_data_units+')'
 
     if not out_plot_name:
-	if region:
+        if region:
             out_plot_name = var_plot_name+"_"+region+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".png"
-	else:
+        else:
             out_plot_name = var_plot_name+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".png"
     out_plot_name = os.path.join(out_plot_dir, out_plot_name)
     
     if not out_data_name:
-	if region:
-	    out_data_name = var_plot_name+"_"+region+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".h5"
-	else:
-	    out_data_name = var_plot_name+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".h5"
+        if region:
+            out_data_name = var_plot_name+"_"+region+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".h5"
+        else:
+            out_data_name = var_plot_name+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".h5"
     out_data_name = os.path.join(out_data_dir, out_data_name)
     
     do_modis_overlay_plot(orbit_info_dict['geo_upper_left'],
                           orbit_info_dict['geo_lower_right'], 
-			  date, lat_data, lon_data, oco2_data, lite_sid,
+                          date, lat_data, lon_data, oco2_data, lite_sid,
                           orbit_start_idx, var_lims=[vmin,vmax], interest_pt=interest_pt, 
-			  cmap=cmap, alpha=alpha,lat_name=lat_name, lon_name=lon_name, var_name=var_name,
-			  out_plot=out_plot_name, out_data=out_data_name, var_label=cbar_name, cities=cities)
+                          cmap=cmap, alpha=alpha,lat_name=lat_name, lon_name=lon_name, var_name=var_name,
+                          out_plot=out_plot_name, out_data=out_data_name, var_label=cbar_name, cities=cities)
