@@ -283,10 +283,10 @@ def do_modis_overlay_plot(
     
     if var_vals_missing:
         var_vals_subset = np.ma.masked_where(var_vals_subset == var_vals_missing, var_vals_subset)
-	if var_vals_subset.count() == 0:
+        if var_vals_subset.count() == 0:
             print("\nThere is no valid data for the given subset criteria.")
-	    out_data = False
-	    var_vals = np.empty([])
+            out_data = False
+            var_vals = np.empty([])
     
     if var_lims is None:
         var_lims = [var_vals_subset.min(), var_vals_subset.max()]
@@ -663,7 +663,7 @@ if __name__ == "__main__":
         oco2_data = h5[var_name][:]
         oco2_data_long_name = oco2_data_obj.attrs.get('long_name')[0]
         oco2_data_units = oco2_data_obj.attrs.get('units')[0]
-	oco2_data_fill = oco2_data_obj.attrs.get('missing_value')[0]
+        oco2_data_fill = oco2_data_obj.attrs.get('missing_value')[0]
     except:
         print(var_name+" DNE in "+var_file)
         print("Check that the variable name includes any necessary group paths. Ex: /Preprocessors/dp_abp")
