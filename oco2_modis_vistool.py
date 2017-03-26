@@ -141,7 +141,7 @@ def read_shp(filename):
 
 def do_modis_overlay_plot(
     geo_upper_left, geo_lower_right, date,
-    var_lat, var_lon, var_vals, lite_sid=np.empty([]),
+    var_lat, var_lon, var_vals, var_vals_missing=None, lite_sid=np.empty([]),
     orbit_start_idx=0, var_lims=None, interest_pt=None, 
     cmap='jet', alpha=1, lat_name=None, lon_name=None, var_name=None,
     out_plot="vistool_output.png", out_data="vistool_output.h5", var_label=None, cities=None):
@@ -280,7 +280,14 @@ def do_modis_overlay_plot(
                     pass
                 out_data = False
                 var_vals = np.empty([])
-
+    
+    if var_vals_missing:
+        var_vals_subset = np.ma.masked_where(var_vals_subset == var_vals_missing, var_vals_subset)
+	if var_vals_subset.count() == 0:
+            print("\nThere is no valid data for the given subset criteria.")
+	    out_data = False
+	    var_vals = np.empty([])
+    
     if var_lims is None:
         var_lims = [var_vals_subset.min(), var_vals_subset.max()]
     
@@ -656,6 +663,7 @@ if __name__ == "__main__":
         oco2_data = h5[var_name][:]
         oco2_data_long_name = oco2_data_obj.attrs.get('long_name')[0]
         oco2_data_units = oco2_data_obj.attrs.get('units')[0]
+	oco2_data_fill = oco2_data_obj.attrs.get('missing_value')[0]
     except:
         print(var_name+" DNE in "+var_file)
         print("Check that the variable name includes any necessary group paths. Ex: /Preprocessors/dp_abp")
@@ -868,7 +876,7 @@ if __name__ == "__main__":
     
     do_modis_overlay_plot(orbit_info_dict['geo_upper_left'],
                           orbit_info_dict['geo_lower_right'], 
-                          date, lat_data, lon_data, oco2_data, lite_sid,
+                          date, lat_data, lon_data, oco2_data, oco2_data_fill, lite_sid,
                           orbit_start_idx, var_lims=[vmin,vmax], interest_pt=interest_pt, 
                           cmap=cmap, alpha=alpha,lat_name=lat_name, lon_name=lon_name, var_name=var_name,
                           out_plot=out_plot_name, out_data=out_data_name, var_label=cbar_name, cities=cities)
