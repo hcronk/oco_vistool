@@ -469,8 +469,8 @@ if __name__ == "__main__":
 
     if config_file.exists():
         orbit_info_dict = config_file.get_contents()
-	for k in orbit_info_dict.keys():
-	    orbit_info_dict[k.lower()] = orbit_info_dict.pop(k)
+        for k in orbit_info_dict.keys():
+            orbit_info_dict[k.lower()] = orbit_info_dict.pop(k)
     else:
         print('The expected configuration file '+ args.config_file_loc + ' DNE in ' + code_dir)
         print('Exiting')
@@ -493,7 +493,7 @@ if __name__ == "__main__":
         overlay_info_dict = {}
     if overlay_info_dict:
         for k in overlay_info_dict.keys():
-	    overlay_info_dict[k.lower()] = overlay_info_dict.pop(k)
+            overlay_info_dict[k.lower()] = overlay_info_dict.pop(k)
 	var_file = overlay_info_dict['file']
         if not glob(var_file):
             print(var_file+" does not exist.")
