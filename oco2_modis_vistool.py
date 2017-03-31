@@ -494,7 +494,7 @@ if __name__ == "__main__":
     if overlay_info_dict:
         for k in overlay_info_dict.keys():
             overlay_info_dict[k.lower()] = overlay_info_dict.pop(k)
-	var_file = overlay_info_dict['file']
+        var_file = overlay_info_dict['file']
         if not glob(var_file):
             print(var_file+" does not exist.")
             print("Exiting")
@@ -524,6 +524,14 @@ if __name__ == "__main__":
         if re.search('oco2_Lt', var_file):
             lite = True
             #print("\nLite overlay file detected. Checking for QF and Warn specs...")
+            
+            if re.search("CO2", var_file):
+                sif_or_co2 = "CO2"
+                qf_file_tag = "_all_quality"
+            else:
+                sif_or_co2 = "SIF"
+                qf_file_tag = ""
+                wl_file_tag = ""
 
             try:
                 lite_quality = overlay_info_dict['lite_qf']
@@ -576,8 +584,9 @@ if __name__ == "__main__":
                     print("Unexpected footprint specification. Limits must be within [1, 8].")
                     print("Exiting")
                     sys.exit()
-        
-        print("Output plot will include "+lite_quality+" quality soundings with warn levels within "+str(lite_warn_lims)+"\n")
+            
+            if sif_or_co2 == "CO2":
+                print("Output plot will include "+lite_quality+" quality soundings with warn levels within "+str(lite_warn_lims)+"\n")
 
         try:
             cmap = overlay_info_dict['cmap']
@@ -664,15 +673,27 @@ if __name__ == "__main__":
     h5 = h5py.File(var_file)
     try:
         oco2_data_obj = h5[var_name]
-        oco2_data = h5[var_name][:]
-        oco2_data_long_name = oco2_data_obj.attrs.get('long_name')[0]
-        oco2_data_units = oco2_data_obj.attrs.get('units')[0]
-        oco2_data_fill = oco2_data_obj.attrs.get('missing_value')[0]
     except:
         print(var_name+" DNE in "+var_file)
         print("Check that the variable name includes any necessary group paths. Ex: /Preprocessors/dp_abp")
         print("Exiting")
         sys.exit()
+    oco2_data = h5[var_name][:]
+    if sif_or_co2 == "CO2":
+        oco2_data_long_name = oco2_data_obj.attrs.get('long_name')[0]
+        oco2_data_units = oco2_data_obj.attrs.get('units')[0]
+        oco2_data_fill = oco2_data_obj.attrs.get('missing_value')[0]
+    if sif_or_co2 == "SIF":
+        oco2_data_long_name = re.split("/", var_name)[-1]
+        try:
+            oco2_data_units = oco2_data_obj.attrs.get('unit').decode('utf-8')
+        except:
+            oco2_data_units = None
+        try:
+            oco2_data_fill = oco2_data_obj.attrs.get('missing_value')[0]
+        except:
+            oco2_data_fill = None
+      
     try:
         lat_data = h5[lat_name][:]
     except:
@@ -701,19 +722,16 @@ if __name__ == "__main__":
             oco2_data = oco2_data[:,band_number-1]
     
     if lite:
-
-        qf_file_tag = "_all_quality"
-
-        lite_file = LiteFile(var_file)
-        lite_file.open_file()
-        #lite_lat = lite_file.get_lat()
-        #lite_lon = lite_file.get_lon()
-        #lite_vert_lat = lite_file.get_vertex_lat()
-        #lite_vert_lon = lite_file.get_vertex_lon()
+        
+        if sif_or_co2 == "CO2":
+            lite_file = LiteCO2File(var_file)
+            lite_file.open_file()
+            lite_warn = lite_file.get_warn()
+            lite_qf = lite_file.get_qf()
+        else:
+            lite_file = LiteSIFFile(var_file)
+            lite_file.open_file()
         lite_sid = lite_file.get_sid()
-        lite_xco2 = lite_file.get_xco2()
-        lite_warn = lite_file.get_warn()
-        lite_qf = lite_file.get_qf()
         lite_orbit = lite_file.get_orbit()
         lite_footprint = lite_file.get_footprint()
         lite_file.close_file()
@@ -722,19 +740,12 @@ if __name__ == "__main__":
             orbit_subset = np.where(lite_orbit == orbit_int)
             orbit_start_idx = orbit_subset[0][0]
             orbit_end_idx = orbit_subset[0][-1]
-            #lite_lat = lite_lat[orbit_subset]
-            #lite_lon = lite_lon[orbit_subset]
-            #lite_vert_lat = lite_vert_lat[orbit_subset, :]
-            #lite_vert_lon = lite_vert_lon[orbit_subset, :]
+            if sif_or_co2 == "CO2":
+                lite_qf = lite_qf[orbit_subset]
+                lite_warn = lite_warn[orbit_subset]
             lite_sid = lite_sid[orbit_subset]
-            lite_qf = lite_qf[orbit_subset]
-            lite_xco2 = lite_xco2[orbit_subset]
-            lite_warn = lite_warn[orbit_subset]
             oco2_data = oco2_data[orbit_subset]
-            lite_footprint = lite_footprint[orbit_subset]
-#            if lat_data.ndim == 3:
-#                lat_data = lat_data[0, orbit_subset, :]
-#                lon_data = lon_data[0, orbit_subset, :]    
+            lite_footprint = lite_footprint[orbit_subset]   
             if lat_data.ndim == 2:
                 lat_data = np.squeeze(lat_data[orbit_subset, :])
                 lon_data = np.squeeze(lon_data[orbit_subset, :])
@@ -742,76 +753,55 @@ if __name__ == "__main__":
                 lat_data = lat_data[orbit_subset]
                 lon_data = lon_data[orbit_subset]
             
-        if lite_quality == 'good':
-    
-            quality_mask = np.where(lite_qf == 0)
-            qf_file_tag = "_good_quality"
+        if sif_or_co2 == "CO2":
+            if lite_quality == 'good':
 
-            #lite_lat = lite_lat[quality_mask]
-            #lite_lon = lite_lon[quality_mask]
-            #lite_vert_lat = lite_vert_lat[0, quality_mask, :]
-            #lite_vert_lon = lite_vert_lon[0, quality_mask, :]
-            lite_sid = lite_sid[quality_mask]
-            lite_xco2 = lite_xco2[quality_mask]
-            lite_warn = lite_warn[quality_mask]
-            oco2_data = oco2_data[quality_mask]
-            lite_footprint = lite_footprint[quality_mask]
-#            if lat_data.ndim == 3:
-#                lat_data = lat_data[0, quality_mask, :]
-#                lon_data = lon_data[0, quality_mask, :]
+                quality_mask = np.where(lite_qf == 0)
+                qf_file_tag = "_good_quality"
+                
+                lite_qf = lite_qf[quality_mask]
+                lite_warn = lite_warn[quality_mask]
+                lite_sid = lite_sid[quality_mask]
+                oco2_data = oco2_data[quality_mask]
+                lite_footprint = lite_footprint[quality_mask]
+                if lat_data.ndim == 2:
+                    lat_data = np.squeeze(lat_data[quality_mask, :])
+                    lon_data = np.squeeze(lon_data[quality_mask, :])
+                else:
+                    lat_data = lat_data[quality_mask]
+                    lon_data = lon_data[quality_mask]
+
+            if lite_quality == 'bad':
+
+                quality_mask = np.where(lite_qf == 1)
+                qf_file_tag = "_bad_quality"
+                
+                lite_qf = lite_qf[quality_mask]
+                lite_warn = lite_warn[quality_mask]
+                lite_sid = lite_sid[quality_mask]
+                oco2_data = oco2_data[quality_mask]
+                lite_footprint = lite_footprint[quality_mask]
+                if lat_data.ndim == 2:
+                    lat_data = np.squeeze(lat_data[quality_mask, :])
+                    lon_data = np.squeeze(lon_data[quality_mask, :])
+                else:
+                    lat_data = lat_data[quality_mask]
+                    lon_data = lon_data[quality_mask]
+
+            warn_mask = np.where(np.logical_and(lite_warn <= lite_warn_lims[1], lite_warn >= lite_warn_lims[0]))[0]
+            lite_qf = lite_qf[warn_mask]
+            lite_warn = lite_warn[warn_mask]
+            lite_sid = lite_sid[warn_mask]
+            oco2_data = oco2_data[warn_mask]
+            lite_footprint = lite_footprint[warn_mask]
             if lat_data.ndim == 2:
-                lat_data = np.squeeze(lat_data[quality_mask, :])
-                lon_data = np.squeeze(lon_data[quality_mask, :])
+                lat_data = np.squeeze(lat_data[warn_mask, :])
+                lon_data = np.squeeze(lon_data[warn_mask, :])
             else:
-                lat_data = lat_data[quality_mask]
-                lon_data = lon_data[quality_mask]
-        
-        if lite_quality == 'bad':
+                lat_data = lat_data[warn_mask]
+                lon_data = lon_data[warn_mask]
 
-            quality_mask = np.where(lite_qf == 1)
-            qf_file_tag = "_bad_quality"
-
-            #lite_lat = lite_lat[quality_mask]
-            #lite_lon = lite_lon[quality_mask]
-            #lite_vert_lat = lite_vert_lat[0, quality_mask, :]
-            #lite_vert_lon = lite_vert_lon[0, quality_mask, :]
-            lite_sid = lite_sid[quality_mask]
-            lite_xco2 = lite_xco2[quality_mask]
-            lite_warn = lite_warn[quality_mask]
-            oco2_data = oco2_data[quality_mask]
-            lite_footprint = lite_footprint[quality_mask]
-#            if lat_data.ndim == 3:
-#                lat_data = lat_data[0, quality_mask, :]
-#                lon_data = lon_data[0, quality_mask, :]
-            if lat_data.ndim == 2:
-                lat_data = np.squeeze(lat_data[quality_mask, :])
-                lon_data = np.squeeze(lon_data[quality_mask, :])
-            else:
-                lat_data = lat_data[quality_mask]
-                lon_data = lon_data[quality_mask]
-        
-        warn_mask = np.where(np.logical_and(lite_warn <= lite_warn_lims[1], lite_warn >= lite_warn_lims[0]))[0]
-
-        #lite_lat = lite_lat[warn_mask]
-        #lite_lon = lite_lon[warn_mask]
-        #lite_vert_lat = lite_vert_lat[0, warn_mask, :]
-        #lite_vert_lon = lite_vert_lon[0, warn_mask, :]
-        lite_sid = lite_sid[warn_mask]
-        lite_xco2 = lite_xco2[warn_mask]
-        lite_warn = lite_warn[warn_mask]
-        oco2_data = oco2_data[warn_mask]
-        lite_footprint = lite_footprint[warn_mask]
-#        if lat_data.ndim == 3:
-#            lat_data = lat_data[0, warn_mask, :]
-#            lon_data = lon_data[0, warn_mask, :]
-        if lat_data.ndim == 2:
-            lat_data = np.squeeze(lat_data[warn_mask, :])
-            lon_data = np.squeeze(lon_data[warn_mask, :])
-        else:
-            lat_data = lat_data[warn_mask]
-            lon_data = lon_data[warn_mask]
-
-        wl_file_tag = "_WL_"+str(lite_warn_lims[0])+"to"+str(lite_warn_lims[1])
+            wl_file_tag = "_WL_"+str(lite_warn_lims[0])+"to"+str(lite_warn_lims[1])
         
         if len(footprint_lims) == 2:
             footprint_mask = np.where(np.logical_and(lite_footprint <= footprint_lims[1], lite_footprint >= footprint_lims[0]))[0]
@@ -820,18 +810,12 @@ if __name__ == "__main__":
             footprint_mask = np.where(lite_footprint == footprint_lims)
             fp_file_tag = "_FP_"+str(footprint_lims[0])
 
-        #lite_lat = lite_lat[footprint_mask]
-        #lite_lon = lite_lon[footprint_mask]
-        #lite_vert_lat = lite_vert_lat[0, footprint_mask, :]
-        #lite_vert_lon = lite_vert_lon[0, footprint_mask, :]
+        if sif_or_co2 == "CO2":
+            lite_qf = lite_warn[footprint_mask]
+            lite_warn = lite_warn[footprint_mask]
         lite_sid = lite_sid[footprint_mask]
-        lite_xco2 = lite_xco2[footprint_mask]
-        lite_warn = lite_warn[footprint_mask]
         oco2_data = oco2_data[footprint_mask]
         lite_footprint = lite_footprint[footprint_mask]
-#        if lat_data.ndim == 3:
-#            lat_data = lat_data[0, footprint_mask, :]
-#            lon_data = lon_data[0, footprint_mask, :]
         if lat_data.ndim == 2:
             lat_data = np.squeeze(lat_data[footprint_mask, :])
             lon_data = np.squeeze(lon_data[footprint_mask, :])
