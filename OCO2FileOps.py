@@ -2,7 +2,40 @@ import h5py
 import sys
 import numpy as np
 
-class LiteFile:
+class LiteSIFFile:
+
+    def __init__(self, lite_file):
+        self.lite_file = lite_file
+
+    def open_file(self):
+        self.lf = h5py.File(self.lite_file, 'r')
+    
+    def get_lat(self):
+        return self.lf['latitude'][:]
+        
+    def get_lon(self):
+        return self.lf['longitude'][:]
+
+    def get_vertex_lat(self):
+        return self.lf['footprint_vertex_latitude'][:]
+        
+    def get_vertex_lon(self):
+        return self.lf['footprint_vertex_longitude'][:]
+        
+    def get_sid(self):
+        return self.lf['sounding_id'][:]
+        
+    def get_orbit(self):
+        return self.lf['orbit_number'][:]
+        
+    def get_footprint(self):
+        return self.lf['footprint'][:]
+        
+    def close_file(self):
+        self.lf.close()
+
+
+class LiteCO2File:
 
     def __init__(self, lite_file):
         self.lite_file = lite_file
