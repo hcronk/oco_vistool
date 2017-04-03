@@ -440,6 +440,7 @@ def do_modis_overlay_plot(
     inset_ax.set_extent([inset_extent_x[0], inset_extent_x[1], inset_extent_y[0], inset_extent_y[1]])
     
     inset_ax.coastlines()
+    inset_ax.add_feature(cfeature.LAKES, edgecolor='black', facecolor='none')
     extent_box = sgeom.box(minx, miny, maxx, maxy)
     inset_ax.add_geometries([extent_box], ccrs.PlateCarree(), color='none', edgecolor='red')
     inset_ax.set_aspect('auto') 
