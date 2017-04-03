@@ -526,7 +526,7 @@ if __name__ == "__main__":
             lite = True
             #print("\nLite overlay file detected. Checking for QF and Warn specs...")
             
-            if re.search("CO2", var_file):
+            if re.search("CO2", os.path.basename(var_file)):
                 sif_or_co2 = "CO2"
                 qf_file_tag = "_all_quality"
             else:
