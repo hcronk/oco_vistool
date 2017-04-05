@@ -1,4 +1,4 @@
-#oco2_modis_vistool.py
+# oco2_modis_vistool.py
 
 The purpose of this script is to pull Aqua-MODIS RGB images from Worldview
 using the NASA GIBS API and overlay various OCO-2 data fields for case study 
@@ -7,7 +7,7 @@ analysis in support of OCO-2 cloud and aerosol screening validation.
 It can be used as a command line tool to plot any data in the OCO-2 Lite file, filtered by warn level and/or quality flag
 or can be called as a function from within another python program to plot other data.
 
-##GETTING STARTED
+## GETTING STARTED
 
 1) Clone this code
    `git clone http://github.com/hcronk/oco2_modis_vistool`
@@ -17,7 +17,7 @@ or can be called as a function from within another python program to plot other 
    and comparing files.)
 
 2) Make sure you have the necessary system and Python requirements
-   ###System Requirements:
+   ### System Requirements:
    1) GDAL version 1.9.1 or greater with cURL support enabled. 
           To check if cURL is enabled for GDAL, type "gdalinfo --format WMS". 
           If cURL is enabled you will see information about the WMS format, if not, 
@@ -31,7 +31,7 @@ or can be called as a function from within another python program to plot other 
            https://www.continuum.io/download and then use the Anaconda utility conda 
            to fetch and install packages.
 
-   ###Python requirements:
+   ### Python requirements:
    1) Python 2.7 or higher (untested but likely compatible with minimal updates on Python 3)
    2) Modules:
        warnings
@@ -122,7 +122,7 @@ or can be called as a function from within another python program to plot other 
        out_data_name (string, default example: xco2_Amazon_20150701_all_quality_WL_0to20.h5): 
                       The name of the output data file
 
-##Other Information
+## Other Information
 
 GIBS developer documentation:https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+API+for+Developers
 
