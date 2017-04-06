@@ -63,7 +63,7 @@ It can also be called as a function from within another Python program for expan
 4) Look for the output PNG and HDF5 in the code directory
 
 5) Update the JSON configuration file with information from your scene of interest. Options include:
-   ##### Required:
+   #### Required:
      **date** (string, format:"YYYY-MM-DD"):  
          The date of your case study. This is used to get the correct RGB. 
 
@@ -75,7 +75,7 @@ It can also be called as a function from within another Python program for expan
          The latitude and longitude coordinates of the lower right hand corner of your area of 
          interest.
 
-   ##### Optional:
+   #### Optional:
 	**region** (string, default: none):  
     	The region of your case study. This is used to build the default output filename in the 
         command line execution.
@@ -163,7 +163,13 @@ from oco2_modis_vistool import do_modis_overlay_plot
 do_modis_overlay_plot([lat_of_upper_lefthand_corner, lon_of_upper_lefthand_corner],
                       [lat_of_lower_righthand_corner, lon_of_lower_righthand_corner], 
 		      date, lat_data, lon_data, variable_data)
-```   
+```  
+
+
+## A Note about Questions, Suggestions, and Issues
+
+For the benefit of the entire user community, it is requested that you submit questions, suggestions, and issues via the GitHub issue tracker so that everyone is able to see the work that is in progress. 
+https://github.com/hcronk/oco2_modis_vistool/issues
 
 ---
 Developed and maintained by:  
