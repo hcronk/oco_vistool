@@ -91,60 +91,65 @@ It can also be called as a function from within another Python program for expan
          The information for the OCO-2 variable to overlay on the MODIS RGB.  
 		**{**  
 		**file** (string):  
-        	This is *required* for a variable overlay.  
-            The full path to the file that contains the variable to overlay.  
+        		This is *required* for a variable overlay.  
+			The full path to the file that contains the variable to overlay.  
 		**variable** (string, format:"Preprocessors/dp_adp"):  
-        	This is *required* for a variable overlay.  
-            The full path to the variable within the file specified.  
+        		This is *required* for a variable overlay.  
+			The full path to the variable within the file specified.  
 		**band_number** (string or integer, format: "1" or 1):  
 			This is optional for variables that are stored per-band in the same array.  
 		**variable_plot_lims** (list, format:[min, max], 
 			default: [integer floor of variable's minimum value, integer ceiling of variable's 
-            maximum value]):  
-            The maximum and minimum values used for plotting and color assignment. Any data values 
-            beyond the min and max will show up on the plot as the minimum or maximum color, 
-            respectively.
+            		maximum value]):  
+            		The maximum and minimum values used for plotting and color assignment. Any data values 
+            		beyond the min and max will show up on the plot as the minimum or maximum color, 
+            		respectively.  
 		**lat_name** (string, format:"latitude"):  
 			This is *required* for a variable overlay for command line execution.  
-            The name of the latitude array associated with the variable. Used for subsetting and 
-            plotting.
+            		The name of the latitude array associated with the variable. Used for subsetting and 
+            		plotting.  
 		**lon_name** (string, format:"longitude"):  
 			This is *required* for a variable overlay for command line execution.  
-            The name of the longitude array associated with the variable. Used for subsetting and 
-            plotting.  
+			The name of the longitude array associated with the variable. Used for subsetting and 
+            		plotting.  
 		**orbit** (integer, format:11016):  
 			This is optional for a variable overlay.  
-            The OCO-2 orbit number. Used for subsetting.  
+            		The OCO-2 orbit number. Used for subsetting.  
 		**lite_QF** (string, format:"good", default: "all"):  
 			The quality flag applied to the CO2 Lite File variable. Used for filtering.  
-            Valid options: "good", "bad", "all"  
+            		Valid options: "good", "bad", "all"  
 		**lite_warn_lims** (list, format:[0,15], default: [0,20]):  
 			The range of acceptable warn levels applied to the CO2 Lite File variable. Used for 
-            filtering.  
-            Valid options: integers from 0 to 20  
-       **footprint** (1 or 2 element list, format: [2:4] or [1], default: [1:8]):  
-           The footprint number applied to the CO2 or SIF Lite File variable. Used for filtering.  
-	   **transparency** (integer between 0 and 1, format: 0, default: 1):  
-           The level of transparency applied to the OCO-2 data where 1 is opaque and 0 is 
-           transparent.  
-       **}**  
+            		filtering.  
+            		Valid options: integers from 0 to 20  
+		**footprint** (1 or 2 element list, format: [2:4] or [1], default: [1:8]):  
+           		The footprint number applied to the CO2 or SIF Lite File variable. Used for filtering.  
+		**transparency** (integer between 0 and 1, format: 0, default: 1):  
+           		The level of transparency applied to the OCO-2 data where 1 is opaque and 0 is 
+           		transparent.  
+		**}**  
        
 	**ground_site** (list, format:[lat lon], default: none):  
     	The latitude and longitude coordinates of a ground site of interest. It will show up as 
-        a white star on the output plot.  
+        a white star on the output plot.
+
 	**city_labels** (string, default: none):  
     	This is optional to display city names on the output plot in the color specified in this 
         string. They are on a 10m scale, and work best if you are displaying a small area.  
         Python built-in named colors are available here: 
-        http://matplotlib.org/examples/color/named_colors.html  
+        http://matplotlib.org/examples/color/named_colors.html
+
 	**out_plot_dir** (string, default: the directory that you are running the code in):  
-    	The full output directory path for the output plot.  
+    	The full output directory path for the output plot.
+
 	**out_plot_name** (string, default example: xco2_Amazon_20150701_all_quality_WL_0to20.png):  
-    	The name of the output plot.  
+    	The name of the output plot.
+
 	**out_data_dir** (string, default: the directory that you are running the code in):  
-    	The full output directory path for the output data file.  
+    	The full output directory path for the output data file.
+
 	**out_data_name** (string, default example: xco2_Amazon_20150701_all_quality_WL_0to20.h5):  
-    	The name of the output data file.  
+    	The name of the output data file.
 
 
 ## Other Information
