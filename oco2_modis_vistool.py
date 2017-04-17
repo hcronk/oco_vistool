@@ -682,14 +682,18 @@ if __name__ == "__main__":
     ### Prep OCO-2 Variable ###
 
     h5 = h5py.File(var_file)
-    try:
-        oco2_data_obj = h5[var_name]
-    except:
-        print(var_name+" DNE in "+var_file)
-        print("Check that the variable name includes any necessary group paths. Ex: /Preprocessors/dp_abp")
-        print("Exiting")
-        sys.exit()
-    oco2_data = h5[var_name][:]
+    if var_name:
+        try:
+            oco2_data_obj = h5[var_name]
+        except:
+            print(var_name+" DNE in "+var_file)
+            print("Check that the variable name includes any necessary group paths. Ex: /Preprocessors/dp_abp")
+            print("Exiting")
+            sys.exit()
+        oco2_data = h5[var_name][:]
+    else:
+        oco2_data_obj = h5['xco2']
+        oco2_data = np.ones_like(oco2_data_obj[:])
     if sif_or_co2 == "CO2":
         oco2_data_long_name = oco2_data_obj.attrs.get('long_name')[0]
         oco2_data_units = oco2_data_obj.attrs.get('units')[0]
