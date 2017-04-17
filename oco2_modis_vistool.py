@@ -233,7 +233,7 @@ def do_modis_overlay_plot(
                 var_vals_subset = np.ma.masked_where(latlon_subset_mask_1d == False, var_vals)
             if lite_sid.shape:
                 lite_sid_subset = np.ma.masked_where(latlon_subset_mask_1d == False, lite_sid)
-                
+            
             if var_lon_subset.count() == 0 or var_lat_subset.count() == 0:
                 print("\nWARNING: The lat/lon ranges given have no common points for the OCO-2 ground track")
                 try:
@@ -280,6 +280,14 @@ def do_modis_overlay_plot(
                     pass
                 out_data = False
                 var_vals = np.empty([])
+    
+    min_segment_lat = np.ma.min(var_lat_subset)
+    max_segment_lat = np.ma.max(var_lat_subset)
+    min_segment_lon = np.ma.min(var_lon_subset)
+    max_segment_lon = np.ma.max(var_lon_subset)
+    
+    print min_segment_lat, max_segment_lat
+    print min_segment_lon, max_segment_lon
     
     if var_vals_missing:
         var_vals_subset = np.ma.masked_where(var_vals_subset == var_vals_missing, var_vals_subset)
@@ -421,6 +429,8 @@ def do_modis_overlay_plot(
                 patches.append(polygon)
             p = mpl.collections.PatchCollection(patches, alpha=alpha, edgecolor='none', match_original=True)
             ax.add_collection(p)
+    
+    #ax.plot([min_segment_lon, max_segment_lat], [max_segment_lon, min_segment_lat], c='white', transform=ccrs.Geodetic()) 
     
     inset_extent_x = [minx, maxx] 
     inset_extent_y = [miny, maxy]
@@ -597,7 +607,7 @@ if __name__ == "__main__":
             cmap = "jet"
 
         try:
-            alpha = overlay_info_dict['transparency']
+            alpha = float(overlay_info_dict['transparency'])
         except:
             alpha = ""
         if not alpha:
