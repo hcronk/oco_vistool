@@ -31,6 +31,16 @@ class LiteSIFFile:
     def get_footprint(self):
         return self.lf['footprint'][:]
         
+    def get_SIF757(self):
+        return self.lf['SIF_757nm'][:]
+    
+    def get_SIF771(self):
+        return self.lf['SIF_771nm'][:]
+    
+    def get_SIF_units(self):
+        SIF_obj = self.lf['SIF_757nm']
+        return SIF_obj.attrs.get('unit').decode('utf-8') 
+        
     def close_file(self):
         self.lf.close()
 
@@ -238,7 +248,24 @@ class SubsetFile:
         
     def get_modis_lon(self):
         return self.sf['MODIS_Longitude'][:]
-
+        
+    def get_modis_solar_zenith(self):
+        solar_zenith_obj = self.sf['SolarZenith']
+        solar_zenith = solar_zenith_obj[:]
+        solar_zenith_scale = solar_zenith_obj.attrs.get('scale_factor')[0]
+        try: 
+            solar_zenith_offset = solar_zenith_obj.attrs.get('add_offset')[0]
+        except: 
+            solar_zenith_offset = 0
+        solar_zenith = solar_zenith.astype(float)
+        solar_zenith *= solar_zenith_scale
+        solar_zenith += solar_zenith_offset
+        
+        return solar_zenith
+        
+    def get_oco2_file(self):
+        return self.sf['OCO_Input_File'][:][0]
+    
     def get_oco2_lat(self):
         return self.sf['OCO_Latitude'][:]
         
@@ -246,17 +273,36 @@ class SubsetFile:
         return self.sf['OCO_Longitude'][:]
     
     def get_xmatch(self):
-        return self.sf['matchup_Xindex'][:]
+        self.xmatch = self.sf['matchup_Xindex'][:]
+        return self.xmatch
         
     def get_ymatch(self):
-        #try:
-        ymatch = self.sf['matchup_Yindex'][:]
-        return ymatch
-        #except ValueError:
-            #print
+        #self.ymatch = self.sf['matchup_Yindex'][:]
+        return self.sf['matchup_Yindex'][:]
             
     def get_match_dist(self):
         return self.sf['matchup_distance_km'][:]
+    
+    def make_matched_array(self, var):
+        xmatch = self.get_xmatch()
+        ymatch = self.get_ymatch()
+        dmatch = self.get_match_dist()
+        match_mask = np.logical_or(np.logical_or(xmatch == -999, ymatch == -999), dmatch > 5)
+        xmatch = np.ma.array(xmatch, mask = match_mask)
+        ymatch = np.ma.array(ymatch, mask = match_mask)
+        
+        n_oco_soundings = xmatch.size
+        
+        xmatch_1D = np.reshape(xmatch, n_oco_soundings)
+        ymatch_1D = np.reshape(ymatch, n_oco_soundings)
+        
+        matched_var = np.full_like(xmatch_1D, -999, dtype = var.dtype)
+        
+        for i, x_idx in enumerate(xmatch_1D):
+            if x_idx:
+                matched_var[i] = var[x_idx, ymatch_1D[i]]
+        
+        return matched_var.reshape(xmatch.shape)
     
     def get_sid(self):
         return self.sf['OCO_sounding_id'][:]
@@ -324,3 +370,55 @@ class SubsetFile:
     
     def close_file(self):
         self.sf.close()
+
+class GeoScFile:
+
+    def __init__(self, geo_file):
+        self.geo_file = geo_file
+
+    def open_file(self):
+        self.gsf = h5py.File(self.geo_file, 'r')
+    
+    def get_lat(self):
+        return self.gsf['/SoundingGeometry/sounding_latitude']
+    
+    def get_lon(self):
+        return self.gsf['/SoundingGeometry/sounding_longitude']
+    
+    def get_start_time(self):
+        self.id = self.gsf['/SoundingGeometry/sounding_id'][:]
+        start = (self.id[0])[0]
+        count=1
+        while True:
+            if start <= 0:
+                start = (self.id[count])[0]
+                count+=1
+            else:
+                break
+
+        return(start)
+        
+    def get_end_time(self):
+        self.id = self.gsf['/SoundingGeometry/sounding_id'][:]
+        end = (self.id[-1])[-1]
+        count=2
+        while True:
+            if end <= 0:
+                end = (self.id[-count])[-1]
+                count+=1
+            else:
+                break
+        
+        return(end)
+    
+    def get_collection(self):
+        return(self.gsf['/Metadata/CollectionLabel'].value[0])
+    
+    def get_vertex_lat(self):
+        return self.gsf['/FootprintGeometry/footprint_vertex_latitude'][:,:,0,:]
+        
+    def get_vertex_lon(self):
+        return self.gsf['/FootprintGeometry/footprint_vertex_longitude'][:,:,0,:]
+    
+    def close_file(self):
+        self.gsf.close()
