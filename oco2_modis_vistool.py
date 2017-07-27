@@ -257,6 +257,8 @@ def do_modis_overlay_plot(
             var_lon_subset = var_lon[latlon_subset_mask]
             var_lat_subset = var_lat[latlon_subset_mask]
             var_vals_subset = var_vals[latlon_subset_mask]
+            if lite_sid.shape:
+                lite_sid_subset = lite_sid[latlon_subset_mask]
                 
         zip_it = np.ma.dstack([var_lon_subset, var_lat_subset])
         
@@ -339,7 +341,10 @@ def do_modis_overlay_plot(
         write_ds = outfile.create_dataset(lon_name, data = lon_data_to_write)
         write_ds = outfile.create_dataset(var_name, data = var_data_to_write)
         if lite_sid.shape:
-            write_ds = outfile.create_dataset("sounding_id", data = lite_sid_subset.compressed())
+            if re.search("Masked", str(type(lite_sid_subset))):
+                write_ds = outfile.create_dataset("sounding_id", data = lite_sid_subset.compressed())
+            else:
+                write_ds = outfile.create_dataset("sounding_id", data = lite_sid_subset)
         outfile.close()
         print("\nData saved at "+out_data)
 
