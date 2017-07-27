@@ -308,16 +308,25 @@ def do_modis_overlay_plot(
     
     if out_data:
         
-        if var_lat_subset.ndim > 1:
-            lat_data_to_write = np.ma.compress_rows(var_lat_subset)
-            lon_data_to_write = np.ma.compress_rows(var_lon_subset)
+        if re.search("Masked", str(type(var_lat_subset))):
+            if var_lat_subset.ndim > 1:
+                lat_data_to_write = np.ma.compress_rows(var_lat_subset)
+                lon_data_to_write = np.ma.compress_rows(var_lon_subset)
+            else:
+                lat_data_to_write = var_lat_subset.compressed()
+                lon_data_to_write = var_lon_subset.compressed()
         else:
-            lat_data_to_write = var_lat_subset.compressed()
-            lon_data_to_write = var_lon_subset.compressed()
-        if var_vals_subset.ndim > 1:
-            var_data_to_write = np.ma.compress_rows(var_vals_subset)
+            lat_data_to_write = var_lat_subset
+            lon_data_to_write = var_lon_subset
+        
+        if re.search("Masked", str(type(var_lat_subset))):
+            if var_vals_subset.ndim > 1:
+                var_data_to_write = np.ma.compress_rows(var_vals_subset)
+            else:
+                var_data_to_write = var_vals_subset.compressed()
         else:
-            var_data_to_write = var_vals_subset.compressed()
+            var_data_to_write = var_vals_subset
+        
         outfile = h5py.File(out_data, "w")
         if not lat_name:
             lat_name = "Latitude"
