@@ -253,6 +253,11 @@ def do_modis_overlay_plot(
                 out_data = False
                 var_vals = np.empty([])
              
+        else:
+            var_lon_subset = var_lon[latlon_subset_mask]
+            var_lat_subset = var_lat[latlon_subset_mask]
+            var_vals_subset = var_vals[latlon_subset_mask]
+                
         zip_it = np.ma.dstack([var_lon_subset, var_lat_subset])
         
     else:
