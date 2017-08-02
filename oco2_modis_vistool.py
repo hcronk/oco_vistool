@@ -543,12 +543,16 @@ if __name__ == "__main__":
 
         if 'variable_plot_lims' in overlay_info_dict:
             var_lims = overlay_info_dict['variable_plot_lims']
-            # if this was a string option, then make sure it is one 
-            # of the two options we have implemented. if not, revert to default.
-            if type(var_lims) in (str, unicode):
-                if var_lims not in ('autoscale_by_orbit', 'autoscale_by_overlay'):
-                    print('var_lims "' + var_lims + '" is not valid, reverting to "autoscale_by_orbit"')
-                    var_lims = 'autoscale_by_orbit'
+            if var_lims:
+                # if this was a string option, then make sure it is one 
+                # of the two options we have implemented. if not, revert to default.
+                if type(var_lims) in (str, unicode):
+                    if var_lims not in ('autoscale_by_orbit', 'autoscale_by_overlay'):
+                        print('var_lims "' + var_lims + '" is not valid, reverting to "autoscale_by_orbit"')
+                        var_lims = 'autoscale_by_orbit'
+            else:
+                # empty list, tuple, None, etc 
+                var_lims = 'autoscale_by_orbit'
         else:
             var_lims = 'autoscale_by_orbit'
 
