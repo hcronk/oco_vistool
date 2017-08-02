@@ -540,10 +540,22 @@ if __name__ == "__main__":
                 print("Unexpected band number specification. Options are 1 (0.76 micron), 2 (1.6 micron), or 3 (2.04 micron)")
                 print(var_name + " is stored per band. Please select an appropriate band number. Exiting")
                 sys.exit()
-        try:
+
+        if 'variable_plot_lims' in overlay_info_dict:
             var_lims = overlay_info_dict['variable_plot_lims']
-        except:
-            var_lims = []
+            if var_lims:
+                # if this was a string option, then make sure it is one 
+                # of the two options we have implemented. if not, revert to default.
+                if type(var_lims) in (str, unicode):
+                    if var_lims not in ('autoscale_by_orbit', 'autoscale_by_overlay'):
+                        print('var_lims "' + var_lims + '" is not valid, reverting to "autoscale_by_orbit"')
+                        var_lims = 'autoscale_by_orbit'
+            else:
+                # empty list, tuple, None, etc 
+                var_lims = 'autoscale_by_orbit'
+        else:
+            var_lims = 'autoscale_by_orbit'
+
         lat_name = overlay_info_dict['lat_name']
         lon_name = overlay_info_dict['lon_name']
         try: 
@@ -857,13 +869,16 @@ if __name__ == "__main__":
             lat_data = lat_data[footprint_mask]
             lon_data = lon_data[footprint_mask]   
     
-    if not var_lims:
+    # here, handle the var limit options. 
+    # if specific limits were input, via a 2-element list, 
+    # that will be passed directly to do_modis_overlay_plot().
+    # if autoscaling by orbit, find those min/max now, and create the 2 element list.
+    if var_lims == 'autoscale_by_orbit':
         var_lims = [np.min(oco2_data), np.max(oco2_data)]
-        vmax = int(math.ceil(var_lims[1]))
-        vmin = int(math.floor(var_lims[0]))
-    
-    vmax = var_lims[1]
-    vmin = var_lims[0]
+    # otherwise, convert to None, so then do_modis_overlay_plot() will then derive an autoscale 
+    # min/max according to the points within the overlay.
+    if var_lims == 'autoscale_by_overlay':
+        var_lims = None
 
     ### Plot prep ###
 
@@ -899,6 +914,6 @@ if __name__ == "__main__":
     do_modis_overlay_plot(orbit_info_dict['geo_upper_left'],
                           orbit_info_dict['geo_lower_right'], 
                           date, lat_data, lon_data, oco2_data, oco2_data_fill, lite_sid,
-                          orbit_start_idx, var_lims=[vmin,vmax], interest_pt=interest_pt, 
+                          orbit_start_idx, var_lims=var_lims, interest_pt=interest_pt, 
                           cmap=cmap, alpha=alpha,lat_name=lat_name, lon_name=lon_name, var_name=var_name,
                           out_plot=out_plot_name, out_data=out_data_name, var_label=cbar_name, cities=cities)
