@@ -570,10 +570,16 @@ if __name__ == "__main__":
             if re.search("CO2", os.path.basename(var_file)):
                 sif_or_co2 = "CO2"
                 qf_file_tag = "_all_quality"
-            else:
+            elif re.search("SIF", os.path.basename(var_file)):
                 sif_or_co2 = "SIF"
                 qf_file_tag = ""
                 wl_file_tag = ""
+            else:
+                print("The command line usage of this tool accommodates official CO2 or SIF lite files only.") 
+                print("Expected filename convention: oco2_LtNNN_YYYYMMDD_B8xxxxx_rxx*.nc, where NNN is CO2 or SIF")
+                print("Other data will need to be plotted by importing the tool as a Python module.")
+                print "Exiting")
+                sys.exit()
 
             try:
                 lite_quality = overlay_info_dict['lite_qf']
