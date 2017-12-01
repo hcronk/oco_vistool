@@ -578,7 +578,7 @@ if __name__ == "__main__":
                 print("The command line usage of this tool accommodates official CO2 or SIF lite files only.") 
                 print("Expected filename convention: oco2_LtNNN_YYYYMMDD_B8xxxxx_rxx*.nc, where NNN is CO2 or SIF")
                 print("Other data will need to be plotted by importing the tool as a Python module.")
-                print "Exiting")
+                print("Exiting")
                 sys.exit()
 
             try:
