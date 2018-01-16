@@ -293,8 +293,8 @@ def do_modis_overlay_plot(
     min_segment_lon = np.ma.min(var_lon_subset)
     max_segment_lon = np.ma.max(var_lon_subset)
     
-    print min_segment_lat, max_segment_lat
-    print min_segment_lon, max_segment_lon
+    #print min_segment_lat, max_segment_lat
+    #print min_segment_lon, max_segment_lon
     
     if var_vals_missing:
         var_vals_subset = np.ma.masked_where(var_vals_subset == var_vals_missing, var_vals_subset)
