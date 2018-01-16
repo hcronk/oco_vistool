@@ -740,11 +740,13 @@ if __name__ == "__main__":
         try:
             oco2_data_units = oco2_data_obj.attrs.get('unit').decode('utf-8')
         except:
-            oco2_data_units = None
+            print("Problem reading units for " + var_name)
+            oco2_data_units = ""
         try:
             oco2_data_fill = oco2_data_obj.attrs.get('missing_value')[0]
         except:
-            oco2_data_fill = None
+            print("Problem reading missing value for " + var_name)
+            oco2_data_fill = ""
       
     try:
         lat_data = h5[lat_name][:]
