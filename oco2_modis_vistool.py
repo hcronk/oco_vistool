@@ -917,6 +917,9 @@ if __name__ == "__main__":
                 cbar_cap_strings = cbar_cap_strings + cap_s +" "
         cbar_cap_strings = cbar_cap_strings[:-1]
         cbar_name = cbar_cap_strings+'\n('+oco2_data_units+')'
+    else:
+        cbar_cap_strings = ""
+        cbar_name = ""
 
     if not out_plot_name:
         if region:
