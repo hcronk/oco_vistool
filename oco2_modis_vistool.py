@@ -902,20 +902,21 @@ if __name__ == "__main__":
 
     ### Plot prep ###
 
-    oco2_data_long_name = re.sub("_", " ", oco2_data_long_name)
-    cbar_strings = re.split(' ', oco2_data_long_name)
-    cbar_cap_strings = ""
+    if oco2_data_long_name:
+        oco2_data_long_name = re.sub("_", " ", oco2_data_long_name)
+        cbar_strings = re.split(' ', oco2_data_long_name)
+        cbar_cap_strings = ""
 
-    for i, s in enumerate(cbar_strings):
-        cap_s = s
-        if not s[0].isupper():
-            cap_s = s.capitalize()
-        if i % 2 != 0:
-            cbar_cap_strings = cbar_cap_strings + cap_s +"\n"
-        else: 
-            cbar_cap_strings = cbar_cap_strings + cap_s +" "
-    cbar_cap_strings = cbar_cap_strings[:-1]
-    cbar_name = cbar_cap_strings+'\n('+oco2_data_units+')'
+        for i, s in enumerate(cbar_strings):
+            cap_s = s
+            if not s[0].isupper():
+                cap_s = s.capitalize()
+            if i % 2 != 0:
+                cbar_cap_strings = cbar_cap_strings + cap_s +"\n"
+            else: 
+                cbar_cap_strings = cbar_cap_strings + cap_s +" "
+        cbar_cap_strings = cbar_cap_strings[:-1]
+        cbar_name = cbar_cap_strings+'\n('+oco2_data_units+')'
 
     if not out_plot_name:
         if region:
