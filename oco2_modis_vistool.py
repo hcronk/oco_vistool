@@ -732,9 +732,21 @@ if __name__ == "__main__":
         oco2_data_obj = h5['xco2']
         oco2_data = np.ones_like(oco2_data_obj[:])
     if sif_or_co2 == "CO2":
-        oco2_data_long_name = oco2_data_obj.attrs.get('long_name')[0]
-        oco2_data_units = oco2_data_obj.attrs.get('units')[0]
-        oco2_data_fill = oco2_data_obj.attrs.get('missing_value')[0]
+        try:
+            oco2_data_long_name = oco2_data_obj.attrs.get('long_name')[0]
+        except:
+            print("Problem reading long name for " + var_name)
+            oco2_data_long_name = ""
+        try:
+            oco2_data_units = oco2_data_obj.attrs.get('units')[0]
+        except:
+            print("Problem reading units for " + var_name)
+            oco2_data_units = ""
+        try:
+            oco2_data_fill = oco2_data_obj.attrs.get('missing_value')[0]
+        except:
+            print("Problem reading missing value for " + var_name)
+            oco2_data_fill = ""
     if sif_or_co2 == "SIF":
         oco2_data_long_name = re.split("/", var_name)[-1]
         try:
