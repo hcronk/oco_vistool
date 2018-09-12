@@ -41,6 +41,7 @@ import cartopy.feature as cfeature
 import shapefile
 from shapely.geometry import LineString, Point, Polygon
 import matplotlib as mpl
+mpl.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.gridspec as gridspec
