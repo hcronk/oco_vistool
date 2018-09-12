@@ -1,0 +1,11 @@
+version: "2"
+
+services:
+    vistool:
+        build: .
+        image: oco2_modis_vistool
+        container_name: oco2_modis_vistool
+        volumes:
+        - ./:/code/
+        tty: true
+        network_mode: bridge

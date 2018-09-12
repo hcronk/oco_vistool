@@ -1,0 +1,7 @@
+FROM continuumio/anaconda
+
+RUN apt update -y
+RUN apt install -y libgl1-mesa-swx11
+RUN apt-get install -y vim
+RUN conda install -y -c conda-forge cartopy
+RUN conda install -y -c conda-forge gdal 
