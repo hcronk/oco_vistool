@@ -23,28 +23,28 @@ It can also be called as a function from within another Python program for expan
     ##### System Requirements:
     GDAL version 1.9.1 or greater with cURL support enabled.  
         
-      To check if cURL is enabled for GDAL, use the command `gdalinfo --format WMS`  
-      If cURL is enabled you will see information about the WMS format, if not, 
-      you will get an error message and you will need to reconfigure GDAL to support cURL.  
-      **NOTE:** If this comes with your Anaconda distribution of Python, you may need
-      to set an environmental variable called GDAL_DATA in your bash profile that points to
-      gdal within your Anaconda folder.
-      (Ex: `export GDAL_DATA="/local/home/hcronk/anaconda/share/gdal"`)
+    To check if cURL is enabled for GDAL, use the command `gdalinfo --format WMS`  
+    If cURL is enabled you will see information about the WMS format, if not, 
+    you will get an error message and you will need to reconfigure GDAL to support cURL.  
+    **NOTE:** If this comes with your Anaconda distribution of Python, you may need
+    to set an environmental variable called GDAL_DATA in your bash profile that points to
+    gdal within your Anaconda folder.
+    (Ex: `export GDAL_DATA="/local/home/hcronk/anaconda/share/gdal"`)
 
     ##### Python requirements:
     Python 2.7 or higher
       
-      For those new to Python, it is easiest to get the Anaconda distribution: 
-      https://www.continuum.io/download and then use the Anaconda utility conda 
-      to fetch and install packages.
+    For those new to Python, it is easiest to get the Anaconda distribution: 
+    https://www.continuum.io/download and then use the Anaconda utility conda 
+    to fetch and install packages.
 
 
-      The conda installs required on top of what comes with Anaconda 5.2 for both Python 2.7 and Python 3.6 are as follows:
-      + conda install -c conda-forge cartopy
-      + conda install -c conda-forge gdal=2.2.4
-      + conda install -c conda-forge ncurses
-      + conda install -c conda-forge hdf5
-      + conda install -c conda-forge future
+    The conda installs required on top of what comes with Anaconda 5.2 for both Python 2.7 and Python 3.6 are as follows:
+    + conda install -c conda-forge cartopy
+    + conda install -c conda-forge gdal=2.2.4
+    + conda install -c conda-forge ncurses
+    + conda install -c conda-forge hdf5
+    + conda install -c conda-forge future
 
     #### Option 2: Docker Container
     Dockerfiles and docker-compose files to set up an appropriate Python 2.7 or Python 3.6 container are included in the repo    
