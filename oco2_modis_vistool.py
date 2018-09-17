@@ -734,12 +734,12 @@ if __name__ == "__main__":
         oco2_data = np.ones_like(oco2_data_obj[:])
     if sif_or_co2 == "CO2":
         try:
-            oco2_data_long_name = oco2_data_obj.attrs.get('long_name')[0]
+            oco2_data_long_name = oco2_data_obj.attrs.get('long_name')[0].decode('utf-8')
         except:
             print("Problem reading long name for " + var_name)
             oco2_data_long_name = ""
         try:
-            oco2_data_units = oco2_data_obj.attrs.get('units')[0]
+            oco2_data_units = oco2_data_obj.attrs.get('units')[0].decode('utf-8')
         except:
             print("Problem reading units for " + var_name)
             oco2_data_units = ""
