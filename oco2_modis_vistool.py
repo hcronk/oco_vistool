@@ -55,6 +55,9 @@ import argparse
 
 import re
 
+import future
+from builtins import range
+
 class ConfigFile:
 
     def __init__(self, json_file):
@@ -420,7 +423,7 @@ def do_modis_overlay_plot(
 
         if color_or_cmap == "cmap":
             if var_lat.ndim == 2 and var_vals.ndim == 1: 
-                for row in xrange(zip_it.shape[0]):
+                for row in range(zip_it.shape[0]):
                     polygon = mpatches.Polygon(zip_it[row,:,:]) 
                     patches.append(polygon)
                     
@@ -444,7 +447,7 @@ def do_modis_overlay_plot(
                 t.set_weight("bold")
                 t.set_fontsize(12)
         if color_or_cmap == "color":
-            for row in xrange(zip_it.shape[0]):
+            for row in range(zip_it.shape[0]):
                 polygon = mpatches.Polygon(zip_it[row,:,:], color=cmap) 
                 patches.append(polygon)
             p = mpl.collections.PatchCollection(patches, alpha=alpha, edgecolor='none', match_original=True)
