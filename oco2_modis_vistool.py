@@ -571,6 +571,8 @@ if __name__ == "__main__":
             lite = True
             #print("\nLite overlay file detected. Checking for QF and Warn specs...")
             
+            version_number =  re.sub("[A-Za-z_]", "", re.search("_B[0-9a-z]{,5}_", os.path.basename(var_file)).group())
+            
             if re.search("CO2", os.path.basename(var_file)):
                 sif_or_co2 = "CO2"
                 qf_file_tag = "_all_quality"
@@ -598,23 +600,33 @@ if __name__ == "__main__":
                 print("Exiting")
                 sys.exit()
 
-            try:
-                lite_warn_lims = overlay_info_dict['lite_warn_lims']
-            except:
-                print("No warn specifications detected. Output plot will contain all warn levels")
-                lite_warn_lims = [0, 20]
-            if not lite_warn_lims:
-                print("No warn specifications detected. Output plot will contain all warn levels")
-                lite_warn_lims = [0, 20]
-            if lite_warn_lims[0] > lite_warn_lims[1]:
-                print("Lower warn limit is greater than upper warn limit.")
-                print("Exiting")
-                sys.exit()
-            for lim in lite_warn_lims:
-                if lim not in np.arange(21):
-                    print("Unexpected warn level specification. Limits must be within [0, 20].")
+            if int(version_number) < 9000:
+                try:
+                    lite_warn_lims = overlay_info_dict['lite_warn_lims']
+                except:
+                    print("No warn specifications detected. Output plot will contain all warn levels")
+                    lite_warn_lims = [0, 20]
+                if not lite_warn_lims:
+                    print("No warn specifications detected. Output plot will contain all warn levels")
+                    lite_warn_lims = [0, 20]
+                if lite_warn_lims[0] > lite_warn_lims[1]:
+                    print("Lower warn limit is greater than upper warn limit.")
                     print("Exiting")
                     sys.exit()
+                for lim in lite_warn_lims:
+                    if lim not in np.arange(21):
+                        print("Unexpected warn level specification. Limits must be within [0, 20].")
+                        print("Exiting")
+                        sys.exit()
+                warn = True
+            else:
+                try:
+                    lite_warn_lims = overlay_info_dict['lite_warn_lims']
+                    if lite_warn_lims:
+                        print("Warn levels are not available in B9 and above")
+                except:
+                    pass
+                warn = False
             
             try:
                 footprint_lims = overlay_info_dict['footprint']
@@ -638,7 +650,10 @@ if __name__ == "__main__":
                     sys.exit()
             
             if sif_or_co2 == "CO2":
-                print("Output plot will include "+lite_quality+" quality soundings with warn levels within "+str(lite_warn_lims)+"\n")
+                if warn:
+                    print("Output plot will include "+lite_quality+" quality soundings with warn levels within "+str(lite_warn_lims)+"\n")
+                else:
+                    print("Output plot will include "+lite_quality+" quality soundings\n")
 
         try:
             cmap = overlay_info_dict['cmap']
@@ -793,10 +808,13 @@ if __name__ == "__main__":
     
     if lite:
         
+        version_file_tag = re.search("_B[0-9a-z]{,5}_", os.path.basename(var_file)).group()[:-1]
+        
         if sif_or_co2 == "CO2":
             lite_file = LiteCO2File(var_file)
             lite_file.open_file()
-            lite_warn = lite_file.get_warn()
+            if warn:
+                lite_warn = lite_file.get_warn()
             lite_qf = lite_file.get_qf()
         else:
             lite_file = LiteSIFFile(var_file)
@@ -805,15 +823,15 @@ if __name__ == "__main__":
         lite_orbit = lite_file.get_orbit()
         lite_footprint = lite_file.get_footprint()
         lite_file.close_file()
-        version_file_tag = re.search("_B[0-9a-z]{,5}_", os.path.basename(var_file)).group()[:-1]
-        
+       
         if orbit_int:
             orbit_subset = np.where(lite_orbit == orbit_int)
             orbit_start_idx = orbit_subset[0][0]
             orbit_end_idx = orbit_subset[0][-1]
             if sif_or_co2 == "CO2":
                 lite_qf = lite_qf[orbit_subset]
-                lite_warn = lite_warn[orbit_subset]
+                if warn:
+                    lite_warn = lite_warn[orbit_subset]
             lite_sid = lite_sid[orbit_subset]
             oco2_data = oco2_data[orbit_subset]
             lite_footprint = lite_footprint[orbit_subset]   
@@ -831,7 +849,8 @@ if __name__ == "__main__":
                 qf_file_tag = "_good_quality"
                 
                 lite_qf = lite_qf[quality_mask]
-                lite_warn = lite_warn[quality_mask]
+                if warn:
+                    lite_warn = lite_warn[quality_mask]
                 lite_sid = lite_sid[quality_mask]
                 oco2_data = oco2_data[quality_mask]
                 lite_footprint = lite_footprint[quality_mask]
@@ -848,7 +867,8 @@ if __name__ == "__main__":
                 qf_file_tag = "_bad_quality"
                 
                 lite_qf = lite_qf[quality_mask]
-                lite_warn = lite_warn[quality_mask]
+                if warn:
+                    lite_warn = lite_warn[quality_mask]
                 lite_sid = lite_sid[quality_mask]
                 oco2_data = oco2_data[quality_mask]
                 lite_footprint = lite_footprint[quality_mask]
@@ -859,20 +879,23 @@ if __name__ == "__main__":
                     lat_data = lat_data[quality_mask]
                     lon_data = lon_data[quality_mask]
 
-            warn_mask = np.where(np.logical_and(lite_warn <= lite_warn_lims[1], lite_warn >= lite_warn_lims[0]))[0]
-            lite_qf = lite_qf[warn_mask]
-            lite_warn = lite_warn[warn_mask]
-            lite_sid = lite_sid[warn_mask]
-            oco2_data = oco2_data[warn_mask]
-            lite_footprint = lite_footprint[warn_mask]
-            if lat_data.ndim == 2:
-                lat_data = np.squeeze(lat_data[warn_mask, :])
-                lon_data = np.squeeze(lon_data[warn_mask, :])
-            else:
-                lat_data = lat_data[warn_mask]
-                lon_data = lon_data[warn_mask]
+            if warn:
+                warn_mask = np.where(np.logical_and(lite_warn <= lite_warn_lims[1], lite_warn >= lite_warn_lims[0]))[0]
+                lite_qf = lite_qf[warn_mask]
+                lite_warn = lite_warn[warn_mask]
+                lite_sid = lite_sid[warn_mask]
+                oco2_data = oco2_data[warn_mask]
+                lite_footprint = lite_footprint[warn_mask]
+                if lat_data.ndim == 2:
+                    lat_data = np.squeeze(lat_data[warn_mask, :])
+                    lon_data = np.squeeze(lon_data[warn_mask, :])
+                else:
+                    lat_data = lat_data[warn_mask]
+                    lon_data = lon_data[warn_mask]
 
-            wl_file_tag = "_WL_"+str(lite_warn_lims[0])+"to"+str(lite_warn_lims[1])
+                wl_file_tag = "_WL_"+str(lite_warn_lims[0])+"to"+str(lite_warn_lims[1])
+            else:
+                wl_file_tag = ""
         
         if len(footprint_lims) == 2:
             footprint_mask = np.where(np.logical_and(lite_footprint <= footprint_lims[1], lite_footprint >= footprint_lims[0]))[0]
@@ -883,7 +906,8 @@ if __name__ == "__main__":
 
         if sif_or_co2 == "CO2":
             lite_qf = lite_qf[footprint_mask]
-            lite_warn = lite_warn[footprint_mask]
+            if warn:
+                lite_warn = lite_warn[footprint_mask]
         lite_sid = lite_sid[footprint_mask]
         oco2_data = oco2_data[footprint_mask]
         lite_footprint = lite_footprint[footprint_mask]
