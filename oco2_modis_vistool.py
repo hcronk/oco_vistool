@@ -881,7 +881,7 @@ if __name__ == "__main__":
             fp_file_tag = "_FP_"+str(footprint_lims[0])
 
         if sif_or_co2 == "CO2":
-            lite_qf = lite_warn[footprint_mask]
+            lite_qf = lite_qf[footprint_mask]
             lite_warn = lite_warn[footprint_mask]
         lite_sid = lite_sid[footprint_mask]
         oco2_data = oco2_data[footprint_mask]
