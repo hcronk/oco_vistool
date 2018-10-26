@@ -805,6 +805,7 @@ if __name__ == "__main__":
         lite_orbit = lite_file.get_orbit()
         lite_footprint = lite_file.get_footprint()
         lite_file.close_file()
+        version_file_tag = re.search("_B[0-9a-z]{,5}_", os.path.basename(var_file)).group()[:-1]
         
         if orbit_int:
             orbit_subset = np.where(lite_orbit == orbit_int)
@@ -926,16 +927,16 @@ if __name__ == "__main__":
 
     if not out_plot_name:
         if region:
-            out_plot_name = var_plot_name+"_"+region+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".png"
+            out_plot_name = var_plot_name+"_"+region+"_"+straight_up_date+version_file_tag+qf_file_tag+wl_file_tag+fp_file_tag+".png"
         else:
-            out_plot_name = var_plot_name+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".png"
+            out_plot_name = var_plot_name+"_"+straight_up_date+version_file_tag+qf_file_tag+wl_file_tag+fp_file_tag+".png"
     out_plot_name = os.path.join(out_plot_dir, out_plot_name)
     
     if not out_data_name:
         if region:
-            out_data_name = var_plot_name+"_"+region+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".h5"
+            out_data_name = var_plot_name+"_"+region+"_"+straight_up_date+version_file_tag+qf_file_tag+wl_file_tag+fp_file_tag+".h5"
         else:
-            out_data_name = var_plot_name+"_"+straight_up_date+qf_file_tag+wl_file_tag+fp_file_tag+".h5"
+            out_data_name = var_plot_name+"_"+straight_up_date+version_file_tag+qf_file_tag+wl_file_tag+fp_file_tag+".h5"
     out_data_name = os.path.join(out_data_dir, out_data_name)
     
     do_modis_overlay_plot(orbit_info_dict['geo_upper_left'],
