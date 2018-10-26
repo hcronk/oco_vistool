@@ -189,7 +189,7 @@ def do_modis_overlay_plot(
     
     #Check if color is single or map
     
-    if cmap in plt.cm.datad.keys():
+    if cmap in plt.colormaps():
         color_or_cmap = "cmap"
     elif cmap in mpl.colors.cnames.keys():
         color_or_cmap = "color"
