@@ -412,10 +412,10 @@ def do_modis_overlay_plot(
     ax_maxlon.axis('off')
     ax_minlon.axis('off')
 
-    ax_minlat.set_title(str(ylocs[0]), horizontalalignment='left', verticalalignment='bottom', fontsize=10, fontweight='bold')
-    ax_maxlat.set_title(str(ylocs[-1]), horizontalalignment='left', verticalalignment='top', fontsize=10, fontweight='bold')
-    ax_minlon.set_title(str(xlocs[0]), horizontalalignment='center', verticalalignment='top', fontsize=10, fontweight='bold')
-    ax_maxlon.set_title(str(xlocs[-1]), horizontalalignment='right', verticalalignment='top', fontsize=10, fontweight='bold')
+    ax_minlat.set_title(str("%.1f" % ylocs[0]), horizontalalignment='left', verticalalignment='bottom', fontsize=10, fontweight='bold')
+    ax_maxlat.set_title(str("%.1f" % ylocs[-1]), horizontalalignment='left', verticalalignment='top', fontsize=10, fontweight='bold')
+    ax_minlon.set_title(str("%.1f" % xlocs[0]), horizontalalignment='center', verticalalignment='top', fontsize=10, fontweight='bold')
+    ax_maxlon.set_title(str("%.1f" % xlocs[-1]), horizontalalignment='right', verticalalignment='top', fontsize=10, fontweight='bold')
     
     if var_vals.shape:
     
