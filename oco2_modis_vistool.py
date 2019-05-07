@@ -564,7 +564,7 @@ if __name__ == "__main__":
         lat_name = overlay_info_dict['lat_name']
         lon_name = overlay_info_dict['lon_name']
         try:
-            orbit_int = overlay_info_dict['orbit']
+            orbit_int = int(overlay_info_dict['orbit'])
         except:
             orbit_int = False
 
