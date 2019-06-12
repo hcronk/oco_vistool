@@ -193,6 +193,289 @@ def write_h5_data_subset(out_data, lite_sid, lite_sid_subset,
 
 
 
+def load_OCO2_Lite_overlay_data(overlay_info_dict, var_file, var_name):
+
+    """loads OCO2 overlay data.
+    this is assumed to be a Lite file (Either LtSIF or LtCO2)"""
+
+
+    #print("\nLite overlay file detected. Checking for QF and Warn specs...")
+
+    version_number =  re.sub("[A-Za-z_]", "",
+                             re.search("_B[0-9a-z]{,5}_",os.path.basename(var_file)).group())
+
+    if re.search("CO2", os.path.basename(var_file)):
+        sif_or_co2 = "CO2"
+        qf_file_tag = "_all_quality"
+    elif re.search("SIF", os.path.basename(var_file)):
+        sif_or_co2 = "SIF"
+        qf_file_tag = ""
+        wl_file_tag = ""
+    else:
+        print("The command line usage of this tool accommodates official CO2 or SIF lite files only.")
+        print("Expected filename convention: oco2_LtNNN_YYYYMMDD_B8xxxxx_rxx*.nc, where NNN is CO2 or SIF")
+        print("Other data will need to be plotted by importing the tool as a Python module.")
+        print("Exiting")
+        sys.exit()
+
+    try:
+        lite_quality = overlay_info_dict['lite_qf']
+    except:
+        print("No quality specifications detected. Output plot will contain all quality soundings")
+        lite_quality = 'all'
+    if not lite_quality:
+        print("No quality specifications detected. Output plot will contain all quality soundings")
+        lite_quality = 'all'
+    if lite_quality not in ['', 'all', 'good', 'bad']:
+        print("Unexpected quality flag specification. Options are: '', 'all', 'good', or 'bad'")
+        print("Exiting")
+        sys.exit()
+
+    if int(version_number) < 9000:
+        try:
+            lite_warn_lims = overlay_info_dict['lite_warn_lims']
+        except:
+            print("No warn specifications detected. Output plot will contain all warn levels")
+            lite_warn_lims = [0, 20]
+        if not lite_warn_lims:
+            print("No warn specifications detected. Output plot will contain all warn levels")
+            lite_warn_lims = [0, 20]
+        if lite_warn_lims[0] > lite_warn_lims[1]:
+            print("Lower warn limit is greater than upper warn limit.")
+            print("Exiting")
+            sys.exit()
+        for lim in lite_warn_lims:
+            if lim not in np.arange(21):
+                print("Unexpected warn level specification. Limits must be within [0, 20].")
+                print("Exiting")
+                sys.exit()
+        warn = True
+    else:
+        try:
+            lite_warn_lims = overlay_info_dict['lite_warn_lims']
+            if lite_warn_lims:
+                print("Warn levels are not available in B9 and above")
+        except:
+            pass
+        warn = False
+
+    try:
+        footprint_lims = overlay_info_dict['footprint']
+    except:
+        print("No footprint specifications detected. Output plot will contain all footprints")
+        footprint_lims = [1, 8]
+    if not footprint_lims:
+        print("No footprint specifications detected. Output plot will contain all footprints")
+        footprint_lims = [1, 8]
+    if footprint_lims == "all":
+        footprint_lims = [1, 8]
+    if len(footprint_lims) == 2:
+        if footprint_lims[0] > footprint_lims[1]:
+            print("Lower footprint limit is greater than upper footprint limit.")
+            print("Exiting")
+            sys.exit()
+    for ft in footprint_lims:
+        if ft not in np.arange(1, 9):
+            print("Unexpected footprint specification. Limits must be within [1, 8].")
+            print("Exiting")
+            sys.exit()
+
+    if sif_or_co2 == "CO2":
+        if warn:
+            print("Output plot will include "+lite_quality+" quality soundings with warn levels within "+str(lite_warn_lims)+"\n")
+        else:
+            print("Output plot will include "+lite_quality+" quality soundings\n")
+
+    ### Prep OCO-2 Variable ###
+
+    h5 = h5py.File(var_file)
+    if var_name:
+        try:
+            oco2_data_obj = h5[var_name]
+        except:
+            print(var_name+" DNE in "+var_file)
+            print("Check that the variable name includes any necessary group paths. Ex: /Preprocessors/dp_abp")
+            print("Exiting")
+            sys.exit()
+        oco2_data = h5[var_name][:]
+    else:
+        oco2_data_obj = h5['xco2']
+        oco2_data = np.ones_like(oco2_data_obj[:])
+    if sif_or_co2 == "CO2":
+        try:
+            oco2_data_long_name = oco2_data_obj.attrs.get('long_name')[0].decode('utf-8')
+        except:
+            print("Problem reading long name for " + var_name)
+            oco2_data_long_name = ""
+        try:
+            oco2_data_units = oco2_data_obj.attrs.get('units')[0].decode('utf-8')
+        except:
+            print("Problem reading units for " + var_name)
+            oco2_data_units = ""
+        try:
+            oco2_data_fill = oco2_data_obj.attrs.get('missing_value')[0]
+        except:
+            print("Problem reading missing value for " + var_name)
+            oco2_data_fill = ""
+    if sif_or_co2 == "SIF":
+        oco2_data_long_name = re.split("/", var_name)[-1]
+        try:
+            oco2_data_units = oco2_data_obj.attrs.get('unit').decode('utf-8')
+        except:
+            print("Problem reading units for " + var_name)
+            oco2_data_units = ""
+        try:
+            oco2_data_fill = oco2_data_obj.attrs.get('missing_value')[0]
+        except:
+            print("Problem reading missing value for " + var_name)
+            oco2_data_fill = ""
+
+    try:
+        lat_data = h5[lat_name][:]
+    except:
+        print(lat_name+" DNE in "+var_file)
+        print("Check that the variable name includes any necessary group paths. Ex: SoundingGeometry/sounding_latitude")
+        print("Exiting")
+        sys.exit()
+    try:
+        lon_data = h5[lon_name][:]
+    except:
+        print(lon_name+" DNE in "+var_file)
+        print("Check that the variable name includes any necessary group paths. Ex: SoundingGeometry/sounding_longitude")
+        print("Exiting")
+        sys.exit()
+    h5.close()
+
+    if lat_data.ndim != lon_data.ndim:
+        print(lat_name+" and "+lon_name+" have different dimensions. Exiting")
+        sys.exit()
+
+    if var_name == "Retrieval/reduced_chi_squared_per_band":
+        if not band_number:
+            print(var_name + " is stored per band. Please select a band number (1=0.76 micron, 2=1.6 micron, 3=2.04 micron). Exiting")
+            sys.exit()
+        else:
+            oco2_data = oco2_data[:,band_number-1]
+
+
+    version_file_tag = re.search("_B[0-9a-z]{,5}_", os.path.basename(var_file)).group()[:-1]
+
+    if sif_or_co2 == "CO2":
+        lite_file = LiteCO2File(var_file)
+        lite_file.open_file()
+        if warn:
+            lite_warn = lite_file.get_warn()
+        lite_qf = lite_file.get_qf()
+    else:
+        lite_file = LiteSIFFile(var_file)
+        lite_file.open_file()
+    lite_sid = lite_file.get_sid()
+    lite_orbit = lite_file.get_orbit()
+    lite_footprint = lite_file.get_footprint()
+    lite_file.close_file()
+
+    if orbit_int:
+        orbit_subset = np.where(lite_orbit == orbit_int)
+        orbit_start_idx = orbit_subset[0][0]
+        orbit_end_idx = orbit_subset[0][-1]
+        if sif_or_co2 == "CO2":
+            lite_qf = lite_qf[orbit_subset]
+            if warn:
+                lite_warn = lite_warn[orbit_subset]
+        lite_sid = lite_sid[orbit_subset]
+        oco2_data = oco2_data[orbit_subset]
+        lite_footprint = lite_footprint[orbit_subset]
+        if lat_data.ndim == 2:
+            lat_data = np.squeeze(lat_data[orbit_subset, :])
+            lon_data = np.squeeze(lon_data[orbit_subset, :])
+        else:
+            lat_data = lat_data[orbit_subset]
+            lon_data = lon_data[orbit_subset]
+
+    if sif_or_co2 == "CO2":
+        if lite_quality == 'good':
+
+            quality_mask = np.where(lite_qf == 0)
+            qf_file_tag = "_good_quality"
+
+            lite_qf = lite_qf[quality_mask]
+            if warn:
+                lite_warn = lite_warn[quality_mask]
+            lite_sid = lite_sid[quality_mask]
+            oco2_data = oco2_data[quality_mask]
+            lite_footprint = lite_footprint[quality_mask]
+            if lat_data.ndim == 2:
+                lat_data = np.squeeze(lat_data[quality_mask, :])
+                lon_data = np.squeeze(lon_data[quality_mask, :])
+            else:
+                lat_data = lat_data[quality_mask]
+                lon_data = lon_data[quality_mask]
+
+        if lite_quality == 'bad':
+
+            quality_mask = np.where(lite_qf == 1)
+            qf_file_tag = "_bad_quality"
+
+            lite_qf = lite_qf[quality_mask]
+            if warn:
+                lite_warn = lite_warn[quality_mask]
+            lite_sid = lite_sid[quality_mask]
+            oco2_data = oco2_data[quality_mask]
+            lite_footprint = lite_footprint[quality_mask]
+            if lat_data.ndim == 2:
+                lat_data = np.squeeze(lat_data[quality_mask, :])
+                lon_data = np.squeeze(lon_data[quality_mask, :])
+            else:
+                lat_data = lat_data[quality_mask]
+                lon_data = lon_data[quality_mask]
+
+        if warn:
+            warn_mask = np.where(np.logical_and(lite_warn <= lite_warn_lims[1],
+                                                lite_warn >= lite_warn_lims[0]))[0]
+            lite_qf = lite_qf[warn_mask]
+            lite_warn = lite_warn[warn_mask]
+            lite_sid = lite_sid[warn_mask]
+            oco2_data = oco2_data[warn_mask]
+            lite_footprint = lite_footprint[warn_mask]
+            if lat_data.ndim == 2:
+                lat_data = np.squeeze(lat_data[warn_mask, :])
+                lon_data = np.squeeze(lon_data[warn_mask, :])
+            else:
+                lat_data = lat_data[warn_mask]
+                lon_data = lon_data[warn_mask]
+
+            wl_file_tag = "_WL_"+str(lite_warn_lims[0])+"to"+str(lite_warn_lims[1])
+        else:
+            wl_file_tag = ""
+
+    if len(footprint_lims) == 2:
+        footprint_mask = np.where(np.logical_and(lite_footprint <= footprint_lims[1],
+                                                 lite_footprint >= footprint_lims[0]))[0]
+        fp_file_tag = "_FP_"+str(footprint_lims[0])+"to"+str(footprint_lims[1])
+    else:
+        footprint_mask = np.where(lite_footprint == footprint_lims)
+        fp_file_tag = "_FP_"+str(footprint_lims[0])
+
+    if sif_or_co2 == "CO2":
+        lite_qf = lite_qf[footprint_mask]
+        if warn:
+            lite_warn = lite_warn[footprint_mask]
+    lite_sid = lite_sid[footprint_mask]
+    oco2_data = oco2_data[footprint_mask]
+    lite_footprint = lite_footprint[footprint_mask]
+    if lat_data.ndim == 2:
+        lat_data = np.squeeze(lat_data[footprint_mask, :])
+        lon_data = np.squeeze(lon_data[footprint_mask, :])
+    else:
+        lat_data = lat_data[footprint_mask]
+        lon_data = lon_data[footprint_mask]
+
+
+    return (sif_or_co2, lat_data, lon_data, oco2_data, oco2_data_fill, lite_sid, 
+            orbit_start_idx, version_file_tag, qf_file_tag, wl_file_tag, fp_file_tag, 
+            oco2_data_long_name, oco2_data_units)
+
+
 def do_modis_overlay_plot(
     geo_upper_left, geo_lower_right, date,
     var_lat, var_lon, var_vals, var_vals_missing=None, lite_sid=np.empty([]),
@@ -584,94 +867,6 @@ if __name__ == "__main__":
         except:
             orbit_int = False
 
-        if re.search('oco2_Lt', var_file):
-            lite = True
-            #print("\nLite overlay file detected. Checking for QF and Warn specs...")
-
-            version_number =  re.sub("[A-Za-z_]", "", re.search("_B[0-9a-z]{,5}_", os.path.basename(var_file)).group())
-
-            if re.search("CO2", os.path.basename(var_file)):
-                sif_or_co2 = "CO2"
-                qf_file_tag = "_all_quality"
-            elif re.search("SIF", os.path.basename(var_file)):
-                sif_or_co2 = "SIF"
-                qf_file_tag = ""
-                wl_file_tag = ""
-            else:
-                print("The command line usage of this tool accommodates official CO2 or SIF lite files only.")
-                print("Expected filename convention: oco2_LtNNN_YYYYMMDD_B8xxxxx_rxx*.nc, where NNN is CO2 or SIF")
-                print("Other data will need to be plotted by importing the tool as a Python module.")
-                print("Exiting")
-                sys.exit()
-
-            try:
-                lite_quality = overlay_info_dict['lite_qf']
-            except:
-                print("No quality specifications detected. Output plot will contain all quality soundings")
-                lite_quality = 'all'
-            if not lite_quality:
-                print("No quality specifications detected. Output plot will contain all quality soundings")
-                lite_quality = 'all'
-            if lite_quality not in ['', 'all', 'good', 'bad']:
-                print("Unexpected quality flag specification. Options are: '', 'all', 'good', or 'bad'")
-                print("Exiting")
-                sys.exit()
-
-            if int(version_number) < 9000:
-                try:
-                    lite_warn_lims = overlay_info_dict['lite_warn_lims']
-                except:
-                    print("No warn specifications detected. Output plot will contain all warn levels")
-                    lite_warn_lims = [0, 20]
-                if not lite_warn_lims:
-                    print("No warn specifications detected. Output plot will contain all warn levels")
-                    lite_warn_lims = [0, 20]
-                if lite_warn_lims[0] > lite_warn_lims[1]:
-                    print("Lower warn limit is greater than upper warn limit.")
-                    print("Exiting")
-                    sys.exit()
-                for lim in lite_warn_lims:
-                    if lim not in np.arange(21):
-                        print("Unexpected warn level specification. Limits must be within [0, 20].")
-                        print("Exiting")
-                        sys.exit()
-                warn = True
-            else:
-                try:
-                    lite_warn_lims = overlay_info_dict['lite_warn_lims']
-                    if lite_warn_lims:
-                        print("Warn levels are not available in B9 and above")
-                except:
-                    pass
-                warn = False
-
-            try:
-                footprint_lims = overlay_info_dict['footprint']
-            except:
-                print("No footprint specifications detected. Output plot will contain all footprints")
-                footprint_lims = [1, 8]
-            if not footprint_lims:
-                print("No footprint specifications detected. Output plot will contain all footprints")
-                footprint_lims = [1, 8]
-            if footprint_lims == "all":
-                footprint_lims = [1, 8]
-            if len(footprint_lims) == 2:
-                if footprint_lims[0] > footprint_lims[1]:
-                    print("Lower footprint limit is greater than upper footprint limit.")
-                    print("Exiting")
-                    sys.exit()
-            for ft in footprint_lims:
-                if ft not in np.arange(1, 9):
-                    print("Unexpected footprint specification. Limits must be within [1, 8].")
-                    print("Exiting")
-                    sys.exit()
-
-            if sif_or_co2 == "CO2":
-                if warn:
-                    print("Output plot will include "+lite_quality+" quality soundings with warn levels within "+str(lite_warn_lims)+"\n")
-                else:
-                    print("Output plot will include "+lite_quality+" quality soundings\n")
-
         try:
             cmap = overlay_info_dict['cmap']
         except:
@@ -733,6 +928,7 @@ if __name__ == "__main__":
         out_data_name = ""
 
 
+    # with no overlay data requested, simply generate the MODIS image by itself and exit.
     if not overlay_info_dict:
 
         if not out_plot_name:
@@ -751,189 +947,12 @@ if __name__ == "__main__":
         sys.exit()
 
 
+    # load OCO-2 data.
+    tmp_data = load_OCO2_Lite_overlay_data(overlay_info_dict, var_file, var_name)
 
-    ### Prep OCO-2 Variable ###
-
-    h5 = h5py.File(var_file)
-    if var_name:
-        try:
-            oco2_data_obj = h5[var_name]
-        except:
-            print(var_name+" DNE in "+var_file)
-            print("Check that the variable name includes any necessary group paths. Ex: /Preprocessors/dp_abp")
-            print("Exiting")
-            sys.exit()
-        oco2_data = h5[var_name][:]
-    else:
-        oco2_data_obj = h5['xco2']
-        oco2_data = np.ones_like(oco2_data_obj[:])
-    if sif_or_co2 == "CO2":
-        try:
-            oco2_data_long_name = oco2_data_obj.attrs.get('long_name')[0].decode('utf-8')
-        except:
-            print("Problem reading long name for " + var_name)
-            oco2_data_long_name = ""
-        try:
-            oco2_data_units = oco2_data_obj.attrs.get('units')[0].decode('utf-8')
-        except:
-            print("Problem reading units for " + var_name)
-            oco2_data_units = ""
-        try:
-            oco2_data_fill = oco2_data_obj.attrs.get('missing_value')[0]
-        except:
-            print("Problem reading missing value for " + var_name)
-            oco2_data_fill = ""
-    if sif_or_co2 == "SIF":
-        oco2_data_long_name = re.split("/", var_name)[-1]
-        try:
-            oco2_data_units = oco2_data_obj.attrs.get('unit').decode('utf-8')
-        except:
-            print("Problem reading units for " + var_name)
-            oco2_data_units = ""
-        try:
-            oco2_data_fill = oco2_data_obj.attrs.get('missing_value')[0]
-        except:
-            print("Problem reading missing value for " + var_name)
-            oco2_data_fill = ""
-
-    try:
-        lat_data = h5[lat_name][:]
-    except:
-        print(lat_name+" DNE in "+var_file)
-        print("Check that the variable name includes any necessary group paths. Ex: SoundingGeometry/sounding_latitude")
-        print("Exiting")
-        sys.exit()
-    try:
-        lon_data = h5[lon_name][:]
-    except:
-        print(lon_name+" DNE in "+var_file)
-        print("Check that the variable name includes any necessary group paths. Ex: SoundingGeometry/sounding_longitude")
-        print("Exiting")
-        sys.exit()
-    h5.close()
-
-    if lat_data.ndim != lon_data.ndim:
-        print(lat_name+" and "+lon_name+" have different dimensions. Exiting")
-        sys.exit()
-
-    if var_name == "Retrieval/reduced_chi_squared_per_band":
-        if not band_number:
-            print(var_name + " is stored per band. Please select a band number (1=0.76 micron, 2=1.6 micron, 3=2.04 micron). Exiting")
-            sys.exit()
-        else:
-            oco2_data = oco2_data[:,band_number-1]
-
-    if lite:
-
-        version_file_tag = re.search("_B[0-9a-z]{,5}_", os.path.basename(var_file)).group()[:-1]
-
-        if sif_or_co2 == "CO2":
-            lite_file = LiteCO2File(var_file)
-            lite_file.open_file()
-            if warn:
-                lite_warn = lite_file.get_warn()
-            lite_qf = lite_file.get_qf()
-        else:
-            lite_file = LiteSIFFile(var_file)
-            lite_file.open_file()
-        lite_sid = lite_file.get_sid()
-        lite_orbit = lite_file.get_orbit()
-        lite_footprint = lite_file.get_footprint()
-        lite_file.close_file()
-
-        if orbit_int:
-            orbit_subset = np.where(lite_orbit == orbit_int)
-            orbit_start_idx = orbit_subset[0][0]
-            orbit_end_idx = orbit_subset[0][-1]
-            if sif_or_co2 == "CO2":
-                lite_qf = lite_qf[orbit_subset]
-                if warn:
-                    lite_warn = lite_warn[orbit_subset]
-            lite_sid = lite_sid[orbit_subset]
-            oco2_data = oco2_data[orbit_subset]
-            lite_footprint = lite_footprint[orbit_subset]
-            if lat_data.ndim == 2:
-                lat_data = np.squeeze(lat_data[orbit_subset, :])
-                lon_data = np.squeeze(lon_data[orbit_subset, :])
-            else:
-                lat_data = lat_data[orbit_subset]
-                lon_data = lon_data[orbit_subset]
-
-        if sif_or_co2 == "CO2":
-            if lite_quality == 'good':
-
-                quality_mask = np.where(lite_qf == 0)
-                qf_file_tag = "_good_quality"
-
-                lite_qf = lite_qf[quality_mask]
-                if warn:
-                    lite_warn = lite_warn[quality_mask]
-                lite_sid = lite_sid[quality_mask]
-                oco2_data = oco2_data[quality_mask]
-                lite_footprint = lite_footprint[quality_mask]
-                if lat_data.ndim == 2:
-                    lat_data = np.squeeze(lat_data[quality_mask, :])
-                    lon_data = np.squeeze(lon_data[quality_mask, :])
-                else:
-                    lat_data = lat_data[quality_mask]
-                    lon_data = lon_data[quality_mask]
-
-            if lite_quality == 'bad':
-
-                quality_mask = np.where(lite_qf == 1)
-                qf_file_tag = "_bad_quality"
-
-                lite_qf = lite_qf[quality_mask]
-                if warn:
-                    lite_warn = lite_warn[quality_mask]
-                lite_sid = lite_sid[quality_mask]
-                oco2_data = oco2_data[quality_mask]
-                lite_footprint = lite_footprint[quality_mask]
-                if lat_data.ndim == 2:
-                    lat_data = np.squeeze(lat_data[quality_mask, :])
-                    lon_data = np.squeeze(lon_data[quality_mask, :])
-                else:
-                    lat_data = lat_data[quality_mask]
-                    lon_data = lon_data[quality_mask]
-
-            if warn:
-                warn_mask = np.where(np.logical_and(lite_warn <= lite_warn_lims[1], lite_warn >= lite_warn_lims[0]))[0]
-                lite_qf = lite_qf[warn_mask]
-                lite_warn = lite_warn[warn_mask]
-                lite_sid = lite_sid[warn_mask]
-                oco2_data = oco2_data[warn_mask]
-                lite_footprint = lite_footprint[warn_mask]
-                if lat_data.ndim == 2:
-                    lat_data = np.squeeze(lat_data[warn_mask, :])
-                    lon_data = np.squeeze(lon_data[warn_mask, :])
-                else:
-                    lat_data = lat_data[warn_mask]
-                    lon_data = lon_data[warn_mask]
-
-                wl_file_tag = "_WL_"+str(lite_warn_lims[0])+"to"+str(lite_warn_lims[1])
-            else:
-                wl_file_tag = ""
-
-        if len(footprint_lims) == 2:
-            footprint_mask = np.where(np.logical_and(lite_footprint <= footprint_lims[1], lite_footprint >= footprint_lims[0]))[0]
-            fp_file_tag = "_FP_"+str(footprint_lims[0])+"to"+str(footprint_lims[1])
-        else:
-            footprint_mask = np.where(lite_footprint == footprint_lims)
-            fp_file_tag = "_FP_"+str(footprint_lims[0])
-
-        if sif_or_co2 == "CO2":
-            lite_qf = lite_qf[footprint_mask]
-            if warn:
-                lite_warn = lite_warn[footprint_mask]
-        lite_sid = lite_sid[footprint_mask]
-        oco2_data = oco2_data[footprint_mask]
-        lite_footprint = lite_footprint[footprint_mask]
-        if lat_data.ndim == 2:
-            lat_data = np.squeeze(lat_data[footprint_mask, :])
-            lon_data = np.squeeze(lon_data[footprint_mask, :])
-        else:
-            lat_data = lat_data[footprint_mask]
-            lon_data = lon_data[footprint_mask]
+    ( sif_or_co2, lat_data, lon_data, oco2_data, oco2_data_fill, lite_sid, 
+      orbit_start_idx, version_file_tag, qf_file_tag, wl_file_tag, fp_file_tag,
+      oco2_data_long_name, oco2_data_units ) = tmp_data
 
     # here, handle the var limit options.
     # if specific limits were input, via a 2-element list,
@@ -968,21 +987,28 @@ if __name__ == "__main__":
 
     if not out_plot_name:
         if region:
-            out_plot_name = var_plot_name+"_"+region+"_"+straight_up_date+version_file_tag+qf_file_tag+wl_file_tag+fp_file_tag+".png"
+            out_plot_name = (var_plot_name+"_"+region+"_"+straight_up_date+version_file_tag+
+                             qf_file_tag+wl_file_tag+fp_file_tag+".png")
         else:
-            out_plot_name = var_plot_name+"_"+straight_up_date+version_file_tag+qf_file_tag+wl_file_tag+fp_file_tag+".png"
+            out_plot_name = (var_plot_name+"_"+straight_up_date+version_file_tag+
+                             qf_file_tag+wl_file_tag+fp_file_tag+".png")
     out_plot_name = os.path.join(out_plot_dir, out_plot_name)
 
     if not out_data_name:
         if region:
-            out_data_name = var_plot_name+"_"+region+"_"+straight_up_date+version_file_tag+qf_file_tag+wl_file_tag+fp_file_tag+".h5"
+            out_data_name = (var_plot_name+"_"+region+"_"+straight_up_date+version_file_tag+
+                             qf_file_tag+wl_file_tag+fp_file_tag+".h5")
         else:
-            out_data_name = var_plot_name+"_"+straight_up_date+version_file_tag+qf_file_tag+wl_file_tag+fp_file_tag+".h5"
+            out_data_name = (var_plot_name+"_"+straight_up_date+version_file_tag+
+                             qf_file_tag+wl_file_tag+fp_file_tag+".h5")
+
     out_data_name = os.path.join(out_data_dir, out_data_name)
 
     do_modis_overlay_plot(orbit_info_dict['geo_upper_left'],
                           orbit_info_dict['geo_lower_right'],
                           date, lat_data, lon_data, oco2_data, oco2_data_fill, lite_sid,
                           orbit_start_idx, var_lims=var_lims, interest_pt=interest_pt,
-                          cmap=cmap, alpha=alpha,lat_name=lat_name, lon_name=lon_name, var_name=var_name,
-                          out_plot=out_plot_name, out_data=out_data_name, var_label=cbar_name, cities=cities)
+                          cmap=cmap, alpha=alpha,
+                          lat_name=lat_name, lon_name=lon_name, var_name=var_name,
+                          out_plot=out_plot_name, out_data=out_data_name,
+                          var_label=cbar_name, cities=cities)
