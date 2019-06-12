@@ -144,6 +144,55 @@ def read_shp(filename):
         warnings.warn('Skipped {} invalid geometrie(s).'.format(num_skipped))
     return df
 
+
+def write_h5_data_subset(out_data, lite_sid, lite_sid_subset,
+                         var_lat_subset, var_lon_subset, var_vals_subset,
+                         lat_name, lon_name, var_name):
+    """
+    writes out the h5 subset file, containing the OCO-2 data plotted in the
+    overlay.
+    """
+
+    if re.search("Masked", str(type(var_lat_subset))):
+        if var_lat_subset.ndim > 1:
+            lat_data_to_write = np.ma.compress_rows(var_lat_subset)
+            lon_data_to_write = np.ma.compress_rows(var_lon_subset)
+        else:
+            lat_data_to_write = var_lat_subset.compressed()
+            lon_data_to_write = var_lon_subset.compressed()
+    else:
+        lat_data_to_write = var_lat_subset
+        lon_data_to_write = var_lon_subset
+
+    if re.search("Masked", str(type(var_lat_subset))):
+        if var_vals_subset.ndim > 1:
+            var_data_to_write = np.ma.compress_rows(var_vals_subset)
+        else:
+            var_data_to_write = var_vals_subset.compressed()
+    else:
+        var_data_to_write = var_vals_subset
+
+    outfile = h5py.File(out_data, "w")
+    if not lat_name:
+        lat_name = "Latitude"
+    if not lon_name:
+        lon_name = "Longitude"
+    if not var_name:
+        var_name = "Data"
+
+    write_ds = outfile.create_dataset(lat_name, data = lat_data_to_write)
+    write_ds = outfile.create_dataset(lon_name, data = lon_data_to_write)
+    write_ds = outfile.create_dataset(var_name, data = var_data_to_write)
+    if lite_sid.shape:
+        if re.search("Masked", str(type(lite_sid_subset))):
+            write_ds = outfile.create_dataset("sounding_id", data = lite_sid_subset.compressed())
+        else:
+            write_ds = outfile.create_dataset("sounding_id", data = lite_sid_subset)
+    outfile.close()
+    print("\nData saved at "+out_data)
+
+
+
 def do_modis_overlay_plot(
     geo_upper_left, geo_lower_right, date,
     var_lat, var_lon, var_vals, var_vals_missing=None, lite_sid=np.empty([]),
@@ -315,43 +364,9 @@ def do_modis_overlay_plot(
 
     if out_data:
 
-        if re.search("Masked", str(type(var_lat_subset))):
-            if var_lat_subset.ndim > 1:
-                lat_data_to_write = np.ma.compress_rows(var_lat_subset)
-                lon_data_to_write = np.ma.compress_rows(var_lon_subset)
-            else:
-                lat_data_to_write = var_lat_subset.compressed()
-                lon_data_to_write = var_lon_subset.compressed()
-        else:
-            lat_data_to_write = var_lat_subset
-            lon_data_to_write = var_lon_subset
-
-        if re.search("Masked", str(type(var_lat_subset))):
-            if var_vals_subset.ndim > 1:
-                var_data_to_write = np.ma.compress_rows(var_vals_subset)
-            else:
-                var_data_to_write = var_vals_subset.compressed()
-        else:
-            var_data_to_write = var_vals_subset
-
-        outfile = h5py.File(out_data, "w")
-        if not lat_name:
-            lat_name = "Latitude"
-        if not lon_name:
-            lon_name = "Longitude"
-        if not var_name:
-            var_name = "Data"
-
-        write_ds = outfile.create_dataset(lat_name, data = lat_data_to_write)
-        write_ds = outfile.create_dataset(lon_name, data = lon_data_to_write)
-        write_ds = outfile.create_dataset(var_name, data = var_data_to_write)
-        if lite_sid.shape:
-            if re.search("Masked", str(type(lite_sid_subset))):
-                write_ds = outfile.create_dataset("sounding_id", data = lite_sid_subset.compressed())
-            else:
-                write_ds = outfile.create_dataset("sounding_id", data = lite_sid_subset)
-        outfile.close()
-        print("\nData saved at "+out_data)
+        write_h5_data_subset(out_data, lite_sid, lite_sid_subset,
+                             var_lat_subset, var_lon_subset, var_vals_subset,
+                             lat_name, lon_name, var_name)
 
     ### Plot prep ###
     states_provinces = cfeature.NaturalEarthFeature(
