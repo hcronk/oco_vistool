@@ -145,6 +145,134 @@ def read_shp(filename):
     return df
 
 
+def process_config_file(orbit_info_dict):
+    """
+    process config file contents, santizing inputs, etc.
+
+    """
+    date = orbit_info_dict['date']
+    straight_up_date = date.replace("-", "")
+    lat_ul = orbit_info_dict['geo_upper_left'][0]
+    lon_ul = orbit_info_dict['geo_upper_left'][1]
+    lat_lr = orbit_info_dict['geo_lower_right'][0]
+    lon_lr = orbit_info_dict['geo_lower_right'][1]
+
+    try:
+        region = orbit_info_dict['region']
+    except:
+        region = ""
+    try:
+        overlay_info_dict = orbit_info_dict['oco2_overlay_info']
+    except:
+        overlay_info_dict = {}
+    if overlay_info_dict:
+        for k in overlay_info_dict.keys():
+            overlay_info_dict[k.lower()] = overlay_info_dict.pop(k)
+        var_file = overlay_info_dict['file']
+        if not glob(var_file):
+            print(var_file+" does not exist.")
+            print("Exiting")
+            sys.exit()
+        var_name = overlay_info_dict['variable']
+        var_plot_name = re.split('/', var_name)[-1]
+        try:
+            band_number = overlay_info_dict['band_number']
+            band_number = int(band_number)
+        except:
+            band_number = False
+        if var_name == "Retrieval/reduced_chi_squared_per_band" and band_number not in [1, 2, 3, False]:
+                print("Unexpected band number specification. Options are 1 (0.76 micron), 2 (1.6 micron), or 3 (2.04 micron)")
+                print(var_name + " is stored per band. Please select an appropriate band number. Exiting")
+                sys.exit()
+
+        if 'variable_plot_lims' in overlay_info_dict:
+            var_lims = overlay_info_dict['variable_plot_lims']
+            if var_lims:
+                # if this was a string option, then make sure it is one
+                # of the two options we have implemented. if not, revert to default.
+                if isinstance(var_lims, string_types):
+                    if var_lims not in ('autoscale_by_orbit', 'autoscale_by_overlay'):
+                        print('var_lims "' + var_lims + '" is not valid, reverting to "autoscale_by_orbit"')
+                        var_lims = 'autoscale_by_orbit'
+            else:
+                # empty list, tuple, None, etc
+                var_lims = 'autoscale_by_orbit'
+        else:
+            var_lims = 'autoscale_by_orbit'
+
+        lat_name = overlay_info_dict['lat_name']
+        lon_name = overlay_info_dict['lon_name']
+        try:
+            orbit_int = int(overlay_info_dict['orbit'])
+        except:
+            orbit_int = False
+
+        try:
+            cmap = overlay_info_dict['cmap']
+        except:
+            cmap = ""
+        if not cmap:
+            cmap = "jet"
+
+        try:
+            alpha = float(overlay_info_dict['transparency'])
+        except:
+            alpha = ""
+        if not alpha:
+            alpha = 1
+        if alpha < 0 or alpha > 1:
+            print("Unexpected transparency specification. Value must be within [0, 1]. Output plot will contain full-color.\n")
+            alpha = 1
+    try:
+        interest_pt = orbit_info_dict['ground_site']
+        if not interest_pt:
+            interest_pt = None
+        if (interest_pt[0] > lat_ul or interest_pt[0] < lat_lr or interest_pt[1] > lon_lr or interest_pt[1] < lon_ul):
+            interest_pt = None
+            print("The ground site is outside the given lat/lon range and will not be included in the output plot.\n")
+    except:
+        interest_pt = None
+    try:
+        cities = orbit_info_dict['city_labels']
+        if cities and cities not in mpl.colors.cnames.keys():
+            print(cities + " is not an available matplotlib color. City labels will not be included on the output plot. \n")
+            cities = None
+        if not cities:
+            cities = None
+    except:
+        cities = None
+
+    try:
+        out_plot_dir = orbit_info_dict['out_plot_dir']
+    except:
+        out_plot_dir = code_dir
+    if not out_plot_dir or not glob(out_plot_dir):
+        print("Either there was no output location specified or the one specified does not exist. Output will go in the code directory. \n")
+        out_plot_dir = code_dir
+    try:
+        out_plot_name = orbit_info_dict['out_plot_name']
+    except:
+        out_plot_name = ""
+
+
+    try:
+        out_data_dir = orbit_info_dict['out_data_dir']
+    except:
+        out_data_dir= code_dir
+    if not out_data_dir or not glob(out_data_dir):
+        print("Either there was no output location specified or the one specified does not exist. Output will go in the code directory. \n")
+        out_data_dir = code_dir
+    try:
+        out_data_name = orbit_info_dict['out_data_name']
+    except:
+        out_data_name = ""
+
+    return (date, straight_up_date, orbit_int, region, var_name, var_plot_name,
+            var_file, overlay_info_dict, band_number, var_lims, lat_name, lon_name, cmap,
+            alpha, interest_pt, cities, out_plot_dir, out_plot_name,
+            out_data_dir, out_data_name)
+
+
 def write_h5_data_subset(out_data, lite_sid, lite_sid_subset,
                          var_lat_subset, var_lon_subset, var_vals_subset,
                          lat_name, lon_name, var_name):
@@ -193,8 +321,7 @@ def write_h5_data_subset(out_data, lite_sid, lite_sid_subset,
 
 
 
-def load_OCO2_Lite_overlay_data(overlay_info_dict, var_file, var_name):
-
+def load_OCO2_Lite_overlay_data(overlay_info_dict, var_file, var_name, band_number, orbit_int):
     """loads OCO2 overlay data.
     this is assumed to be a Lite file (Either LtSIF or LtCO2)"""
 
@@ -810,123 +937,10 @@ if __name__ == "__main__":
         print('Exiting')
         sys.exit()
 
-
-    date = orbit_info_dict['date']
-    straight_up_date = date.replace("-", "")
-    lat_ul = orbit_info_dict['geo_upper_left'][0]
-    lon_ul = orbit_info_dict['geo_upper_left'][1]
-    lat_lr = orbit_info_dict['geo_lower_right'][0]
-    lon_lr = orbit_info_dict['geo_lower_right'][1]
-    try:
-        region = orbit_info_dict['region']
-    except:
-        region = ""
-    try:
-        overlay_info_dict = orbit_info_dict['oco2_overlay_info']
-    except:
-        overlay_info_dict = {}
-    if overlay_info_dict:
-        for k in overlay_info_dict.keys():
-            overlay_info_dict[k.lower()] = overlay_info_dict.pop(k)
-        var_file = overlay_info_dict['file']
-        if not glob(var_file):
-            print(var_file+" does not exist.")
-            print("Exiting")
-            sys.exit()
-        var_name = overlay_info_dict['variable']
-        var_plot_name = re.split('/', var_name)[-1]
-        try:
-            band_number = overlay_info_dict['band_number']
-            band_number = int(band_number)
-        except:
-            band_number = False
-        if var_name == "Retrieval/reduced_chi_squared_per_band" and band_number not in [1, 2, 3, False]:
-                print("Unexpected band number specification. Options are 1 (0.76 micron), 2 (1.6 micron), or 3 (2.04 micron)")
-                print(var_name + " is stored per band. Please select an appropriate band number. Exiting")
-                sys.exit()
-
-        if 'variable_plot_lims' in overlay_info_dict:
-            var_lims = overlay_info_dict['variable_plot_lims']
-            if var_lims:
-                # if this was a string option, then make sure it is one
-                # of the two options we have implemented. if not, revert to default.
-                if isinstance(var_lims, string_types):
-                    if var_lims not in ('autoscale_by_orbit', 'autoscale_by_overlay'):
-                        print('var_lims "' + var_lims + '" is not valid, reverting to "autoscale_by_orbit"')
-                        var_lims = 'autoscale_by_orbit'
-            else:
-                # empty list, tuple, None, etc
-                var_lims = 'autoscale_by_orbit'
-        else:
-            var_lims = 'autoscale_by_orbit'
-
-        lat_name = overlay_info_dict['lat_name']
-        lon_name = overlay_info_dict['lon_name']
-        try:
-            orbit_int = int(overlay_info_dict['orbit'])
-        except:
-            orbit_int = False
-
-        try:
-            cmap = overlay_info_dict['cmap']
-        except:
-            cmap = ""
-        if not cmap:
-            cmap = "jet"
-
-        try:
-            alpha = float(overlay_info_dict['transparency'])
-        except:
-            alpha = ""
-        if not alpha:
-            alpha = 1
-        if alpha < 0 or alpha > 1:
-            print("Unexpected transparency specification. Value must be within [0, 1]. Output plot will contain full-color.\n")
-            alpha = 1
-    try:
-        interest_pt = orbit_info_dict['ground_site']
-        if not interest_pt:
-            interest_pt = None
-        if (interest_pt[0] > lat_ul or interest_pt[0] < lat_lr or interest_pt[1] > lon_lr or interest_pt[1] < lon_ul):
-            interest_pt = None
-            print("The ground site is outside the given lat/lon range and will not be included in the output plot.\n")
-    except:
-        interest_pt = None
-    try:
-        cities = orbit_info_dict['city_labels']
-        if cities and cities not in mpl.colors.cnames.keys():
-            print(cities + " is not an available matplotlib color. City labels will not be included on the output plot. \n")
-            cities = None
-        if not cities:
-            cities = None
-    except:
-        cities = None
-
-    try:
-        out_plot_dir = orbit_info_dict['out_plot_dir']
-    except:
-        out_plot_dir = code_dir
-    if not out_plot_dir or not glob(out_plot_dir):
-        print("Either there was no output location specified or the one specified does not exist. Output will go in the code directory. \n")
-        out_plot_dir = code_dir
-    try:
-        out_plot_name = orbit_info_dict['out_plot_name']
-    except:
-        out_plot_name = ""
-
-
-    try:
-        out_data_dir = orbit_info_dict['out_data_dir']
-    except:
-        out_data_dir= code_dir
-    if not out_data_dir or not glob(out_data_dir):
-        print("Either there was no output location specified or the one specified does not exist. Output will go in the code directory. \n")
-        out_data_dir = code_dir
-    try:
-        out_data_name = orbit_info_dict['out_data_name']
-    except:
-        out_data_name = ""
-
+    (date, straight_up_date, orbit_int, region, var_name, var_plot_name,
+     var_file, overlay_info_dict, band_number, var_lims, lat_name, lon_name, cmap,
+     alpha, interest_pt, cities, out_plot_dir, out_plot_name,
+     out_data_dir, out_data_name) = process_config_file(orbit_info_dict)
 
     # with no overlay data requested, simply generate the MODIS image by itself and exit.
     if not overlay_info_dict:
@@ -948,11 +962,10 @@ if __name__ == "__main__":
 
 
     # load OCO-2 data.
-    tmp_data = load_OCO2_Lite_overlay_data(overlay_info_dict, var_file, var_name)
-
-    ( sif_or_co2, lat_data, lon_data, oco2_data, oco2_data_fill, lite_sid, 
-      orbit_start_idx, version_file_tag, qf_file_tag, wl_file_tag, fp_file_tag,
-      oco2_data_long_name, oco2_data_units ) = tmp_data
+    (sif_or_co2, lat_data, lon_data, oco2_data, oco2_data_fill, lite_sid, 
+     orbit_start_idx, version_file_tag, qf_file_tag, wl_file_tag, fp_file_tag,
+     oco2_data_long_name, oco2_data_units) = load_OCO2_Lite_overlay_data(
+         overlay_info_dict, var_file, var_name, band_number, orbit_int)
 
     # here, handle the var limit options.
     # if specific limits were input, via a 2-element list,
