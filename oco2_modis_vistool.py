@@ -150,7 +150,11 @@ def read_shp(filename):
 def _process_overlay_dict(input_dict):
     """
     process OCO-2 overlay data input.
-    this is a helper normally called by process_config_dict()
+    this is a helper normally called by process_config_dict(), see docstring there.
+
+    In general, this is doing similar work as process_config_dict(), just this function
+    acts on the data inside the overlay information from the JSON file (the 1-level
+    nested dictionary)
     """
     ovr_d = collections.OrderedDict()
 
@@ -174,7 +178,7 @@ def _process_overlay_dict(input_dict):
     # Retrieval/reduced_chi_squared_per_band, and only in V7, because this was 
     # stored as a [N,3] variable.
     if ovr_d['band_number'] is not None:
-        if var_name == "Retrieval/reduced_chi_squared_per_band":
+        if ovr_d['var_name'] == "Retrieval/reduced_chi_squared_per_band":
             err_msg = ("Unexpected band number specification for "+var_name+
                        ". Options are 1 (0.76 micron), 2 (1.6 micron), or 3 (2.04 micron)")
             try:
@@ -221,7 +225,120 @@ def _process_overlay_dict(input_dict):
     if ovr_d['alpha'] < 0 or ovr_d['alpha'] > 1:
         raise ValueError('Input transparency value is invalid. Must be floating point'+
                          'number in range [0,1]')
+
+    try:
+        ovr_d['lite_quality'] = input_dict['lite_qf']
+    except KeyError :
+        print("No quality specifications detected. Output plot will contain all quality soundings")
+        ovr_d['lite_quality'] = 'all'
+    if not ovr_d['lite_quality']:
+        print("No quality specifications detected. Output plot will contain all quality soundings")
+        ovr_d['lite_quality'] = 'all'
+    if ovr_d['lite_quality'] not in ['all', 'good', 'bad']:
+        print("Unexpected quality flag specification. Options are: '', 'all', 'good', or 'bad'")
+        print("Exiting")
+        sys.exit()
+
+    ovr_d['version_number'] =  re.sub(
+        "[A-Za-z_]", "", re.search("_B[0-9a-z]{,5}_",os.path.basename(ovr_d['var_file'])).group())
+
+    if int(ovr_d['version_number']) < 9000:
+        try:
+            ovr_d['lite_warn_lims'] = input_dict['lite_warn_lims']
+        except KeyError:
+            print("No warn specifications detected. Output plot will contain all warn levels")
+            ovr_d['lite_warn_lims'] = [0, 20]
+        if not ovr_d['lite_warn_lims']:
+            print("No warn specifications detected. Output plot will contain all warn levels")
+            ovr_d['lite_warn_lims'] = [0, 20]
+        if ovr_d['lite_warn_lims'][0] > ovr_d['lite_warn_lims'][1]:
+            print("Lower warn limit is greater than upper warn limit.")
+            print("Exiting")
+            sys.exit()
+        for lim in ovr_d['lite_warn_lims']:
+            if lim not in np.arange(21):
+                print("Unexpected warn level specification. Limits must be within [0, 20].")
+                print("Exiting")
+                sys.exit()
+        ovr_d['warn'] = True
+    else:
+        try:
+            ovr_d['lite_warn_lims'] = input_dict['lite_warn_lims']
+            if ovr_d['lite_warn_lims']:
+                print("Warn levels are not available in B9 and above")
+        except:
+            pass
+        ovr_d['lite_warn_lims'] = None
+        ovr_d['warn'] = False
+
+    try:
+        ovr_d['footprint_lims'] = input_dict['footprint']
+    except KeyError:
+        print("No footprint specifications detected. Output plot will contain all footprints")
+        ovr_d['footprint_lims'] = [1, 8]
+    if not ovr_d['footprint_lims']:
+        print("No footprint specifications detected. Output plot will contain all footprints")
+        ovr_d['footprint_lims'] = [1, 8]
+    if ovr_d['footprint_lims'] == "all":
+        footprint_lims = [1, 8]
+    try:
+        if len(ovr_d['footprint_lims']) == 2:
+            if ovr_d['footprint_lims'][0] > ovr_d['footprint_lims'][1]:
+                print("Lower footprint limit is greater than upper footprint limit.")
+                print("Exiting")
+                sys.exit()
+        elif len(ovr_d['footprint_lims']) > 2:
+            print("footprint limits should be a scalar integer or 2-element integer list")
+            print("Exiting")
+            sys.exit()
+    except TypeError:
+        # catch for a input scalar integer, put it back in a 1-element list.
+        # (the scalar will generate a TypeError on len().)
+        ovr_d['footprint_lims'] = [ovr_d['footprint_lims']]
         
+    for ft in ovr_d['footprint_lims']:
+        if ft not in np.arange(1, 9):
+            print("Unexpected footprint specification. Limits must be within [1, 8].")
+            print("Exiting")
+            sys.exit()
+
+    if len(ovr_d['footprint_lims']) == 2:
+        ovr_d['fp_file_tag'] = ("_FP_" + str(ovr_d['footprint_lims'][0]) +
+                                "to" + str(ovr_d['footprint_lims'][1]))
+    else:
+        ovr_d['fp_file_tag'] = "_FP_"+str(ovr_d['footprint_lims'][0])
+
+    if re.search("CO2", os.path.basename(ovr_d['var_file'])):
+        ovr_d['sif_or_co2'] = "CO2"
+        ovr_d['qf_file_tag'] = "_"+ovr_d['lite_quality']+"_quality"
+        if ovr_d['warn']:
+            ovr_d['wl_file_tag'] = ("_WL_" + str(ovr_d['lite_warn_lims'][0]) +
+                                    "to"+str(ovr_d['lite_warn_lims'][1]))
+        else:
+            ovr_d['wl_file_tag'] = ""
+
+    elif re.search("SIF", os.path.basename(ovr_d['var_file'])):
+        ovr_d['sif_or_co2'] = "SIF"
+        ovr_d['qf_file_tag'] = ""
+        ovr_d['wl_file_tag'] = ""
+    else:
+        print("The command line usage of this tool accommodates official CO2 or SIF lite files only.")
+        print("Expected filename convention: oco2_LtNNN_YYYYMMDD_B8xxxxx_rxx*.nc, where NNN is CO2 or SIF")
+        print("Other data will need to be plotted by importing the tool as a Python module.")
+        print("Exiting")
+        sys.exit()
+
+    ovr_d['version_file_tag'] = re.search(
+        "_B[0-9a-z]{,5}_", os.path.basename(ovr_d['var_file'])).group()[:-1]
+
+    if ovr_d['sif_or_co2'] == "CO2":
+        if ovr_d['warn']:
+            print("Output plot will include "+ovr_d['lite_quality']+
+                  " quality soundings with warn levels within "+
+                  str(ovr_d['lite_warn_lims'])+"\n")
+        else:
+            print("Output plot will include "+ovr_d['lite_quality']+" quality soundings\n")
+
     return ovr_d
 
 
@@ -338,9 +455,12 @@ def process_config_dict(input_dict):
     
     if 'oco2_overlay_info' in input_dict:
         ovr_d = _process_overlay_dict(input_dict['oco2_overlay_info'])
+        # copy the geo corners
+        for k in ('lat_ul', 'lat_lr', 'lon_ul', 'lon_lr'):
+            ovr_d[k] = cfg_d[k]
     else:
         ovr_d = collections.OrderedDict()
-    
+
     return cfg_d, ovr_d
 
 
@@ -391,8 +511,204 @@ def write_h5_data_subset(out_data, lite_sid, lite_sid_subset,
     print("\nData saved at "+out_data)
 
 
+def _compute_ll_msk(lat_data, lon_data, lat_ul, lat_lr, lon_ul, lon_lr):
+    """
+    helper to subset the data according to lat/lon upper left, lower right corners.
+    """
 
-def load_OCO2_Lite_overlay_data(overlay_info_dict, var_file, var_name,
+    # get subset of var values etc.
+    lat_msk = np.logical_and(lat_data <= lat_ul, lat_data >= lat_lr)
+    lon_msk = np.logical_and(lon_data <= lon_lr, lon_data >= lon_ul)
+    ll_msk = np.logical_and(lat_msk, lon_msk)
+
+    # Ensure that for vertex input, if any of the vertices are outside the lat/lon
+    # limits, that the footprint will be masked out.
+    if lat_data.ndim == 2:
+        ll_msk = np.all(ll_msk, axis=1)
+
+    # if there are no common points, print some info back to console
+    # to suggest where the LL box needs to be to capture some OCO2 data.
+    if not np.any(ll_msk):
+        lon_subset_idx = lon_msk.nonzero()[0]
+        print("No OCO-2 data found in the input lat/lon box, with coords:")
+        print("lat/lon UL: ", lat_ul, lon_ul)
+        print("lat/lon LR: ", lat_lr, lon_lr)
+        if lon_subset_idx.shape[0] == 0:
+            print("No OCO-2 data found within the lon range")
+        else:
+            min_idx = lon_subset_idx.min()
+            max_idx = lon_subset_idx.max()
+            print("Lite indices where the longitude is between " +
+                  str(lon_ul) + " and " + str(lon_lr) +": " +
+                  str(min_idx) + "-" + str(max_idx))
+            print("Latitude range for those indices: " +
+                  str(min(var_lat[min_idx])) + "-" + str(min(var_lat[max_idx])))
+            print("Latitude range given: " + str(lat_lr) + "-" + str(lat_ul))
+        
+    return ll_msk
+    
+
+def load_OCO2_Lite_overlay_data(ovr_d):
+    """
+    loads OCO2 Lite data, given the processed overlay dictionary as input
+
+    returns a dictionary containing the OCO-2 data subsetted to the overlay
+    lat/lon corners. contains the following fields:
+
+    sif_or_co2: "CO2" or "SIF", denoting the type of the data file
+    data_long_name: string long name for the variable (from the netCDF attributes)
+    data_units: string units for the variable (from the netCDF attributes)
+    data_fill: the missing data fill value
+    data: the subsetted data values, with shape (N,)
+    lat, lon: the subsetted lat/lon, with shape (N,) (for footprint lat/lon), 
+        or shape (N,4) (for footprint vertex lat/lon)
+    """
+
+    # data dictionary that will be constructed.
+    dd = collections.OrderedDict()
+
+    ### Prep OCO-2 Variable ###
+
+    h5 = h5py.File(ovr_d['var_file'], "r")
+
+    try:
+        data_obj = h5[ovr_d['var_name']]
+    except:
+        print(ovr_d['var_name']+" DNE in "+ovr_d['var_file'])
+        print("Check that the variable name includes any necessary group paths. Ex: /Preprocessors/dp_abp")
+        print("Exiting")
+        sys.exit()
+
+    data = data_obj[:]
+
+    if ovr_d['sif_or_co2'] == "CO2":
+        try:
+            dd['data_long_name'] = data_obj.attrs.get('long_name')[0].decode('utf-8')
+        except:
+            print("Problem reading long name for " + var_name)
+            dd['data_long_name'] = ""
+        try:
+            dd['data_units'] = data_obj.attrs.get('units')[0].decode('utf-8')
+        except:
+            print("Problem reading units for " + var_name)
+            dd['data_units'] = ""
+        try:
+            dd['data_fill'] = data_obj.attrs.get('missing_value')[0]
+        except:
+            print("Problem reading missing value for " + var_name)
+            dd['data_fill'] = ""
+    if ovr_d['sif_or_co2'] == "SIF":
+        dd['data_long_name'] = re.split("/", var_name)[-1]
+        try:
+            dd['data_units'] = data_obj.attrs.get('unit').decode('utf-8')
+        except:
+            print("Problem reading units for " + var_name)
+            dd['data_units'] = ""
+        try:
+            dd['data_fill'] = data_obj.attrs.get('missing_value')[0]
+        except:
+            print("Problem reading missing value for " + var_name)
+            dd['data_fill'] = ""
+
+    try:
+        lat_data = h5[ovr_d['lat_name']][:]
+    except:
+        print(ovr_d['lat_name']+" DNE in "+var_file)
+        print("Check that the variable name includes any necessary group paths. Ex: SoundingGeometry/sounding_latitude")
+        print("Exiting")
+        sys.exit()
+
+    try:
+        lon_data = h5[ovr_d['lon_name']][:]
+    except:
+        print(ovr_d['lon_name']+" DNE in "+var_file)
+        print("Check that the variable name includes any necessary group paths. Ex: SoundingGeometry/sounding_longitude")
+        print("Exiting")
+        sys.exit()
+    h5.close()
+
+    if lat_data.ndim != lon_data.ndim:
+        print(ovr_d['lat_name']+" and "+ovr_d['lon_name']+" have different dimensions. Exiting")
+        sys.exit()
+
+    if ovr_d['var_name'] == "Retrieval/reduced_chi_squared_per_band":
+        if not ovr_d['band_number']:
+            print(ovr_d['var_name'] + " is stored per band. "+
+                  "Please select a band number (1=0.76 micron, 2=1.6 micron, 3=2.04 micron). Exiting")
+            sys.exit()
+        else:
+            data = data[:,ovr_d['band_number']-1]
+
+    # use helper object to get the remaining variables (sid, warnlevel, QF, orbit, footprint)
+    if ovr_d['sif_or_co2'] == "CO2":
+        lite_file = LiteCO2File(ovr_d['var_file'])
+        lite_file.open_file()
+        if ovr_d['warn']:
+            lite_warn = lite_file.get_warn()
+        lite_qf = lite_file.get_qf()
+    else:
+        lite_file = LiteSIFFile(ovr_d['var_file'])
+        lite_file.open_file()
+    lite_time = lite_file.get_time()
+    lite_sid = lite_file.get_sid()
+    lite_orbit = lite_file.get_orbit()
+    lite_footprint = lite_file.get_footprint()
+    lite_file.close_file()
+
+    # create a list of masks to logical_and together
+    # orbit, WL, QF are easy, LatLon is more complicated, so there is a helper function.
+    # Note: consider checking these masks as they are computed, to inform the user
+    # if one or more removes all available observations.
+    msk_list = []
+
+    if ovr_d['orbit']:
+        orbit_msk = lite_orbit == ovr_d['orbit']
+        msk_list.append(orbit_msk)
+
+    ll_msk = _compute_ll_msk(lat_data, lon_data,
+                             ovr_d['lat_ul'], ovr_d['lat_lr'],
+                             ovr_d['lon_ul'], ovr_d['lon_lr'])
+    msk_list.append(ll_msk)
+        
+    if ovr_d['sif_or_co2'] == "CO2":
+
+        if ovr_d['lite_quality'] == 'good':
+            qf_msk = lite_qf == 0
+        elif ovr_d['lite_quality'] == 'bad':
+            qf_msk = lite_qf == 1
+        else:
+            qf_msk = np.ones(lite_qf.shape, np.bool)
+        msk_list.append(qf_msk)
+
+        if ovr_d['warn']:
+            warn_msk = np.logical_and(
+                lite_warn >= ovr_d['lite_warn_lims'][0],
+                lite_warn <= ovr_d['lite_warn_lims'][1])
+            msk_list.append(warn_msk)
+
+    if len(ovr_d['footprint_lims']) == 2:
+        fp_msk = np.logical_and(
+            lite_footprint >= ovr_d['footprint_lims'][0],
+            lite_footprint <= ovr_d['footprint_lims'][1])
+    else:
+        fp_msk = lite_footprint == ovr_d['footprint_lims'][0]
+    msk_list.append(fp_msk)
+
+    combined_msk = msk_list[0].copy()
+    for msk in msk_list[1:]:
+        combined_msk = np.logical_and(combined_msk, msk)
+
+    dd['var_data'] = data[combined_msk]
+    # note the ellipsis will work equally well for 1D or 2D (vertex) data
+    dd['lat'] = lat_data[combined_msk, ...]
+    dd['lon'] = lon_data[combined_msk, ...]
+    dd['sounding_id'] = lite_sid[combined_msk]
+    dd['time'] = lite_time[combined_msk]
+
+    return dd
+
+
+def load_OCO2_Lite_overlay_data_old(overlay_info_dict, var_file, var_name,
                                 lat_name, lon_name, var_lims, band_number, orbit_int):
     """loads OCO2 overlay data.
     this is assumed to be a Lite file (Either LtSIF or LtCO2)"""
@@ -1036,19 +1352,21 @@ if __name__ == "__main__":
 
 
     # load OCO-2 data.
-    (sif_or_co2, lat_data, lon_data, oco2_data, oco2_data_fill, lite_sid, 
-     orbit_start_idx, version_file_tag, qf_file_tag, wl_file_tag, fp_file_tag,
-     oco2_data_long_name, oco2_data_units) = load_OCO2_Lite_overlay_data(
-         input_dict['oco2_overlay_info'], ovr_d['var_file'], ovr_d['var_name'],
-         ovr_d['lat_name'], ovr_d['lon_name'], ovr_d['var_lims'],
-         ovr_d['band_number'], ovr_d['orbit'])
+    #(sif_or_co2, lat_data, lon_data, oco2_data, oco2_data_fill, lite_sid, 
+    # orbit_start_idx, version_file_tag, qf_file_tag, wl_file_tag, fp_file_tag,
+    # oco2_data_long_name, oco2_data_units) = load_OCO2_Lite_overlay_data(
+    #     input_dict['oco2_overlay_info'], ovr_d['var_file'], ovr_d['var_name'],
+    #     ovr_d['lat_name'], ovr_d['lon_name'], ovr_d['var_lims'],
+    #     ovr_d['band_number'], ovr_d['orbit'])
+
+    odat = load_OCO2_Lite_overlay_data(ovr_d)
 
     # here, handle the var limit options.
     # if specific limits were input, via a 2-element list,
     # that will be passed directly to do_modis_overlay_plot().
     # if autoscaling by orbit, find those min/max now, and create the 2 element list.
     if ovr_d['var_lims'] == 'autoscale_by_orbit':
-        ovr_d['var_lims'] = [np.min(oco2_data), np.max(oco2_data)]
+        ovr_d['var_lims'] = [np.min(odat['var_data']), np.max(odat['var_data'])]
     # otherwise, convert to None, so then do_modis_overlay_plot() will then derive an autoscale
     # min/max according to the points within the overlay.
     if ovr_d['var_lims'] == 'autoscale_by_overlay':
@@ -1056,8 +1374,8 @@ if __name__ == "__main__":
 
     ### Plot prep ###
 
-    if oco2_data_long_name:
-        oco2_data_long_name = re.sub("_", " ", oco2_data_long_name)
+    if odat['data_long_name']:
+        oco2_data_long_name = re.sub("_", " ", odat['data_long_name'])
         cbar_strings = re.split(' ', oco2_data_long_name)
         cbar_cap_strings = ""
 
@@ -1070,37 +1388,41 @@ if __name__ == "__main__":
             else:
                 cbar_cap_strings = cbar_cap_strings + cap_s +" "
         cbar_cap_strings = cbar_cap_strings[:-1]
-        cbar_name = cbar_cap_strings+'\n('+oco2_data_units+')'
+        cbar_name = cbar_cap_strings+'\n('+odat['data_units']+')'
     else:
         cbar_name = ""
 
     if not cfg_d['out_plot_name']:
         if cfg_d['region']:
-            out_plot_name = (ovr_d['var_name'] + "_" + cfg_d['region'] +
-                             "_" + cfg_d['straight_up_date']+version_file_tag+
-                             qf_file_tag+wl_file_tag+fp_file_tag+".png")
+            out_plot_name = ovr_d['var_name'] + "_" + cfg_d['region']
         else:
-            out_plot_name = (ovr_d['var_name'] + "_" +
-                             cfg_d['straight_up_date']+version_file_tag+
-                             qf_file_tag+wl_file_tag+fp_file_tag+".png")
+            out_plot_name = ovr_d['var_name']
+        out_plot_name = (out_plot_name + "_" +
+                         cfg_d['straight_up_date'] + 
+                         ovr_d['version_file_tag']+
+                         ovr_d['qf_file_tag']+
+                         ovr_d['wl_file_tag']+
+                         ovr_d['fp_file_tag']+".png")
     out_plot_name = os.path.join(cfg_d['out_plot_dir'], out_plot_name)
 
     if not cfg_d['out_data_name']:
         if cfg_d['region']:
-            out_data_name = (ovr_d['var_name'] + "_" + cfg_d['region'] + 
-                             "_" + cfg_d['straight_up_date']+version_file_tag+
-                             qf_file_tag+wl_file_tag+fp_file_tag+".h5")
+            out_data_name = ovr_d['var_name'] + "_" + cfg_d['region']
         else:
-            out_data_name = (ovr_d['var_name'] + "_" +
-                             cfg_d['straight_up_date']+version_file_tag+
-                             qf_file_tag+wl_file_tag+fp_file_tag+".h5")
+            out_data_name = ovr_d['var_name']
+        out_data_name = (out_data_name + "_" +
+                         cfg_d['straight_up_date'] + 
+                         ovr_d['version_file_tag']+
+                         ovr_d['qf_file_tag']+
+                         ovr_d['wl_file_tag']+
+                         ovr_d['fp_file_tag']+".h5")
 
     out_data_name = os.path.join(cfg_d['out_data_dir'], out_data_name)
 
     do_modis_overlay_plot(cfg_d['geo_upper_left'],
                           cfg_d['geo_lower_right'],
-                          cfg_d['date'], lat_data, lon_data, oco2_data, oco2_data_fill, lite_sid,
-                          orbit_start_idx, 
+                          cfg_d['date'], odat['lat'], odat['lon'], odat['var_data'],
+                          odat['data_fill'], odat['sounding_id'], 0,
                           var_lims=ovr_d['var_lims'], interest_pt=cfg_d['ground_site'],
                           cmap=ovr_d['cmap'], alpha=ovr_d['alpha'],
                           lat_name=ovr_d['lat_name'], lon_name=ovr_d['lon_name'],
