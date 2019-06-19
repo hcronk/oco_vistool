@@ -29,6 +29,8 @@ import os
 import sys
 from glob import glob
 from six import string_types
+import collections
+import datetime
 
 from OCO2FileOps import *
 import h5py
@@ -145,9 +147,212 @@ def read_shp(filename):
     return df
 
 
-def process_config_file(orbit_info_dict):
+def _process_overlay_dict(input_dict):
     """
-    process config file contents, santizing inputs, etc.
+    process OCO-2 overlay data input.
+    this is a helper normally called by process_config_dict()
+    """
+    ovr_d = collections.OrderedDict()
+
+    required_keys = ('file', 'variable', 'lat_name', 'lon_name', 'orbit')
+    for k in required_keys:
+        if k not in input_dict:
+            raise ValueError('Config file, overlay info is missing required key: '+k)
+
+    ovr_d['var_file'] = input_dict['file']
+    ovr_d['var_name'] = input_dict['variable']
+    ovr_d['lat_name'] = input_dict['lat_name']
+    ovr_d['lon_name'] = input_dict['lon_name']
+    ovr_d['orbit'] = int(input_dict['orbit'])
+
+    ovr_d['band_number'] = input_dict.get('band_number', None)
+    # convert empty string to None
+    if ovr_d['band_number'] == "":
+        ovr_d['band_number'] = None
+
+    if ovr_d['band_number'] is not None:
+        try:
+            ovr_d['band_number'] = int(ovr_d['band_number'])
+        except ValueError:
+            raise ValueError('band_number contents are invalid, should be: 1,2, or 3')
+        if ovr_d['band_number'] not in (1,2,3):
+            raise ValueError('band_number contents are invalid, should be: 1,2, or 3')
+
+    if 'variable_plot_lims' in input_dict:
+        ovr_d['var_lims'] = input_dict['variable_plot_lims']
+        if ovr_d['var_lims']:
+            # if this was a string option, then make sure it is one
+            # of the two options we have implemented. if not, revert to default.
+            if isinstance(var_lims, string_types):
+                if var_lims not in ('autoscale_by_orbit', 'autoscale_by_overlay'):
+                    print('var_lims "' + var_lims +
+                          '" is not valid, reverting to "autoscale_by_orbit"')
+                    ovr_d['var_lims'] = 'autoscale_by_orbit'
+            else:
+                try:
+                    ovr_d['var_lims'] = float(ovr_d['var_lims'][0]), float(ovr_d['var_lims'][1])
+                except:
+                    raise ValueError('input variable_plot_lims is invalid')
+        else:
+            ovr_d['var_lims'] = 'autoscale_by_orbit'
+    else:
+        ovr_d['var_lims'] = 'autoscale_by_orbit'
+
+    ovr_d['cmap'] = input_dict.get('cmap', 'jet')
+    # note this will generate a useful ValueError if the input cmap is not available.
+    ovr_d['cmap_obj'] = mpl.cm.get_cmap(ovr_d['cmap'])
+
+    ovr_d['alpha'] = input_dict.get('transparency', 1)
+    if ovr_d['alpha'] == "":
+        ovr_d['alpha'] = 1.0
+
+    try:
+        ovr_d['alpha'] = float(ovr_d['alpha'])
+    except:
+        raise ValueError('Input transparency value is invalid. Must be floating point'+
+                         'number in range [0,1]')
+
+    if ovr_d['alpha'] < 0 or ovr_d['alpha'] > 1:
+        raise ValueError('Input transparency value is invalid. Must be floating point'+
+                         'number in range [0,1]')
+        
+    return ovr_d
+
+
+def process_config_dict(input_dict):
+    """
+    process config file contents.
+
+    this cleans inputs, checking for valid contents, and then creates
+    namedtuple objects containing all configuration settings.
+
+    inputs: config_file_dict, the dictionary as returned from the read
+    of the JSON dictionary.
+
+    outputs:
+
+    config_dict: a dictionary containing the configuration settings
+        related to the base image (MODIS or otherwise)
+
+    contents:
+    date: "YYYY-MM-DD"
+    straight_up_date: "YYYYMMDD"
+    lat_ul
+    lon_ul
+    lat_lr
+    lon_lr
+    region: string label
+    ground_site: lat, lon of ground site to label
+    city_labels: color to use for city labels, or None, ""
+    datetime: python datetime object for date.
+
+    overlay_dict: a dictionary containing information related to the
+        OCO-2 data overlay for the plot
+
+    contents:
+    var_file: filename to use for overlay data (must be OCO2 Lite file)
+    var_name: variable name to use
+    lat_name: lat variable to use (to control footprint lat, or vertices)
+    lon_name: lon variable to use
+    orbit: integer orbit number
+    var_lims: plot limits, or "autoscale_by_orbit", "autoscale_by_overlay"
+    cmap: string colormap name, defaults to 'jet'
+    cmap_obj: the MPL linearSegmentedColormap object
+    alpha: transparency variable (1=opaque, 0=transparent), float in range [0,1]
+    """
+
+    cfg_d = collections.OrderedDict()
+
+    # check for required keys
+    required_keys = ('date', 'geo_upper_left', 'geo_lower_right')
+    for k in required_keys:
+        if k not in input_dict:
+            raise ValueError('Config file is missing required key: '+k)
+
+    # first just copy from input dictionary into OrderedDict for config data.
+    # note the use of dict.get(key, default) will effectively set default blank or None
+    # values.
+    cfg_d['date'] = input_dict['date']
+    cfg_d['straight_up_date'] = cfg_d['date'].replace("-", "")
+
+    cfg_d['geo_upper_left'] = input_dict['geo_upper_left']
+    cfg_d['geo_lower_right'] = input_dict['geo_lower_right']
+
+    try:
+        cfg_d['lat_ul'] = float(input_dict['geo_upper_left'][0])
+        cfg_d['lon_ul'] = float(input_dict['geo_upper_left'][1])
+    except ValueError:
+        raise ValueError('geo_upper_left contents are invalid')
+    try:
+        cfg_d['lat_lr'] = float(input_dict['geo_lower_right'][0])
+        cfg_d['lon_lr'] = float(input_dict['geo_lower_right'][1])
+    except ValueError:
+        raise ValueError('geo_lower_right contents are invalid')
+
+    cfg_d['region'] = input_dict.get('region', '')
+
+    cfg_d['ground_site'] = input_dict.get('ground_site', None)
+    cfg_d['city_labels'] = input_dict.get('city_labels', None)
+
+    cfg_d['out_plot_dir'] = input_dict.get('out_plot_dir', '')
+    cfg_d['out_plot_name'] = input_dict.get('out_plot_name', '')
+    cfg_d['out_data_dir'] = input_dict.get('out_data_dir', '')
+    cfg_d['out_data_name'] = input_dict.get('out_data_name', '')
+
+    # now do various checks.
+    try:
+        cfg_d['datetime'] = datetime.datetime.strptime(cfg_d['date'], '%Y-%m-%d')
+    except:
+        raise ValueError('input field "date" has incorrect format, expecting YYYY-MM-DD')
+
+    if cfg_d['ground_site']:
+        cfg_d['ground_site'] = float(cfg_d['ground_site'][0]), float(cfg_d['ground_site'][1])
+        if (cfg_d['ground_site'][0] > cfg_d['lat_ul'] or
+            cfg_d['ground_site'][0] < cfg_d['lat_lr'] or
+            cfg_d['ground_site'][1] > cfg_d['lon_lr'] or
+            cfg_d['ground_site'][1] < cfg_d['lon_ul']):
+            cfg_d['ground_site'] = None
+            print("The ground site is outside the given lat/lon range and "+
+                  "will not be included in the output plot.\n")
+
+    if cfg_d['city_labels'] == '':
+        cfg_d['city_labels'] = None
+
+    if cfg_d['city_labels'] and cfg_d['city_labels'] not in mpl.colors.cnames.keys():
+        print(cities + " is not an available matplotlib color. "+
+              "City labels will not be included on the output plot. \n")
+        cfg_d['city_labels'] = None
+
+    if not cfg_d['out_plot_dir'] or not glob(cfg_d['out_plot_dir']):
+        print("Either there was no output plot location specified or the one specified "+
+              "does not exist. Plot output will go in the code directory. \n")
+    if not cfg_d['out_data_dir'] or not glob(cfg_d['out_data_dir']):
+        print("Either there was no output data location specified or the one specified "+
+              "does not exist. Data output will go in the code directory. \n")
+    
+    if 'oco2_overlay_info' in input_dict:
+        ovr_d = _process_overlay_dict(input_dict['oco2_overlay_info'])
+    else:
+        ovr_d = collections.OrderedDict()
+    
+    return cfg_d, ovr_d
+
+
+def process_config_file_orig(orbit_info_dict):
+    """
+    process config file contents.
+
+    this cleans inputs, checking for valid contents, and then creates
+    namedtuple objects containing all configuration settings.
+
+    inputs: config_file_dict, the dictionary as returned from the read
+    of the JSON dictionary.
+
+    outputs:
+    config_info: a namedtuple containing the configuration settings
+        related to the base image (MODIS or otherwise)
+    overlay_info: a namedtuple containing informatioin related to the
+        OCO-2 data overlay for the plot.
 
     """
     date = orbit_info_dict['date']
@@ -321,7 +526,8 @@ def write_h5_data_subset(out_data, lite_sid, lite_sid_subset,
 
 
 
-def load_OCO2_Lite_overlay_data(overlay_info_dict, var_file, var_name, band_number, orbit_int):
+def load_OCO2_Lite_overlay_data(overlay_info_dict, var_file, var_name,
+                                lat_name, lon_name, var_lims, band_number, orbit_int):
     """loads OCO2 overlay data.
     this is assumed to be a Lite file (Either LtSIF or LtCO2)"""
 
@@ -929,34 +1135,36 @@ if __name__ == "__main__":
     config_file = ConfigFile(args.config_file_loc)
 
     if config_file.exists():
-        orbit_info_dict = config_file.get_contents()
-        for k in orbit_info_dict.keys():
-            orbit_info_dict[k.lower()] = orbit_info_dict.pop(k)
+        input_dict = config_file.get_contents()
+        for k in input_dict.keys():
+            input_dict[k.lower()] = input_dict.pop(k)
     else:
         print('The expected configuration file '+ args.config_file_loc + ' DNE in ' + code_dir)
         print('Exiting')
         sys.exit()
 
-    (date, straight_up_date, orbit_int, region, var_name, var_plot_name,
-     var_file, overlay_info_dict, band_number, var_lims, lat_name, lon_name, cmap,
-     alpha, interest_pt, cities, out_plot_dir, out_plot_name,
-     out_data_dir, out_data_name) = process_config_file(orbit_info_dict)
+    #(date, straight_up_date, orbit_int, region, var_name, var_plot_name,
+    # var_file, overlay_info_dict, band_number, var_lims, lat_name, lon_name, cmap,
+    # alpha, interest_pt, cities, out_plot_dir, out_plot_name,
+    # out_data_dir, out_data_name) = process_config_file(orbit_info_dict)
+    cfg_d, ovr_d = process_config_dict(input_dict)
 
     # with no overlay data requested, simply generate the MODIS image by itself and exit.
-    if not overlay_info_dict:
+    if not ovr_d:
 
-        if not out_plot_name:
+        if not cfg_d['out_plot_name']:
             if region:
-                out_plot_name = "MODISimagery_"+region+"_"+straight_up_date+".png"
+                out_plot_name = ("MODISimagery_" + cfg_d['region'] +
+                                 "_" + cfg_d['straight_up_date'] + ".png")
             else:
-                out_plot_name = "MODISimagery_"+straight_up_date+".png"
-        out_plot_name = os.path.join(out_plot_dir, out_plot_name)
+                out_plot_name = ("MODISimagery_" + cfg_d['straight_up_date'] + ".png")
+            out_plot_name = os.path.join(out_plot_dir, out_plot_name)
 
-        do_modis_overlay_plot(orbit_info_dict['geo_upper_left'],
-                              orbit_info_dict['geo_lower_right'],
-                              date, np.array([]), np.empty([]), np.empty([]), np.empty([]),
-                              interest_pt=interest_pt, cmap='black',
-                              out_plot=out_plot_name, cities=cities)
+        do_modis_overlay_plot(cfg_d['geo_upper_left'],
+                              cfg_d['geo_lower_right'],
+                              cfg_d['date'], np.array([]), np.empty([]), np.empty([]), np.empty([]),
+                              interest_pt=cfg_d['ground_site'], cmap='black',
+                              out_plot=cfg_d['out_plot_name'], cities=cfg_d['city_labels'])
 
         sys.exit()
 
@@ -965,18 +1173,20 @@ if __name__ == "__main__":
     (sif_or_co2, lat_data, lon_data, oco2_data, oco2_data_fill, lite_sid, 
      orbit_start_idx, version_file_tag, qf_file_tag, wl_file_tag, fp_file_tag,
      oco2_data_long_name, oco2_data_units) = load_OCO2_Lite_overlay_data(
-         overlay_info_dict, var_file, var_name, band_number, orbit_int)
+         input_dict['oco2_overlay_info'], ovr_d['var_file'], ovr_d['var_name'],
+         ovr_d['lat_name'], ovr_d['lon_name'], ovr_d['var_lims'],
+         ovr_d['band_number'], ovr_d['orbit'])
 
     # here, handle the var limit options.
     # if specific limits were input, via a 2-element list,
     # that will be passed directly to do_modis_overlay_plot().
     # if autoscaling by orbit, find those min/max now, and create the 2 element list.
-    if var_lims == 'autoscale_by_orbit':
-        var_lims = [np.min(oco2_data), np.max(oco2_data)]
+    if ovr_d['var_lims'] == 'autoscale_by_orbit':
+        ovr_d['var_lims'] = [np.min(oco2_data), np.max(oco2_data)]
     # otherwise, convert to None, so then do_modis_overlay_plot() will then derive an autoscale
     # min/max according to the points within the overlay.
-    if var_lims == 'autoscale_by_overlay':
-        var_lims = None
+    if ovr_d['var_lims'] == 'autoscale_by_overlay':
+        ovr_d['var_lims'] = None
 
     ### Plot prep ###
 
@@ -998,30 +1208,36 @@ if __name__ == "__main__":
     else:
         cbar_name = ""
 
-    if not out_plot_name:
-        if region:
-            out_plot_name = (var_plot_name+"_"+region+"_"+straight_up_date+version_file_tag+
+    if not cfg_d['out_plot_name']:
+        if cfg_d['region']:
+            out_plot_name = (ovr_d['var_name'] + "_" + cfg_d['region'] +
+                             "_" + cfg_d['straight_up_date']+version_file_tag+
                              qf_file_tag+wl_file_tag+fp_file_tag+".png")
         else:
-            out_plot_name = (var_plot_name+"_"+straight_up_date+version_file_tag+
+            out_plot_name = (ovr_d['var_name'] + "_" +
+                             cfg_d['straight_up_date']+version_file_tag+
                              qf_file_tag+wl_file_tag+fp_file_tag+".png")
-    out_plot_name = os.path.join(out_plot_dir, out_plot_name)
+    out_plot_name = os.path.join(cfg_d['out_plot_dir'], out_plot_name)
 
-    if not out_data_name:
-        if region:
-            out_data_name = (var_plot_name+"_"+region+"_"+straight_up_date+version_file_tag+
+    if not cfg_d['out_data_name']:
+        if cfg_d['region']:
+            out_data_name = (ovr_d['var_name'] + "_" + cfg_d['region'] + 
+                             "_" + cfg_d['straight_up_date']+version_file_tag+
                              qf_file_tag+wl_file_tag+fp_file_tag+".h5")
         else:
-            out_data_name = (var_plot_name+"_"+straight_up_date+version_file_tag+
+            out_data_name = (ovr_d['var_name'] + "_" +
+                             cfg_d['straight_up_date']+version_file_tag+
                              qf_file_tag+wl_file_tag+fp_file_tag+".h5")
 
-    out_data_name = os.path.join(out_data_dir, out_data_name)
+    out_data_name = os.path.join(cfg_d['out_data_dir'], out_data_name)
 
-    do_modis_overlay_plot(orbit_info_dict['geo_upper_left'],
-                          orbit_info_dict['geo_lower_right'],
-                          date, lat_data, lon_data, oco2_data, oco2_data_fill, lite_sid,
-                          orbit_start_idx, var_lims=var_lims, interest_pt=interest_pt,
-                          cmap=cmap, alpha=alpha,
-                          lat_name=lat_name, lon_name=lon_name, var_name=var_name,
+    do_modis_overlay_plot(cfg_d['geo_upper_left'],
+                          cfg_d['geo_lower_right'],
+                          cfg_d['date'], lat_data, lon_data, oco2_data, oco2_data_fill, lite_sid,
+                          orbit_start_idx, 
+                          var_lims=ovr_d['var_lims'], interest_pt=cfg_d['ground_site'],
+                          cmap=ovr_d['cmap'], alpha=ovr_d['alpha'],
+                          lat_name=ovr_d['lat_name'], lon_name=ovr_d['lon_name'],
+                          var_name=ovr_d['var_name'],
                           out_plot=out_plot_name, out_data=out_data_name,
-                          var_label=cbar_name, cities=cities)
+                          var_label=cbar_name, cities=cfg_d['city_labels'])
