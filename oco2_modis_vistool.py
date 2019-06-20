@@ -214,8 +214,12 @@ def _process_overlay_dict(input_dict):
     ovr_d['cmap'] = input_dict.get('cmap', 'jet')
     if ovr_d['cmap'] == "":
         ovr_d['cmap'] = 'jet'
-    # note this will generate a useful ValueError if the input cmap is not available.
-    ovr_d['cmap_obj'] = mpl.cm.get_cmap(ovr_d['cmap'])
+    # make sure this is a valid colormap OR color string.
+    if ( (ovr_d['cmap'] not in plt.colormaps()) and
+         (ovr_d['cmap'] not in mpl.colors.cnames.keys()) ):
+        print(ovr_d['cmap']  + " is not a recognized color or colormap. "+
+              "Data will be displayed in jet colormap")
+        ovr_d['cmap'] = 'jet'
 
     ovr_d['alpha'] = input_dict.get('transparency', 1)
     if ovr_d['alpha'] == "":
@@ -910,10 +914,12 @@ def do_modis_overlay_plot(
     
     patches = []
 
+    if var_lat.ndim == 2:
+        zip_it = np.ma.dstack([var_lon, var_lat])
+
     if color_or_cmap == "cmap" and var_vals.shape[0] > 0:
     
         # vertex points for each footprint
-        zip_it = np.ma.dstack([var_lon, var_lat])
         if var_lat.ndim == 2 and var_vals.ndim == 1:
             for row in range(zip_it.shape[0]):
                 polygon = mpatches.Polygon(zip_it[row,:,:])
@@ -942,11 +948,20 @@ def do_modis_overlay_plot(
             t.set_fontsize(12)
 
     if color_or_cmap == "color" and var_vals.shape[0] > 0:
-        for row in range(zip_it.shape[0]):
-            polygon = mpatches.Polygon(zip_it[row,:,:], color=cmap)
-            patches.append(polygon)
-        p = mpl.collections.PatchCollection(patches, alpha=alpha, edgecolor='none', match_original=True)
-        ax.add_collection(p)
+
+        # vertex points for each footprint
+        if var_lat.ndim == 2 and var_vals.ndim == 1:
+            for row in range(zip_it.shape[0]):
+                polygon = mpatches.Polygon(zip_it[row,:,:], color=cmap)
+                patches.append(polygon)
+            p = mpl.collections.PatchCollection(patches, alpha=alpha, edgecolor='none',
+                                                match_original=True)
+            ax.add_collection(p)
+
+        # or just plot the central (sounding) lat lon.
+        else:
+            ax.scatter(var_lon, var_lat, c=cmap, edgecolor='none', s=2)
+
 
     # during testing, it appears that sometimes the scatter
     # could cause MPL to shift the axis range - I think because one
