@@ -9,8 +9,11 @@ for the matplotlib integration.
 The bare minimum install would be (tested with python 3.6)
 
 `$ conda create -n satpy36 python=3.6`
+
 `$ conda activate satpy36`
+
 `$ conda install -c conda-forge satpy`
+
 `$ conda install -c conda-forge cartopy`
 
 TBD: this will need a revisit to make sure there is a coherent install that 
