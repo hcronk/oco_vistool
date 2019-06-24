@@ -6,18 +6,19 @@ for the matplotlib integration.
 
 ### satpy setup notes
 
-The bare minimum install would be (tested with python 3.6)
+The bare minimum install would be (tested with python 3.6, conda 4.6.14, June 2019)
 
-`$ conda create -n satpy36 python=3.6`
+`$ conda create -n <envname> python=3.6`
 
-`$ conda activate satpy36`
+`$ conda activate <envname>`
 
 `$ conda install -c conda-forge satpy`
 
 `$ conda install -c conda-forge cartopy`
 
-TBD: this will need a revisit to make sure there is a coherent install that 
-includes all dependencies for the vistool (the gdal install in particular).
+`$ conda install future`
+
+`$ conda install -c conda-forge gdal`
 
 ### environment notes
 
