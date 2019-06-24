@@ -44,7 +44,7 @@ import cartopy.feature as cfeature
 import shapefile
 from shapely.geometry import LineString, Point, Polygon
 import matplotlib as mpl
-mpl.use('agg')
+#mpl.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.gridspec as gridspec
@@ -335,11 +335,16 @@ def _process_overlay_dict(input_dict):
         ovr_d['qf_file_tag'] = ""
         ovr_d['wl_file_tag'] = ""
     else:
-        print("The command line usage of this tool accommodates official CO2 or SIF lite files only.")
-        print("Expected filename convention: oco2_LtNNN_YYYYMMDD_B8xxxxx_rxx*.nc, where NNN is CO2 or SIF")
-        print("Other data will need to be plotted by importing the tool as a Python module.")
-        print("Exiting")
-        sys.exit()
+        #print("The command line usage of this tool accommodates official CO2 or SIF lite files only.")
+        #print("Expected filename convention: oco2_LtNNN_YYYYMMDD_B8xxxxx_rxx*.nc, where NNN is CO2 or SIF")
+        #print("Other data will need to be plotted by importing the tool as a Python module.")
+        print("Warning, input file does not appear to be Lite SIF or CO2")
+        print("proceeding with experimented L1/L2 data process.")
+        ovr_d['sif_or_co2'] = None 
+        ovr_d['qf_file_tag'] = ""
+        ovr_d['wl_file_tag'] = ""
+        #print("Exiting")
+        #sys.exit()
 
     ovr_d['version_file_tag'] = re.search(
         "_B[0-9a-z]{,5}_", os.path.basename(ovr_d['var_file'])).group()[:-1]
@@ -608,6 +613,71 @@ def _compute_ll_msk(lat_data, lon_data, lat_ul, lat_lr, lon_ul, lon_lr):
         
     return ll_msk
     
+
+def load_OCO2_L1L2_overlay_data(ovr_d):
+    
+    # data dictionary that will be constructed.
+    dd = collections.OrderedDict()
+
+    ### Prep OCO-2 Variable ###
+
+    h5 = h5py.File(ovr_d['var_file'], "r")
+
+    lat_data = h5[ovr_d['lat_name']][:]
+    lon_data = h5[ovr_d['lon_name']][:]
+    var_data = h5[ovr_d['var_name']][:]
+    sounding_id = h5['SoundingGeometry/sounding_id'][:]
+    timestamps = h5['SoundingGeometry/sounding_time_tai93'][:]
+    dt = datetime.datetime(1993,1,1) - datetime.datetime(1970,1,1)
+    timestamps += dt.total_seconds()
+
+    dd['data_long_name'] = ovr_d['var_name'].split('/')[-1]
+    dd['data_units'] = h5[ovr_d['var_name']].attrs['Units'][0].decode()
+
+    h5.close()
+
+    if len(ovr_d['footprint_lims']) == 2:
+        fpi = slice(ovr_d['footprint_lims'][0]-1,
+                    ovr_d['footprint_lims'][1]-1)
+    else:
+        fpi = [ovr_d['footprint_lims'][0]-1]
+
+    if lat_data.ndim == 2:
+        lat_data = lat_data[:,fpi].flatten()
+        lon_data = lon_data[:,fpi].flatten()
+        lat_centers = lat_data
+        lon_centers = lon_data
+    else:
+        lat_data = lat_data[:,fpi,0,:]
+        lon_data = lon_data[:,fpi,0,:]
+        shape2D = (lat_data.shape[0] * lat_data.shape[1], 4)
+        lat_data = np.reshape(lat_data, shape2D)
+        lon_data = np.reshape(lon_data, shape2D)
+
+    var_data = var_data[:,fpi].flatten()
+    sounding_id = sounding_id[:,fpi].flatten()
+    timestamps = timestamps[:,fpi].flatten()
+
+    # now apply the latlon mask, and proceed to do the
+    # subsetting.
+    ll_msk = _compute_ll_msk(lat_data, lon_data,
+                             ovr_d['lat_ul'], ovr_d['lat_lr'],
+                             ovr_d['lon_ul'], ovr_d['lon_lr'])
+    #combined_msk = np.logical_and(combined_msk, ll_msk)
+    combined_msk = ll_msk
+
+    tmp_data = var_data[combined_msk]
+    dd['orbit_var_lims'] = np.ma.min(tmp_data), np.ma.max(tmp_data)
+
+    dd['var_data'] = var_data[combined_msk]
+    # note the ellipsis will work equally well for 1D or 2D (vertex) data
+    dd['lat'] = lat_data[combined_msk, ...]
+    dd['lon'] = lon_data[combined_msk, ...]
+    dd['sounding_id'] = sounding_id[combined_msk]
+    dd['time'] = timestamps[combined_msk]
+
+    return dd
+
 
 def load_OCO2_Lite_overlay_data(ovr_d):
     """
@@ -1071,8 +1141,10 @@ if __name__ == "__main__":
 
         sys.exit()
 
-
-    odat = load_OCO2_Lite_overlay_data(ovr_d)
+    if ovr_d['sif_or_co2']:
+        odat = load_OCO2_Lite_overlay_data(ovr_d)
+    else:
+        odat = load_OCO2_L1L2_overlay_data(ovr_d)
     
     # here, handle the var limit options.
     # if specific limits were input, via a 2-element list,
