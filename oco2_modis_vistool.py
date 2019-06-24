@@ -61,6 +61,10 @@ import re
 import future
 from builtins import range
 
+# Note: there is a conditional import of the satpy module below;
+# this is to reduce import time, for cases when it is not used
+# import satpy_overlay_plots
+
 class ConfigFile:
 
     def __init__(self, json_file):
@@ -378,6 +382,9 @@ def process_config_dict(input_dict):
     ground_site: lat, lon of ground site to label
     city_labels: color to use for city labels, or None, ""
     datetime: python datetime object for date.
+    sensor: a string with the sensor data to use for the background image.
+        options: "MODIS" or "GOES16_ABI"
+    data_home: a string path to local data archive (needed for GOES16_ABI)
 
     overlay_dict: a dictionary containing information related to the
         OCO-2 data overlay for the plot
@@ -466,6 +473,14 @@ def process_config_dict(input_dict):
     if not cfg_d['out_data_dir'] or not glob(cfg_d['out_data_dir']):
         print("Either there was no output data location specified or the one specified "+
               "does not exist. Data output will go in the code directory. \n")
+
+    cfg_d['data_home'] = input_dict.get('data_home', None)
+    cfg_d['sensor'] = input_dict.get('sensor', 'MODIS')
+    if cfg_d['sensor'] == "":
+        cfg_d['sensor'] = 'MODIS'
+    valid_sensor_names = ('MODIS', 'GOES16_ABI')
+    if cfg_d['sensor'] not in valid_sensor_names:
+        raise ValueError('sensor name: ' + cfg_d['sensor'] + ' is not valid')
     
     if 'oco2_overlay_info' in input_dict:
         ovr_d = _process_overlay_dict(input_dict['oco2_overlay_info'])
@@ -1040,11 +1055,19 @@ if __name__ == "__main__":
             out_plot_name = os.path.join(cfg_d['out_plot_dir'], 
                                          cfg_d['out_plot_name'])
 
-        do_modis_overlay_plot(cfg_d['geo_upper_left'],
-                              cfg_d['geo_lower_right'],
-                              cfg_d['date'], np.array([]), np.array([]), np.array([]), np.array([]),
-                              interest_pt=cfg_d['ground_site'], cmap='black',
-                              out_plot=out_plot_name, cities=cfg_d['city_labels'])
+        if cfg_d['sensor'] == 'MODIS':
+            do_modis_overlay_plot(
+                cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
+                cfg_d['date'], np.array([]), np.array([]),
+                np.array([]), np.array([]),
+                interest_pt=cfg_d['ground_site'], cmap='black',
+                out_plot=out_plot_name, cities=cfg_d['city_labels'])
+        elif cfg_d['sensor'] == 'GOES16_ABI':
+            import satpy_overlay_plots
+            satpy_overlay_plots.GOES_ABI_overlay_plot(
+                cfg_d, None, None, out_plot_name=out_plot_name)
+        else:
+            raise ValueError('Unknown sensor: '+cfg_d['sensor'])
 
         sys.exit()
 
@@ -1114,16 +1137,26 @@ if __name__ == "__main__":
         out_data_name = os.path.join(cfg_d['out_data_dir'], 
                                      cfg_d['out_data_name'])
 
-    do_modis_overlay_plot(cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
-                          cfg_d['date'], odat['lat'], odat['lon'], odat['var_data'],
-                          var_vals_missing=odat['data_fill'],
-                          lite_sid=odat['sounding_id'],
-                          var_lims=ovr_d['var_lims'], interest_pt=cfg_d['ground_site'],
-                          cmap=ovr_d['cmap'], alpha=ovr_d['alpha'],
-                          lat_name=ovr_d['lat_name'], lon_name=ovr_d['lon_name'],
-                          var_name=ovr_d['var_name'],
-                          out_plot=out_plot_name, out_data=out_data_name,
-                          var_label=cbar_name, cities=cfg_d['city_labels'])
+    if cfg_d['sensor'] == 'MODIS':
+        do_modis_overlay_plot(
+            cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
+            cfg_d['date'], odat['lat'], odat['lon'], odat['var_data'],
+            var_vals_missing=odat['data_fill'],
+            lite_sid=odat['sounding_id'],
+            var_lims=ovr_d['var_lims'], interest_pt=cfg_d['ground_site'],
+            cmap=ovr_d['cmap'], alpha=ovr_d['alpha'],
+            lat_name=ovr_d['lat_name'], lon_name=ovr_d['lon_name'],
+            var_name=ovr_d['var_name'],
+            out_plot=out_plot_name, out_data=out_data_name,
+            var_label=cbar_name, cities=cfg_d['city_labels'])
+    elif cfg_d['sensor'] == 'GOES16_ABI':
+        import satpy_overlay_plots
+        satpy_overlay_plots.GOES_ABI_overlay_plot(
+            cfg_d, ovr_d, odat, var_label=cbar_name,
+            out_plot_name=out_plot_name)
+    else:
+        raise ValueError('Unknown sensor: '+cfg_d['sensor'])
+
 
     ### Write data to hdf5 file ###
     if odat['var_data'].shape[0] == 0:
