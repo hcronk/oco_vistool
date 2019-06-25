@@ -33,6 +33,8 @@ import collections
 import datetime
 
 from OCO2FileOps import *
+from default_cmaps import default_cmaps
+
 import h5py
 
 import numpy as np
@@ -215,15 +217,22 @@ def _process_overlay_dict(input_dict):
     else:
         ovr_d['var_lims'] = 'autoscale_by_orbit'
 
-    ovr_d['cmap'] = input_dict.get('cmap', 'jet')
-    if ovr_d['cmap'] == "":
-        ovr_d['cmap'] = 'jet'
+    ovr_d['cmap'] = input_dict.get('cmap', '')
+    if ovr_d['cmap'] == '':
+        if ovr_d['var_name'] in default_cmaps:
+            ovr_d['cmap'] = default_cmaps[ovr_d['var_name']]
+            print('Using default cmap ' + ovr_d['cmap'] +
+                  ' for var_name: ' + ovr_d['var_name'])
+        else:
+            ovr_d['cmap'] = 'viridis'
+            print('Using generic default cmap '+ovr_d['cmap'])
+
     # make sure this is a valid colormap OR color string.
     if ( (ovr_d['cmap'] not in plt.colormaps()) and
          (ovr_d['cmap'] not in mpl.colors.cnames.keys()) ):
         print(ovr_d['cmap']  + " is not a recognized color or colormap. "+
-              "Data will be displayed in jet colormap")
-        ovr_d['cmap'] = 'jet'
+              "Data will be displayed in viridis colormap")
+        ovr_d['cmap'] = 'viridis'
 
     ovr_d['alpha'] = input_dict.get('transparency', 1)
     if ovr_d['alpha'] == "":
