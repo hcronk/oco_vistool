@@ -371,16 +371,15 @@ def plot_scene_obj(ax, scn):
     # causes exception in MPL:
     # TypeError: Invalid dimensions for image data
     # because shape is (3,600,600), needs to be (600,600,3)?
-    # use helper to change to MaskedArray of the correct shape.
-
+    #
     # get_enhanced_image returns a trollimage XRImage, the
-    # data attribute is an xarray type.
-    data_arr = get_enhanced_image(scn['true_color']).data
-    img_ma_ = data_arr.to_masked_array()
-    # change from (3,N,M) to (N,M,3)
-    img_ma = np.rollaxis(img_ma_, 0, 3)
+    # data attribute is an xarray type. Use xarray transpose method to 
+    # fix the axes; note we assume certain axis names.
 
-    im = ax.imshow(img_ma, transform=crs, extent=crs.bounds,
+    data_arr = get_enhanced_image(scn['true_color']).data
+    data_arr_T = data_arr.transpose('y','x','bands')
+
+    im = ax.imshow(data_arr_T, transform=crs, extent=crs.bounds,
                    origin='upper')
 
     return im
