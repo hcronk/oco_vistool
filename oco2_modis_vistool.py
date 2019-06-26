@@ -1063,6 +1063,10 @@ def do_modis_overlay_plot(
         else:
             ax.scatter(var_lon, var_lat, c=cmap, edgecolor='none', s=2)
 
+    ax.set_title('Overlay data from '+
+                 os.path.split(ovr_d['var_file'])[1] +
+                 '\n background image from MODIS-Aqua on Worldview', 
+                 size='x-small')
 
     # during testing, it appears that sometimes the scatter
     # could cause MPL to shift the axis range - I think because one
