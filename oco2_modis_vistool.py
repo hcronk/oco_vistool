@@ -654,7 +654,7 @@ def load_OCO2_L1L2_overlay_data(ovr_d):
 
     if len(ovr_d['footprint_lims']) == 2:
         fpi = slice(ovr_d['footprint_lims'][0]-1,
-                    ovr_d['footprint_lims'][1]-1)
+                    ovr_d['footprint_lims'][1])
     else:
         fpi = [ovr_d['footprint_lims'][0]-1]
 
