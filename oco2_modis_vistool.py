@@ -384,6 +384,8 @@ def process_config_dict(input_dict):
     datetime: python datetime object for date.
     sensor: a string with the sensor data to use for the background image.
         options: "MODIS" or "GOES16_ABI"
+    resample_method: a string with a resample method sent to satpy based
+        image display (e.g., only for GOES16_ABI at the moment)
     data_home: a string path to local data archive (needed for GOES16_ABI)
 
     overlay_dict: a dictionary containing information related to the
@@ -482,6 +484,11 @@ def process_config_dict(input_dict):
     if cfg_d['sensor'] not in valid_sensor_names:
         raise ValueError('sensor name: ' + cfg_d['sensor'] + ' is not valid')
     
+    cfg_d['resample_method'] = input_dict.get(
+        'resample_method', 'native_bilinear')
+    if cfg_d['resample_method'] == "":
+        cfg_d['resample_method'] = 'native_bilinear'
+
     if 'oco2_overlay_info' in input_dict:
         ovr_d = _process_overlay_dict(input_dict['oco2_overlay_info'])
         # copy the geo corners
