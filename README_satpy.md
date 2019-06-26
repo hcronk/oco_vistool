@@ -37,4 +37,22 @@ For example, by setting the following in the `.bash_profile` or similar:
 `export DASK_NUM_WORKERS=2`
 
 this would limit satpy to use 4x2 = 8 CPU on a multiprocessor system.
+
+With limited testing, for small image creation (1 x 1 degree in lat/lon), 
+there is very limited benefit by increasing the number of workers or 
+threads. In these cases it might make sense to reduce the number of 
+workers and threads to 1. It is advisable to test a few combinations 
+on your system.
+
 See the [satpy FAQ](https://satpy.readthedocs.io/en/latest/faq.html) for more information.
+
+
+The satpy library also relies on pytroll for image processing, which uses 
+an environment variable to control the internal "chunk" size for image 
+processing. This value is very important for efficiency when making small 
+image creation, since chunks that are outside the area of interest will be 
+skipped. The default chunk size is 4096 if the environment variable is not 
+set. For small image processing, a value on the order of 1024 or 512 may 
+be optimal:
+
+`export PYTROLL_CHUNK_SIZE=512`

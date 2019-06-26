@@ -145,7 +145,8 @@ def get_ABI_files(datetime_utc, data_home, domain='C', verbose=False):
 
 
 def get_scene_obj(file_list, lat, lon, width_km, height_km,
-                  pixels=500, tmp_cache=False, **kw):
+                  pixels=500, tmp_cache=False, 
+                  resample_method='native_bilinear'):
     """Get Scene object, apply the resample area, to a small box 
     centered on the lat lon point.
 
@@ -166,6 +167,13 @@ def get_scene_obj(file_list, lat, lon, width_km, height_km,
     outputs: the satpy Scene object.
 
     """
+
+    valid_resample_methods = [
+        'nearest', 'bilinear', 'native_nearest', 'native_bilinear']
+
+    if resample_method not in valid_resample_methods:
+        raise ValueError('resample_method ' + resample_method +
+                         ' is not valid')
 
     if tmp_cache:
         tdir = tempfile.mkdtemp()
@@ -192,7 +200,18 @@ def get_scene_obj(file_list, lat, lon, width_km, height_km,
     my_area = pyresample.AreaDefinition.from_extent(
         'testC', proj_dict, (pixels, pixels),
         (-width_m, -height_m, width_m, height_m))
-    new_scn = scn.resample(my_area, **kw)
+
+    if resample_method.startswith('native'):
+        tmp_scn = scn.resample(resampler='native')
+    else:
+        tmp_scn = scn
+
+    # this would split the second string str1_str2,
+    # or just return the str if there is no underscore.
+    # thus, it should be the resample method after the
+    # optional native resampling.
+    method = resample_method.split('_')[-1]
+    new_scn = tmp_scn.resample(my_area, resampler=method)
 
     return new_scn
 
@@ -371,16 +390,15 @@ def plot_scene_obj(ax, scn):
     # causes exception in MPL:
     # TypeError: Invalid dimensions for image data
     # because shape is (3,600,600), needs to be (600,600,3)?
-    # use helper to change to MaskedArray of the correct shape.
-
+    #
     # get_enhanced_image returns a trollimage XRImage, the
-    # data attribute is an xarray type.
-    data_arr = get_enhanced_image(scn['true_color']).data
-    img_ma_ = data_arr.to_masked_array()
-    # change from (3,N,M) to (N,M,3)
-    img_ma = np.rollaxis(img_ma_, 0, 3)
+    # data attribute is an xarray type. Use xarray transpose method to 
+    # fix the axes; note we assume certain axis names.
 
-    im = ax.imshow(img_ma, transform=crs, extent=crs.bounds,
+    data_arr = get_enhanced_image(scn['true_color']).data
+    data_arr_T = data_arr.transpose('y','x','bands')
+
+    im = ax.imshow(data_arr_T, transform=crs, extent=crs.bounds,
                    origin='upper')
 
     return im
@@ -528,7 +546,8 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     width_km = d_lon * km_per_deg * np.cos(np.deg2rad(center_lat))
 
     scn = get_scene_obj(file_list, center_lat, center_lon,
-                        width_km, height_km, resampler='bilinear')
+                        width_km, height_km,
+                        resample_method=cfg_d['resample_method'])
     crs = scn['true_color'].attrs['area'].to_cartopy_crs()
 
     overlay_present = ovr_d is not None
