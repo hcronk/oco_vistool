@@ -144,18 +144,17 @@ def get_ABI_files(datetime_utc, data_home, domain='C', verbose=False):
     return flist, time_offset
 
 
-def get_scene_obj(file_list, lat, lon, width_km, height_km,
-                  pixels=500, tmp_cache=False, 
-                  resample_method='native_bilinear'):
+def get_scene_obj(file_list, latlon_extent, width=750, height=750,
+                  tmp_cache=False, resample_method='native_bilinear'):
     """Get Scene object, apply the resample area, to a small box 
     centered on the lat lon point.
 
     inputs:
     file_list: list of netCDF L1b ABI files, must contain bands 1,2,3
-    lat: scalar, latitude in deg
-    lon: scalar, longitude in deg
-    width_km: scalar, size of image (e.g., -N to +N km in longitude/width)
-    height_km: scalar, size of image (e.g., -N to +N km in latitude/height)
+    latlon_extent: extent of displayed region in latlon:
+        [min_lon, min_lat, max_lon, max_lat]
+    width: number of resampled image pixels in width (x-dimension)
+    height: number of resampled image pixels in width (y-dimension)
 
     tmp_cache: optional keyword, set to True to copy the located files
     to a temporary dir (from tempfile) before loading.
@@ -163,6 +162,17 @@ def get_scene_obj(file_list, lat, lon, width_km, height_km,
     Use this option if the data_home access is slow or limited in some
     way, which can be mitigated by copying to a temp file on the local
     filesystem
+
+    resample_method: string keyword to specify the resampling method.
+    valid options are:
+    nearest: perform nearest neighbor resampling in one step
+    bilinear: perform bilinear interpolation in one step
+    native_nearest: perform a native interpolation first, to upsample
+       lower resolution bands to the highest native resolution; 
+       then perform nearest neighbor interpolation to the output grid.
+    native_nearest: perform a native interpolation first, to upsample
+       lower resolution bands to the highest native resolution; 
+       then perform bilinear interpolation to the output grid.
 
     outputs: the satpy Scene object.
 
@@ -189,17 +199,9 @@ def get_scene_obj(file_list, lat, lon, width_km, height_km,
 
     scn.load(['true_color'])
 
-    proj_dict = {'proj': 'eqc', 
-                 'lat_0': lat, 'lon_0': lon,
-                 'a': 6371228.0, 'units': 'm'}
-
-    # the resample's area_extent needs to be in meters (I guess,
-    # matching the units in the proj_dict.)
-    width_m = width_km * 1e3
-    height_m = height_km * 1e3
-    my_area = pyresample.AreaDefinition.from_extent(
-        'testC', proj_dict, (pixels, pixels),
-        (-width_m, -height_m, width_m, height_m))
+    my_area = pyresample.create_area_def(
+        'testC', {'proj':'eqc'}, width=width, height=height,
+        area_extent=latlon_extent, units='degrees')
 
     if resample_method.startswith('native'):
         tmp_scn = scn.resample(resampler='native')
@@ -535,18 +537,12 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     
     file_list, time_offsets = get_ABI_files(dt, cfg_d['data_home'])
 
-    # convert the LL box corners (in degrees LL) to a center LL (degrees)
-    # and the half-height/width (in km) needed for the satpy scene obj.
-    center_lat = (cfg_d['lat_ul'] + cfg_d['lat_lr'])/2.0
-    center_lon = (cfg_d['lon_ul'] + cfg_d['lon_lr'])/2.0
-    d_lat = np.abs(cfg_d['lat_ul'] - cfg_d['lat_lr'])/2.0
-    d_lon = np.abs(cfg_d['lon_ul'] - cfg_d['lon_lr'])/2.0
-    km_per_deg = 2 * np.pi * 6378.0 / 360.0
-    height_km = d_lat * km_per_deg
-    width_km = d_lon * km_per_deg * np.cos(np.deg2rad(center_lat))
+    # convert the LL box corners (in degrees LL) to an extent box
+    # [min_lon, min_lat, max_lon, max_lat]
+    latlon_extent = [cfg_d['lon_ul'], cfg_d['lat_lr'], 
+                     cfg_d['lon_lr'], cfg_d['lat_ul']]
 
-    scn = get_scene_obj(file_list, center_lat, center_lon,
-                        width_km, height_km,
+    scn = get_scene_obj(file_list, latlon_extent,
                         resample_method=cfg_d['resample_method'])
     crs = scn['true_color'].attrs['area'].to_cartopy_crs()
 
