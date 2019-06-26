@@ -570,10 +570,12 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
 
     make_inset_map(inset_ax, cfg_d['geo_upper_left'], cfg_d['geo_lower_right'])
     mean_time_offset = np.mean(time_offsets)/60.0
+    todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
     ax.set_title('Overlay data from '+
                  os.path.split(ovr_d['var_file'])[1] +
                  '\n background from GOES16-ABI, mean time offset = ' +
-                 '{0:4.1f}  min'.format(mean_time_offset),
+                 '{0:4.1f}  min'.format(mean_time_offset) +
+                 '\nplot created on ' + todays_date,
                  size='x-small')
 
     anno_axes = annotate_ll_axes(

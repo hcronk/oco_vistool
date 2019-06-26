@@ -1063,9 +1063,11 @@ def do_modis_overlay_plot(
         else:
             ax.scatter(var_lon, var_lat, c=cmap, edgecolor='none', s=2)
 
+    todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
     ax.set_title('Overlay data from '+
                  os.path.split(ovr_d['var_file'])[1] +
-                 '\n background image from MODIS-Aqua on Worldview', 
+                 '\nbackground image from MODIS-Aqua on Worldview' +
+                 '\nplot created on ' + todays_date,
                  size='x-small')
 
     # during testing, it appears that sometimes the scatter
