@@ -1,6 +1,7 @@
 import h5py
 import sys
 import numpy as np
+import datetime
 
 class LiteSIFFile:
 
@@ -40,7 +41,18 @@ class LiteSIFFile:
     def get_SIF_units(self):
         SIF_obj = self.lf['SIF_757nm']
         return SIF_obj.attrs.get('unit').decode('utf-8') 
-        
+
+    def get_time(self):
+        # gets time and shifts it to match the 1970 reference time
+        # (standard unix time stamp)
+        # this matches LtCO2 except that there is a leap second
+        # mismatch (the same sounding ID in LtCO2 will be off by 
+        # the leap second change.)
+        t = self.lf['time'][:]
+        dt = datetime.datetime(1993,1,1) - datetime.datetime(1970,1,1)
+        t = t + dt.total_seconds()
+        return t
+
     def close_file(self):
         self.lf.close()
 
@@ -100,6 +112,9 @@ class LiteCO2File:
 
     def get_sfc_type(self):
         return self.lf['/Retrieval/surface_type'][:]
+
+    def get_time(self):
+        return self.lf['time'][:]
     
     def close_file(self):
         self.lf.close()
