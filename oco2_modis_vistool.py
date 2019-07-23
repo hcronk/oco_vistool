@@ -58,8 +58,9 @@ import argparse
 
 import re
 
-import future
-from builtins import range
+if sys.version_info < (3,):
+    import future
+    from builtins import range
 
 class ConfigFile:
 
