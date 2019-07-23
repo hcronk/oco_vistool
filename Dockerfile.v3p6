@@ -1,8 +1,6 @@
-FROM continuumio/anaconda3
+FROM continuumio/anaconda3:5.3.0
 
-RUN apt-get install -y vim
-RUN conda install -y -c conda-forge cartopy
-RUN conda install -y -c conda-forge gdal
-RUN conda install -y -c conda-forge ncurses
-RUN conda install -y -c conda-forge hdf5
-RUN conda install -y -c conda-forge future
+RUN conda install -y -c conda-forge numpy=1.16.3
+RUN conda install -y -c conda-forge numpy-base=1.16.3
+RUN conda install -y -c conda-forge gdal=2.3.3
+RUN conda install -y -c conda-forge cartopy=0.16.0
