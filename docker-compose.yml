@@ -2,11 +2,9 @@ version: "2"
 
 services:
     vistool:
-        build:
-            context: .
-            dockerfile: Dockerfile.v3p6
-        image: oco2_modis_vistool_v3p6
-        container_name: oco2_modis_vistool_v3p6
+        build: .
+        image: oco2_modis_vistool
+        container_name: oco2_modis_vistool
         volumes:
         - ./:/code/
         tty: true
