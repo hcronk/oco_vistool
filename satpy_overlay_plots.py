@@ -218,7 +218,7 @@ def get_scene_obj(file_list, latlon_extent, width=750, height=750,
     return new_scn
 
 
-def setup_axes(fignum, crs, figsize=(6,6), create_colorbar_axis=True):
+def setup_axes(fignum, crs, figsize=(10,8), create_colorbar_axis=True):
     """
     setup gridspec axes
 
@@ -240,13 +240,13 @@ def setup_axes(fignum, crs, figsize=(6,6), create_colorbar_axis=True):
 
     gs = mpl.gridspec.GridSpec(16, 16)
 
-    ax = plt.subplot(gs[0:-1,3:-2], projection=crs)
+    ax = plt.subplot(gs[0:-1,2:-2], projection=crs)
     if create_colorbar_axis:
         cb_ax = plt.subplot(gs[0:-1, -1])
     else:
         cb_ax = None
 
-    inset_ax = plt.subplot(gs[7:9, 0:3], projection=ccrs.PlateCarree())
+    inset_ax = plt.subplot(gs[6:9, 0:2], projection=ccrs.PlateCarree())
     
     return gs, ax, cb_ax, inset_ax
 
@@ -486,10 +486,10 @@ def overlay_data(ax, cb_ax, odata, var_label=None, **kw):
         if use_cmap:
             ax.scatter(odata['lon'], odata['lat'], c=odata['var_data'],
                        cmap=cmap_name, vmin=vmin, vmax=vmax,
-                       s=2, edgecolor='none', transform=ccrs.PlateCarree())
+                       s=9, edgecolor='none', transform=ccrs.PlateCarree())
         else:
             ax.scatter(odata['lon'], odata['lat'], c=color_name,
-                       s=2, edgecolor='none', transform=ccrs.PlateCarree())
+                       s=9, edgecolor='none', transform=ccrs.PlateCarree())
 
     if use_cmap:
         cb = mpl.colorbar.ColorbarBase(
@@ -497,7 +497,7 @@ def overlay_data(ax, cb_ax, odata, var_label=None, **kw):
         if var_label:
             cb_lab = cb.ax.set_xlabel(var_label, labelpad=8,
                                       fontweight='bold')
-            cb_lab.set_fontsize(14)
+            cb_lab.set_fontsize(10)
             cb.ax.xaxis.set_label_position("top")
         for t in cb.ax.yaxis.get_ticklabels():
             t.set_weight("bold")
@@ -505,7 +505,7 @@ def overlay_data(ax, cb_ax, odata, var_label=None, **kw):
 
 
 def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
-                          var_label=None, fignum=10):
+                          var_label=None, domain='C', fignum=10):
     """
     make a GOES ABI overlay plot. This is function to integrate with the
     vistool plot data flow.
@@ -535,7 +535,8 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     else:
         dt = cfg_d['datetime']
     
-    file_list, time_offsets = get_ABI_files(dt, cfg_d['data_home'])
+    file_list, time_offsets = get_ABI_files(
+        dt, cfg_d['data_home'], domain=domain)
 
     # convert the LL box corners (in degrees LL) to an extent box
     # [min_lon, min_lat, max_lon, max_lat]
@@ -567,13 +568,26 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     make_inset_map(inset_ax, cfg_d['geo_upper_left'], cfg_d['geo_lower_right'])
     mean_time_offset = np.mean(time_offsets)/60.0
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
-    ax.set_title('Overlay data from '+
-                 os.path.split(ovr_d['var_file'])[1] +
-                 '\n background from GOES16-ABI, mean time offset = ' +
-                 '{0:4.1f}  min'.format(mean_time_offset) +
-                 '\nplot created on ' + todays_date,
-                 size='x-small')
+    if ovr_d:
+        title_string = (
+            'Overlay data from {0:s}' +
+            '\nBackground from GOES16-ABI {1:s}, '+
+            'mean time offset = {2:4.1f} min.'+
+            '\nplot created on {3:d}' )
+        title_string = title_string.format(
+            os.path.split(ovr_d['var_file'])[1],
+            os.path.split(file_list[1])[1], mean_time_offset,
+            todays_date)
+    else:
+        title_string = (
+            'Background from GOES16-ABI {0:s}, time = {1:s} min.'+
+            '\nplot created on {2:d}' )
+        title_string = title_string.format(
+            os.path.split(file_list[1])[1],
+            dt.strftime('%Y-%m-%d %H:%M:%S'), todays_date)
 
+    ax.set_title(title_string, size='x-small')
+    ax.coastlines(resolution='10m', color='lightgray') 
     anno_axes = annotate_ll_axes(
         gs, cfg_d['geo_upper_left'], cfg_d['geo_lower_right'])
 
