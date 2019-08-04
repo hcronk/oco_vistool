@@ -8,6 +8,14 @@
 
 default_cmaps = dict()
 
+# L1 variables
+default_cmaps['SoundingMeasurements/rad_continuum_o2'] = 'Purples_r'
+default_cmaps['SoundingMeasurements/rad_continuum_weak_co2'] = 'Purples_r'
+default_cmaps['SoundingMeasurements/rad_continuum_strong_co2'] = 'Purples_r'
+default_cmaps['SoundingMeasurements/radiance_o2'] = 'Purples_r'
+default_cmaps['SoundingMeasurements/radiance_weak_co2'] = 'Purples_r'
+default_cmaps['SoundingMeasurements/radiance_strong_co2'] = 'Purples_r'
+
 # LtCO2 variables
 default_cmaps['xco2'] = 'viridis'
 default_cmaps['Retrieval/xco2_raw'] = 'viridis'
