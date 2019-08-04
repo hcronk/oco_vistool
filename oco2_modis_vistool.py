@@ -683,11 +683,8 @@ def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
         lat_data = np.reshape(lat_data, shape2D)
         lon_data = np.reshape(lon_data, shape2D)
 
-    if var_data.ndim == 3:
-        print('warning, hack in play to allow plotting of radiance')
-        var_data = var_data[:,fpi,10].flatten()
-    else:
-        var_data = var_data[:,fpi].flatten()
+
+    var_data = var_data[:,fpi].flatten()
     sounding_id = sounding_id[:,fpi].flatten()
     timestamps = timestamps[:,fpi].flatten()
     sounding_qf = sounding_qf[:,fpi].flatten()
