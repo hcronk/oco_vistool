@@ -494,7 +494,7 @@ def process_config_dict(input_dict):
     cfg_d['sensor'] = input_dict.get('sensor', 'MODIS')
     if cfg_d['sensor'] == "":
         cfg_d['sensor'] = 'MODIS'
-    valid_sensor_names = ('MODIS', 'GOES16_ABI')
+    valid_sensor_names = ('MODIS', 'GOES16_ABI_C', 'GOES16_ABI_F')
     if cfg_d['sensor'] not in valid_sensor_names:
         raise ValueError('sensor name: ' + cfg_d['sensor'] + ' is not valid')
     
@@ -630,7 +630,7 @@ def _compute_ll_msk(lat_data, lon_data, lat_ul, lat_lr, lon_ul, lon_lr):
     return ll_msk
     
 
-def load_OCO2_L1L2_overlay_data(ovr_d):
+def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
     
     # data dictionary that will be constructed.
     dd = collections.OrderedDict()
@@ -644,11 +644,24 @@ def load_OCO2_L1L2_overlay_data(ovr_d):
     var_data = h5[ovr_d['var_name']][:]
     sounding_id = h5['SoundingGeometry/sounding_id'][:]
     timestamps = h5['SoundingGeometry/sounding_time_tai93'][:]
+    sounding_qf = h5['SoundingGeometry/sounding_qual_flag'][:]
     dt = datetime.datetime(1993,1,1) - datetime.datetime(1970,1,1)
     timestamps += dt.total_seconds()
 
+    if load_view_geom:
+        solar_azi = h5['SoundingGeometry/sounding_solar_azimuth'][:]
+        solar_zen = h5['SoundingGeometry/sounding_solar_zenith'][:]
+        sensor_azi = h5['SoundingGeometry/sounding_azimuth'][:]
+        sensor_zen = h5['SoundingGeometry/sounding_zenith'][:]
+
     dd['data_long_name'] = ovr_d['var_name'].split('/')[-1]
-    dd['data_units'] = h5[ovr_d['var_name']].attrs['Units'][0].decode()
+
+    try:
+        dd['data_units'] = h5[ovr_d['var_name']].attrs['Units'][0].decode()
+    except KeyError:
+        # probably need a better solution here?
+        dd['data_units'] = ''
+        print('cannot read Units attribute')
 
     h5.close()
 
@@ -670,27 +683,38 @@ def load_OCO2_L1L2_overlay_data(ovr_d):
         lat_data = np.reshape(lat_data, shape2D)
         lon_data = np.reshape(lon_data, shape2D)
 
-    var_data = var_data[:,fpi].flatten()
+    if var_data.ndim == 3:
+        print('warning, hack in play to allow plotting of radiance')
+        var_data = var_data[:,fpi,10].flatten()
+    else:
+        var_data = var_data[:,fpi].flatten()
     sounding_id = sounding_id[:,fpi].flatten()
     timestamps = timestamps[:,fpi].flatten()
+    sounding_qf = sounding_qf[:,fpi].flatten()
 
     # now apply the latlon mask, and proceed to do the
     # subsetting.
     ll_msk = _compute_ll_msk(lat_data, lon_data,
                              ovr_d['lat_ul'], ovr_d['lat_lr'],
                              ovr_d['lon_ul'], ovr_d['lon_lr'])
-    #combined_msk = np.logical_and(combined_msk, ll_msk)
-    combined_msk = ll_msk
-
-    tmp_data = var_data[combined_msk]
-    dd['orbit_var_lims'] = np.ma.min(tmp_data), np.ma.max(tmp_data)
+    combined_msk = np.logical_and(ll_msk, sounding_qf==0)
 
     dd['var_data'] = var_data[combined_msk]
+    dd['orbit_var_lims'] = np.ma.min(dd['var_data']), np.ma.max(dd['var_data'])
+
     # note the ellipsis will work equally well for 1D or 2D (vertex) data
     dd['lat'] = lat_data[combined_msk, ...]
     dd['lon'] = lon_data[combined_msk, ...]
     dd['sounding_id'] = sounding_id[combined_msk]
     dd['time'] = timestamps[combined_msk]
+
+    dd['data_fill'] = -999999.0
+
+    if load_view_geom:
+        dd['solar_zen'] = solar_zen[:,fpi].flatten()[combined_msk]
+        dd['solar_azi'] = solar_azi[:,fpi].flatten()[combined_msk]
+        dd['sensor_zen'] = sensor_zen[:,fpi].flatten()[combined_msk]
+        dd['sensor_azi'] = sensor_azi[:,fpi].flatten()[combined_msk]
 
     return dd
 
@@ -1154,10 +1178,12 @@ if __name__ == "__main__":
                 np.array([]), np.array([]),
                 interest_pt=cfg_d['ground_site'], cmap='black',
                 out_plot=out_plot_name, cities=cfg_d['city_labels'])
-        elif cfg_d['sensor'] == 'GOES16_ABI':
+        elif cfg_d['sensor'].startswith('GOES16_ABI'):
             import satpy_overlay_plots
+            GOES_domain = cfg_d['sensor'].split('_')[-1]
             satpy_overlay_plots.GOES_ABI_overlay_plot(
-                cfg_d, None, None, out_plot_name=out_plot_name)
+                cfg_d, None, None, domain = GOES_domain,
+                out_plot_name=out_plot_name)
         else:
             raise ValueError('Unknown sensor: '+cfg_d['sensor'])
 
@@ -1243,10 +1269,12 @@ if __name__ == "__main__":
             var_name=ovr_d['var_name'],
             out_plot=out_plot_name, out_data=out_data_name,
             var_label=cbar_name, cities=cfg_d['city_labels'])
-    elif cfg_d['sensor'] == 'GOES16_ABI':
+    elif cfg_d['sensor'].startswith('GOES16_ABI'):
         import satpy_overlay_plots
+        GOES_domain = cfg_d['sensor'].split('_')[-1]
         satpy_overlay_plots.GOES_ABI_overlay_plot(
             cfg_d, ovr_d, odat, var_label=cbar_name,
+            domain=GOES_domain,
             out_plot_name=out_plot_name)
     else:
         raise ValueError('Unknown sensor: '+cfg_d['sensor'])
