@@ -171,7 +171,10 @@ def _process_overlay_dict(input_dict):
     ovr_d['var_name_only'] = re.split('/', ovr_d['var_name'])[-1]
     ovr_d['lat_name'] = input_dict['lat_name']
     ovr_d['lon_name'] = input_dict['lon_name']
-    ovr_d['orbit'] = int(input_dict['orbit'])
+    try:
+        ovr_d['orbit'] = int(input_dict['orbit'])
+    except:
+        ovr_d['orbit'] = False
 
     ovr_d['band_number'] = input_dict.get('band_number', None)
     # convert empty string to None
