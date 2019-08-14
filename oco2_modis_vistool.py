@@ -446,6 +446,7 @@ def process_config_dict(input_dict):
     except:
         raise ValueError('input field "date" has incorrect format, expecting YYYY-MM-DD')
 
+    
     if cfg_d['ground_site']:
         cfg_d['ground_site'] = float(cfg_d['ground_site'][0]), float(cfg_d['ground_site'][1])
         if (cfg_d['ground_site'][0] > cfg_d['lat_ul'] or
@@ -455,6 +456,8 @@ def process_config_dict(input_dict):
             cfg_d['ground_site'] = None
             print("The ground site is outside the given lat/lon range and "+
                   "will not be included in the output plot.\n")
+    else:
+        cfg_d['ground_site'] = None
 
     if cfg_d['city_labels'] == '':
         cfg_d['city_labels'] = None
