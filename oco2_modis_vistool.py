@@ -240,7 +240,7 @@ def _process_overlay_dict(input_dict):
                          'number in range [0,1]')
 
     try:
-        ovr_d['lite_quality'] = input_dict['lite_qf']
+        ovr_d['lite_quality'] = input_dict['lite_QF']
     except KeyError :
         print("No quality specifications detected. Output plot will contain all quality soundings")
         ovr_d['lite_quality'] = 'all'
