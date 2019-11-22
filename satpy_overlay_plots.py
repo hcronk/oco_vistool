@@ -571,17 +571,17 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     if ovr_d:
         title_string = (
             'Overlay data from {0:s}' +
-            '\nBackground from GOES16-ABI {1:s}, '+
+            '\nBackground from {1:s}, '+
             'mean time offset = {2:4.1f} min.'+
-            '\nplot created on {3:d}' )
+            '\nplot created on {3:s}' )
         title_string = title_string.format(
             os.path.split(ovr_d['var_file'])[1],
             os.path.split(file_list[1])[1], mean_time_offset,
             todays_date)
     else:
         title_string = (
-            'Background from GOES16-ABI {0:s}, time = {1:s} min.'+
-            '\nplot created on {2:d}' )
+            'Background from  {0:s}, time = {1:s} min.'+
+            '\nplot created on {2:s}' )
         title_string = title_string.format(
             os.path.split(file_list[1])[1],
             dt.strftime('%Y-%m-%d %H:%M:%S'), todays_date)
