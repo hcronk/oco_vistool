@@ -318,6 +318,16 @@ def _process_overlay_dict(input_dict):
         # (the scalar will generate a TypeError on len().)
         ovr_d['footprint_lims'] = [ovr_d['footprint_lims']]
         
+
+    # an optional setting to shift the overlay lat/lon (e.g., "fixing"
+    # a geolocation error.)
+    # Note here we are breaking with the pattern above, because it is 
+    # starting to feel cumbersome. Instead, use the pythonic pattern of
+    # dict.get('key', 'default'); then the value could be checked after
+    # to be within some valid range or datatype.
+    ovr_d['lat_shift'] = input_dict.get('lat_shift', 0.0)
+    ovr_d['lon_shift'] = input_dict.get('lon_shift', 0.0)
+
     for ft in ovr_d['footprint_lims']:
         if ft not in np.arange(1, 9):
             print("Unexpected footprint specification. Limits must be within [1, 8].")
@@ -648,6 +658,9 @@ def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
     dt = datetime.datetime(1993,1,1) - datetime.datetime(1970,1,1)
     timestamps += dt.total_seconds()
 
+    lat_data += ovr_d['lat_shift']
+    lon_data += ovr_d['lon_shift']
+
     if load_view_geom:
         solar_azi = h5['SoundingGeometry/sounding_solar_azimuth'][:]
         solar_zen = h5['SoundingGeometry/sounding_solar_zenith'][:]
@@ -805,6 +818,9 @@ def load_OCO2_Lite_overlay_data(ovr_d):
     if lat_data.ndim != lon_data.ndim:
         print(ovr_d['lat_name']+" and "+ovr_d['lon_name']+" have different dimensions. Exiting")
         sys.exit()
+
+    lat_data += ovr_d['lat_shift']
+    lon_data += ovr_d['lon_shift']
 
     if ovr_d['var_name'] == "Retrieval/reduced_chi_squared_per_band":
         if not ovr_d['band_number']:
