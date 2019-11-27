@@ -655,7 +655,7 @@ def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
 
     h5 = h5py.File(ovr_d['var_file'], "r")
 
-    frame_slice = slice(ovr_d['frame_limit_min'],ovr_d['frame_limit_max'])
+    frame_slice = slice(ovr_d['frame_limit_min'],ovr_d['frame_limit_max']+1)
 
     lat_data = h5[ovr_d['lat_name']][frame_slice,...]
     lon_data = h5[ovr_d['lon_name']][frame_slice,...]
