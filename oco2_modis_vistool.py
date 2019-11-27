@@ -328,6 +328,12 @@ def _process_overlay_dict(input_dict):
     ovr_d['lat_shift'] = input_dict.get('lat_shift', 0.0)
     ovr_d['lon_shift'] = input_dict.get('lon_shift', 0.0)
 
+    # another optional setting to extract a frame range before subsetting
+    # (this helps with TG mode, where the soundings overlap, esp. for OCO-3.)
+    # use the dict.get() method.
+    ovr_d['frame_limit_min'] = input_dict.get('frame_limit_min', None)
+    ovr_d['frame_limit_max'] = input_dict.get('frame_limit_max', None)
+
     for ft in ovr_d['footprint_lims']:
         if ft not in np.arange(1, 9):
             print("Unexpected footprint specification. Limits must be within [1, 8].")
@@ -649,12 +655,14 @@ def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
 
     h5 = h5py.File(ovr_d['var_file'], "r")
 
-    lat_data = h5[ovr_d['lat_name']][:]
-    lon_data = h5[ovr_d['lon_name']][:]
-    var_data = h5[ovr_d['var_name']][:]
-    sounding_id = h5['SoundingGeometry/sounding_id'][:]
-    timestamps = h5['SoundingGeometry/sounding_time_tai93'][:]
-    sounding_qf = h5['SoundingGeometry/sounding_qual_flag'][:]
+    frame_slice = slice(ovr_d['frame_limit_min'],ovr_d['frame_limit_max'])
+
+    lat_data = h5[ovr_d['lat_name']][frame_slice,...]
+    lon_data = h5[ovr_d['lon_name']][frame_slice,...]
+    var_data = h5[ovr_d['var_name']][frame_slice,...]
+    sounding_id = h5['SoundingGeometry/sounding_id'][frame_slice, ...]
+    timestamps = h5['SoundingGeometry/sounding_time_tai93'][frame_slice,...]
+    sounding_qf = h5['SoundingGeometry/sounding_qual_flag'][frame_slice,...]
     dt = datetime.datetime(1993,1,1) - datetime.datetime(1970,1,1)
     timestamps += dt.total_seconds()
 
@@ -662,10 +670,10 @@ def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
     lon_data += ovr_d['lon_shift']
 
     if load_view_geom:
-        solar_azi = h5['SoundingGeometry/sounding_solar_azimuth'][:]
-        solar_zen = h5['SoundingGeometry/sounding_solar_zenith'][:]
-        sensor_azi = h5['SoundingGeometry/sounding_azimuth'][:]
-        sensor_zen = h5['SoundingGeometry/sounding_zenith'][:]
+        solar_azi = h5['SoundingGeometry/sounding_solar_azimuth'][frame_slice,...]
+        solar_zen = h5['SoundingGeometry/sounding_solar_zenith'][frame_slice,...]
+        sensor_azi = h5['SoundingGeometry/sounding_azimuth'][frame_slice,...]
+        sensor_zen = h5['SoundingGeometry/sounding_zenith'][frame_slice,...]
 
     dd['data_long_name'] = ovr_d['var_name'].split('/')[-1]
 
