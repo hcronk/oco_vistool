@@ -1183,10 +1183,10 @@ if __name__ == "__main__":
 
         if not cfg_d['out_plot_name']:
             if cfg_d['region']:
-                out_plot_name = ("MODISimagery_" + cfg_d['region'] +
+                out_plot_name = (cfg_d['sensor']+"imagery_" + cfg_d['region'] +
                                  "_" + cfg_d['straight_up_date'] + ".png")
             else:
-                out_plot_name = ("MODISimagery_" + cfg_d['straight_up_date'] + ".png")
+                out_plot_name = (cfg_d['sensor']+"imagery_" + cfg_d['straight_up_date'] + ".png")
             out_plot_name = os.path.join(cfg_d['out_plot_dir'], out_plot_name)
         else:
             out_plot_name = os.path.join(cfg_d['out_plot_dir'], 
