@@ -31,7 +31,47 @@ from oco2_modis_vistool import read_shp
 # code is located).
 _code_dir = os.path.dirname(os.path.realpath(__file__))
 
-def get_ABI_files(datetime_utc, data_home, domain='C', verbose=False):
+def _approx_scanline_time(stime, etime, lat, domain):
+    """
+    returns the scanline time, for a particular lat, and domain (C or F).
+    see docstring in get_ABI_files for implementation notes.
+
+    returns a single datetime object with the approx scanline time.
+
+    if the lat is out of range, it returns the closest time; in other
+    words, out of range will be limited to pick the stime or etime.
+
+    inputs:
+    stime: datetime object with start time
+    etime: datetime object with end time
+    lat: latitude (scalar)
+    domain: (C)ONUS or (F)ull disk
+    """
+
+    if domain == 'C':
+        slat = 50.0
+        elat = 15.0
+    elif domain == 'F':
+        slat = 81.0
+        elat = -81.0
+    else:
+        raise ValueError('invalid domain: '+domain)
+
+    tfrac = (slat - lat) / (slat - elat)
+
+    if tfrac < 0:
+        scan_time = stime
+    elif tfrac > 1:
+        scan_time = etime
+    else:
+        total_time = (etime-stime).total_seconds()
+        scan_time = stime + datetime.timedelta(seconds=total_time*tfrac)
+
+    return scan_time
+
+
+def get_ABI_files(datetime_utc, center_lat, data_home,
+                  domain='C', verbose=False):
     """
     find the file list for an ABI domain, given an input date.
     this will find the images (for bands 1,2,3) closest to the UTC
@@ -77,6 +117,30 @@ def get_ABI_files(datetime_utc, data_home, domain='C', verbose=False):
 
     data_home/2018/2018_01_01_001/abi/L1b/RadC/
         OR_ABI-L1b-RadC-M3C01_G16_s20180010002196_e20180010004569_c20180010005015.nc
+
+    For the time offset calculation; there is not a straightforward
+    time for each series of scan lines in the L1b image. As a simple
+    approximation, we assume the data collection time is a linear ramp
+    between the start and end times (as encoded in the filename), and
+    that this ramp can be mapped in terms of latitude only. For a CONUS
+    image, we assume the ramp runs between latitude: 15 - 50 (approx.
+    CONUS coverage), and for Full Disk, between -81 and 81 (which is
+    roughly the full disk coverage from the Geo position.)
+
+    This approximation ignores any misalignment of the scans with respect
+    to parallels (lines of constant latitude) on the Earth surface; and
+    the curvature of the scan lines as the scans move away from the equator;
+    and ignores details of the true scan pattern. The true scan pattern 
+    would necessarily include time gaps between scans, and each scan itself
+    has a finite time for collection; The simple approximation here, treats
+    each East-West scan as an instantenous collection, and the scans are 
+    continuously and smoothly collected from the start to end time.
+
+    Put together, I think the different approximations here should incur
+    errors smaller than +/- 0.5 minutes, so it should be better than just
+    assuming the whole image was collected simultaneous at the mid time
+    (in which case the error could be up to the image revisit time, e.g.
+    5 minutes for CONUS or 10 minutes for Full disk)
 
     """
 
@@ -131,11 +195,13 @@ def get_ABI_files(datetime_utc, data_home, domain='C', verbose=False):
             continue
         time_offsets_all = []
         for n in range(nfiles):
-            stimestamp = flists[band][n].split('_')[-3]
-            # removes 's' and the extra number (frac seconds?)
-            stimestamp = stimestamp[1:-1]
-            file_stime = datetime.datetime.strptime(stimestamp, '%Y%j%H%M%S')
-            time_offsets_all.append((datetime_utc-file_stime).total_seconds())
+            # find the approx scan line time for the requested latitude.
+            stimestamp, etimestamp = flists[band][n].split('_')[-3:-1]
+            # [1:-1] slice removes 's' or 'e' and the extra number (frac seconds?)
+            stime = datetime.datetime.strptime(stimestamp[1:-1], '%Y%j%H%M%S')
+            etime = datetime.datetime.strptime(etimestamp[1:-1], '%Y%j%H%M%S')
+            scan_time = _approx_scanline_time(stime, etime, center_lat, domain)
+            time_offsets_all.append((datetime_utc-scan_time).total_seconds())
         # find minimum
         k = np.argmin(np.abs(time_offsets_all))
         flist.append(flists[band][k])
@@ -534,9 +600,10 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
         dt = datetime.datetime.fromtimestamp(np.mean(odat['time']))
     else:
         dt = cfg_d['datetime']
-    
+
+    center_lat = (cfg_d['lat_lr'] + cfg_d['lat_ul']) / 2.0
     file_list, time_offsets = get_ABI_files(
-        dt, cfg_d['data_home'], domain=domain)
+        dt, center_lat, cfg_d['data_home'], domain=domain)
 
     # convert the LL box corners (in degrees LL) to an extent box
     # [min_lon, min_lat, max_lon, max_lat]
@@ -568,23 +635,27 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     make_inset_map(inset_ax, cfg_d['geo_upper_left'], cfg_d['geo_lower_right'])
     mean_time_offset = np.mean(time_offsets)/60.0
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
+
     if ovr_d:
         title_string = (
             'Overlay data from {0:s}' +
             '\nBackground from {1:s}, '+
-            'mean time offset = {2:4.1f} min.'+
-            '\nplot created on {3:s}' )
+            '\nmean time offset = {2:4.1f} min.,  '+
+            'plot created on {3:s}' )
         title_string = title_string.format(
             os.path.split(ovr_d['var_file'])[1],
             os.path.split(file_list[1])[1], mean_time_offset,
             todays_date)
     else:
         title_string = (
-            'Background from  {0:s}, time = {1:s} min.'+
-            '\nplot created on {2:s}' )
+            'Background from  {0:s}' + 
+            '\n Request time = {1:s},   '+
+            'mean time offset = {2:4.1f} min.,  '+
+            'plot created on {3:s}' )
         title_string = title_string.format(
             os.path.split(file_list[1])[1],
-            dt.strftime('%Y-%m-%d %H:%M:%S'), todays_date)
+            dt.strftime('%Y-%m-%d %H:%M:%S'),
+            mean_time_offset, todays_date)
 
     ax.set_title(title_string, size='x-small')
     ax.coastlines(resolution='10m', color='lightgray') 
