@@ -640,11 +640,13 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
         title_string = (
             'Overlay data from {0:s}' +
             '\nBackground from {1:s}, '+
-            '\nmean time offset = {2:4.1f} min.,  '+
-            'plot created on {3:s}' )
+            '\nOverlay time = {2:s},   '+
+            'mean time offset = {3:4.1f} min.,  '+
+            'plot created on {4:s}' )
         title_string = title_string.format(
             os.path.split(ovr_d['var_file'])[1],
-            os.path.split(file_list[1])[1], mean_time_offset,
+            os.path.split(file_list[1])[1], 
+            dt.strftime('%Y-%m-%d %H:%M:%S'), mean_time_offset,
             todays_date)
     else:
         title_string = (
