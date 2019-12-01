@@ -382,6 +382,8 @@ def _process_overlay_dict(input_dict):
         else:
             print("Output plot will include "+ovr_d['lite_quality']+" quality soundings\n")
 
+    ovr_d['make_background_image'] = input_dict.get(
+        'make_background_image', False)
 
     return ovr_d
 
@@ -655,7 +657,11 @@ def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
 
     h5 = h5py.File(ovr_d['var_file'], "r")
 
-    frame_slice = slice(ovr_d['frame_limit_min'],ovr_d['frame_limit_max']+1)
+    if ovr_d['frame_limit_max'] is None:
+        frame_slice = slice(ovr_d['frame_limit_min'],None)
+    else:
+        frame_slice = slice(ovr_d['frame_limit_min'],
+                            ovr_d['frame_limit_max']+1)
 
     lat_data = h5[ovr_d['lat_name']][frame_slice,...]
     lon_data = h5[ovr_d['lon_name']][frame_slice,...]
@@ -1175,22 +1181,39 @@ if __name__ == "__main__":
         print('The expected configuration file '+ args.config_file_loc + ' DNE in ' + code_dir)
         print('Exiting')
         sys.exit()
-
+    
     cfg_d, ovr_d = process_config_dict(input_dict)
 
-    # with no overlay data requested, simply generate the MODIS image by itself and exit.
-    if not ovr_d:
+    if ovr_d:
+        if ovr_d['sif_or_co2']:
+            odat = load_OCO2_Lite_overlay_data(ovr_d)
+        else:
+            odat = load_OCO2_L1L2_overlay_data(ovr_d)
+    
+    # if there is no overlay data present, or the 'background image'
+    # flag is set, then generate the image without overlay data.
+
+    if ovr_d:
+        make_background_image = ovr_d['make_background_image']
+        dt = datetime.datetime.fromtimestamp(np.mean(odat['time']))
+        cfg_d['datetime'] = dt
+    else:
+        make_background_image = True
+
+    if make_background_image:
 
         if not cfg_d['out_plot_name']:
             if cfg_d['region']:
                 out_plot_name = (cfg_d['sensor']+"imagery_" + cfg_d['region'] +
                                  "_" + cfg_d['straight_up_date'] + ".png")
             else:
-                out_plot_name = (cfg_d['sensor']+"imagery_" + cfg_d['straight_up_date'] + ".png")
+                out_plot_name = (cfg_d['sensor']+"imagery_" + 
+                                 cfg_d['straight_up_date'] + ".png")
             out_plot_name = os.path.join(cfg_d['out_plot_dir'], out_plot_name)
         else:
-            out_plot_name = os.path.join(cfg_d['out_plot_dir'], 
-                                         cfg_d['out_plot_name'])
+            out_plot_name = os.path.join(
+                cfg_d['out_plot_dir'], 
+                cfg_d['sensor']+"imagery_" + cfg_d['out_plot_name'])
 
         if cfg_d['sensor'] == 'MODIS':
             do_modis_overlay_plot(
@@ -1208,13 +1231,6 @@ if __name__ == "__main__":
         else:
             raise ValueError('Unknown sensor: '+cfg_d['sensor'])
 
-        sys.exit()
-
-    if ovr_d['sif_or_co2']:
-        odat = load_OCO2_Lite_overlay_data(ovr_d)
-    else:
-        odat = load_OCO2_L1L2_overlay_data(ovr_d)
-    
     # here, handle the var limit options.
     # if specific limits were input, via a 2-element list,
     # that will be passed directly to do_modis_overlay_plot().

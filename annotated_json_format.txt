@@ -46,7 +46,6 @@ out_data_name: set to a specific filename to control the output h5 data
     string, which means a default file name is constructed, matching the
     default plot name.
 
-
 Overlay specification:
 
 Required Fields
@@ -110,3 +109,9 @@ frame_limit_max: set to an integer frame number (0-indexed) to use a frame
     skipped, this will act as a 1-sided interval. For example, to use all
     frames from number 1000 to the end of the file, set frame_limit_min to
     1000 and do not specify the max value.
+make_background_image: set to 1, to make an additional plot containing the
+    background image without the overlay data. This is useful to be able
+    to "blink" between an image with and without the overlay, as an alternative
+    to using transparency as a way to see both the overlay data and the RGB
+    background image. If the field is skipped, or set to zero, then only
+    the full overlay data image is created.
