@@ -1190,9 +1190,33 @@ if __name__ == "__main__":
         else:
             odat = load_OCO2_L1L2_overlay_data(ovr_d)
     
+    # construct the auto-generated filename - it is easiest to do this
+    # once here (since it gets reused in multiple places)
+    if ovr_d:
+        output_file_root = ovr_d['var_name_only']
+        if cfg_d['region']:
+            output_file_root = output_file_root + "_" + cfg_d['region']
+        output_file_root = (output_file_root + "_" +
+                            cfg_d['straight_up_date'] + 
+                            ovr_d['version_file_tag']+
+                            ovr_d['qf_file_tag']+
+                            ovr_d['wl_file_tag']+
+                            ovr_d['fp_file_tag'])
+    else:
+        output_file_root = cfg_d['straight_up_date']
+
+    if cfg_d['out_plot_name']:
+        out_plot_name = cfg_d['out_plot_name']
+    else:
+        out_plot_name = output_file_root + '.png'
+
+    if cfg_d['out_data_name']:
+        out_data_name = cfg_d['out_data_name']
+    else:
+        out_data_name = output_file_root + '.h5'
+
     # if there is no overlay data present, or the 'background image'
     # flag is set, then generate the image without overlay data.
-
     if ovr_d:
         make_background_image = ovr_d['make_background_image']
         dt = datetime.datetime.fromtimestamp(np.mean(odat['time']))
@@ -1202,18 +1226,9 @@ if __name__ == "__main__":
 
     if make_background_image:
 
-        if not cfg_d['out_plot_name']:
-            if cfg_d['region']:
-                out_plot_name = (cfg_d['sensor']+"imagery_" + cfg_d['region'] +
-                                 "_" + cfg_d['straight_up_date'] + ".png")
-            else:
-                out_plot_name = (cfg_d['sensor']+"imagery_" + 
-                                 cfg_d['straight_up_date'] + ".png")
-            out_plot_name = os.path.join(cfg_d['out_plot_dir'], out_plot_name)
-        else:
-            out_plot_name = os.path.join(
-                cfg_d['out_plot_dir'], 
-                cfg_d['sensor']+"imagery_" + cfg_d['out_plot_name'])
+        out_plot_fullpath = os.path.join(
+            cfg_d['out_plot_dir'], 
+            cfg_d['sensor']+"_imagery_" + out_plot_name)
 
         if cfg_d['sensor'] == 'MODIS':
             do_modis_overlay_plot(
@@ -1221,13 +1236,13 @@ if __name__ == "__main__":
                 cfg_d['date'], np.array([]), np.array([]),
                 np.array([]), np.array([]),
                 interest_pt=cfg_d['ground_site'], cmap='black',
-                out_plot=out_plot_name, cities=cfg_d['city_labels'])
+                out_plot=out_plot_fullpath, cities=cfg_d['city_labels'])
         elif cfg_d['sensor'].startswith('GOES16_ABI'):
             import satpy_overlay_plots
             GOES_domain = cfg_d['sensor'].split('_')[-1]
             satpy_overlay_plots.GOES_ABI_overlay_plot(
                 cfg_d, None, None, domain = GOES_domain,
-                out_plot_name=out_plot_name)
+                out_plot_name=out_plot_fullpath)
         else:
             raise ValueError('Unknown sensor: '+cfg_d['sensor'])
 
@@ -1264,35 +1279,8 @@ if __name__ == "__main__":
         cbar_name = ""
 
     # construct filenames for the plot and optional h5 output file.
-    if not cfg_d['out_plot_name']:
-        out_plot_name = ovr_d['var_name_only']
-        if cfg_d['region']:
-            out_plot_name = out_plot_name + "_" + cfg_d['region']
-        out_plot_name = (out_plot_name + "_" +
-                         cfg_d['straight_up_date'] + 
-                         ovr_d['version_file_tag']+
-                         ovr_d['qf_file_tag']+
-                         ovr_d['wl_file_tag']+
-                         ovr_d['fp_file_tag']+".png")
-        out_plot_name = os.path.join(cfg_d['out_plot_dir'], out_plot_name)
-    else:
-        out_plot_name = os.path.join(cfg_d['out_plot_dir'], 
-                                     cfg_d['out_plot_name'])
-
-    if not cfg_d['out_data_name']:
-        out_data_name = ovr_d['var_name_only']
-        if cfg_d['region']:
-            out_data_name = out_data_name + "_" + cfg_d['region']
-        out_data_name = (out_data_name + "_" +
-                         cfg_d['straight_up_date'] + 
-                         ovr_d['version_file_tag']+
-                         ovr_d['qf_file_tag']+
-                         ovr_d['wl_file_tag']+
-                         ovr_d['fp_file_tag']+".h5")
-        out_data_name = os.path.join(cfg_d['out_data_dir'], out_data_name)
-    else:
-        out_data_name = os.path.join(cfg_d['out_data_dir'], 
-                                     cfg_d['out_data_name'])
+    out_plot_fullpath = os.path.join(cfg_d['out_plot_dir'], out_plot_name)
+    out_data_fullpath = os.path.join(cfg_d['out_data_dir'], out_data_name)
 
     if cfg_d['sensor'] == 'MODIS':
         do_modis_overlay_plot(
@@ -1304,7 +1292,7 @@ if __name__ == "__main__":
             cmap=ovr_d['cmap'], alpha=ovr_d['alpha'],
             lat_name=ovr_d['lat_name'], lon_name=ovr_d['lon_name'],
             var_name=ovr_d['var_name'],
-            out_plot=out_plot_name, out_data=out_data_name,
+            out_plot=out_plot_fullpath, out_data=out_data_fullpath,
             var_label=cbar_name, cities=cfg_d['city_labels'])
     elif cfg_d['sensor'].startswith('GOES16_ABI'):
         import satpy_overlay_plots
@@ -1315,7 +1303,6 @@ if __name__ == "__main__":
             out_plot_name=out_plot_name)
     else:
         raise ValueError('Unknown sensor: '+cfg_d['sensor'])
-
 
     ### Write data to hdf5 file ###
     if odat['var_data'].shape[0] == 0:
