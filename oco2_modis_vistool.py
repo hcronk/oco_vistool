@@ -364,7 +364,7 @@ def _process_overlay_dict(input_dict):
         #print("Expected filename convention: oco2_LtNNN_YYYYMMDD_B8xxxxx_rxx*.nc, where NNN is CO2 or SIF")
         #print("Other data will need to be plotted by importing the tool as a Python module.")
         print("Warning, input file does not appear to be Lite SIF or CO2")
-        print("proceeding with experimented L1/L2 data process.")
+        print("proceeding with experimental L1/L2 data process.")
         ovr_d['sif_or_co2'] = None 
         ovr_d['qf_file_tag'] = ""
         ovr_d['wl_file_tag'] = ""
