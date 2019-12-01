@@ -928,7 +928,8 @@ def do_modis_overlay_plot(
     var_lat, var_lon, var_vals, var_vals_missing=None, lite_sid=np.empty([]),
     var_lims=None, interest_pt=None,
     cmap='jet', alpha=1, lat_name=None, lon_name=None, var_name=None,
-    out_plot="vistool_output.png", out_data="vistool_output.h5", var_label=None, cities=None):
+    out_plot="vistool_output.png", var_label=None, cities=None,
+    var_file=None):
 
     lat_ul = geo_upper_left[0]
     lon_ul = geo_upper_left[1]
@@ -1115,11 +1116,16 @@ def do_modis_overlay_plot(
             ax.scatter(var_lon, var_lat, c=cmap, edgecolor='none', s=2)
 
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
-    ax.set_title('Overlay data from '+
-                 os.path.split(ovr_d['var_file'])[1] +
-                 '\nbackground image from MODIS-Aqua on Worldview' +
-                 '\nplot created on ' + todays_date,
-                 size='x-small')
+    if var_file:
+        ax.set_title('Overlay data from '+
+                     os.path.split(ovr_d['var_file'])[1] +
+                     '\nbackground image from MODIS-Aqua on Worldview' +
+                     '\nplot created on ' + todays_date,
+                     size='x-small')
+    else:
+        ax.set_title('background image from MODIS-Aqua on Worldview' +
+                     '\nplot created on ' + todays_date,
+                     size='x-small')
 
     # during testing, it appears that sometimes the scatter
     # could cause MPL to shift the axis range - I think because one
@@ -1219,8 +1225,10 @@ if __name__ == "__main__":
     # flag is set, then generate the image without overlay data.
     if ovr_d:
         make_background_image = ovr_d['make_background_image']
-        dt = datetime.datetime.fromtimestamp(np.mean(odat['time']))
-        cfg_d['datetime'] = dt
+        # there can be an overlay dict, but it might have no data.
+        if len(odat['time']) > 0:
+            dt = datetime.datetime.fromtimestamp(np.mean(odat['time']))
+            cfg_d['datetime'] = dt
     else:
         make_background_image = True
 
@@ -1245,6 +1253,11 @@ if __name__ == "__main__":
                 out_plot_name=out_plot_fullpath)
         else:
             raise ValueError('Unknown sensor: '+cfg_d['sensor'])
+
+
+    # at this point, if there is no overlay to process, can exit here.
+    if len(ovr_d) == 0:
+        sys.exit()
 
     # here, handle the var limit options.
     # if specific limits were input, via a 2-element list,
@@ -1292,8 +1305,9 @@ if __name__ == "__main__":
             cmap=ovr_d['cmap'], alpha=ovr_d['alpha'],
             lat_name=ovr_d['lat_name'], lon_name=ovr_d['lon_name'],
             var_name=ovr_d['var_name'],
-            out_plot=out_plot_fullpath, out_data=out_data_fullpath,
-            var_label=cbar_name, cities=cfg_d['city_labels'])
+            out_plot=out_plot_fullpath,
+            var_label=cbar_name, cities=cfg_d['city_labels'],
+            var_file=os.path.split(ovr_d['var_file'])[1])
     elif cfg_d['sensor'].startswith('GOES16_ABI'):
         import satpy_overlay_plots
         GOES_domain = cfg_d['sensor'].split('_')[-1]
