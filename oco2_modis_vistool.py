@@ -60,8 +60,9 @@ import argparse
 
 import re
 
-import future
-from builtins import range
+if sys.version_info < (3,):
+    import future
+    from builtins import range
 
 # Note: there is a conditional import of the satpy module below;
 # this is to reduce import time, for cases when it is not used
@@ -176,7 +177,10 @@ def _process_overlay_dict(input_dict):
     ovr_d['var_name_only'] = re.split('/', ovr_d['var_name'])[-1]
     ovr_d['lat_name'] = input_dict['lat_name']
     ovr_d['lon_name'] = input_dict['lon_name']
-    ovr_d['orbit'] = int(input_dict['orbit'])
+    try:
+        ovr_d['orbit'] = int(input_dict['orbit'])
+    except:
+        ovr_d['orbit'] = False
 
     ovr_d['band_number'] = input_dict.get('band_number', None)
     # convert empty string to None
@@ -249,7 +253,7 @@ def _process_overlay_dict(input_dict):
                          'number in range [0,1]')
 
     try:
-        ovr_d['lite_quality'] = input_dict['lite_qf']
+        ovr_d['lite_quality'] = input_dict['lite_QF']
     except KeyError :
         print("No quality specifications detected. Output plot will contain all quality soundings")
         ovr_d['lite_quality'] = 'all'
@@ -483,6 +487,7 @@ def process_config_dict(input_dict):
     except:
         raise ValueError('input field "date" has incorrect format, expecting YYYY-MM-DD')
 
+    
     if cfg_d['ground_site']:
         cfg_d['ground_site'] = float(cfg_d['ground_site'][0]), float(cfg_d['ground_site'][1])
         if (cfg_d['ground_site'][0] > cfg_d['lat_ul'] or
@@ -492,6 +497,8 @@ def process_config_dict(input_dict):
             cfg_d['ground_site'] = None
             print("The ground site is outside the given lat/lon range and "+
                   "will not be included in the output plot.\n")
+    else:
+        cfg_d['ground_site'] = None
 
     if cfg_d['city_labels'] == '':
         cfg_d['city_labels'] = None
