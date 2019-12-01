@@ -1,3 +1,4 @@
 *.png
 *.h5
 *~
+__pycache__
