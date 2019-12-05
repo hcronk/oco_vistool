@@ -1321,7 +1321,7 @@ if __name__ == "__main__":
         satpy_overlay_plots.GOES_ABI_overlay_plot(
             cfg_d, ovr_d, odat, var_label=cbar_name,
             domain=GOES_domain,
-            out_plot_name=out_plot_name)
+            out_plot_name=out_plot_fullpath)
     else:
         raise ValueError('Unknown sensor: '+cfg_d['sensor'])
 
@@ -1330,6 +1330,6 @@ if __name__ == "__main__":
         print("\nThere is no valid data for the given subset criteria.")
     else:
         write_h5_data_subset(
-            out_data_name, odat['sounding_id'],
+            out_data_fullpath, odat['sounding_id'],
             odat['lat'], odat['lon'], odat['var_data'],
             ovr_d['lat_name'], ovr_d['lon_name'], ovr_d['var_name'])
