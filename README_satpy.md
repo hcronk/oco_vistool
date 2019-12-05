@@ -20,6 +20,25 @@ The bare minimum install would be (tested with python 3.6, conda 4.6.14, June 20
 
 `$ conda install -c conda-forge gdal`
 
+
+### temporary version issue
+
+As of 2019-12-05, satpy may fail due to a regression bug in one of the 
+libraries it uses. If the version of tqdm is 4.40, then satpy will likely 
+crash with an Assertion error:
+
+```
+"/.../lib/python3.6/site-packages/tqdm/std.py", line 146, in __init__
+    assert 0 <= frac <= 1
+AssertionError
+```
+
+If this occurs, downgrading tqdm to an earlier version (4.32.2 works) should 
+fix the issue:
+
+`$ conda install tqdm=4.32.2 -c conda-forge`
+
+
 ### environment notes
 
 satpy uses the dask library for fast multithreaded processing of the large ABI 
