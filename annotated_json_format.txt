@@ -1,0 +1,117 @@
+Notes on JSON file format.
+--------------------------
+
+Top level JSON specification:
+
+Required fields
+---------------
+date:	year-month-day "YYYY-MM-DD" format
+sensor: string sensor name, one of: "MODIS" to retrieve MODIS-Aqua RGB
+    imagery from NASA Worldview; GOES16_ABI_C or GOES16_ABI_F for ABI
+    RGB imagery from GOES-16, from (C)ONUS or (F)ull disk data.
+data_home: If GOES16 is selected, this must specified with the path to the
+    L1b radiance files. This is not needed for MODIS.
+geo_upper_left: two element lat, lon values for upper left corner of
+    background image (MODIS or GOES-ABI)
+geo_lower_right: two element lat, lon values for lower right corner of
+    background image (MODIS or GOES-ABI)
+
+
+Optional Fields
+---------------
+region: a string containing the name of the geographic region being plotted.
+    this is used as part of the filename for the automatic image file creation
+    skipping this field is equivalent to setting it to an empty string.
+ground_site: two element lat, lon value, to mark a specific ground location point
+    of interest. This will be marked with a white star.
+city_labels: set to a matplotlib color; this will cause city names to be drawn on
+    the plot in the desired color.
+    Skipping this field is equivalent to setting it to an empty string, which
+    means the city labels will not be plotted.
+oco2_overlay_info: set this to a nested JSON structure. (see below for
+    description).
+out_plot_dir: set to a specific directory, for the automatically generated
+    image plot. Skipping this field is equivalent to setting it to an empty
+    string, in which case the file is created in the current dir.
+out_plot_name: set to a specific filename to control the output image filename.
+    Skipping this field is equivalent to setting it to an empty string,
+    which means a default plot name is constructed, using the region string
+    (if set), the date, and various Quality filter, warn level, or footprint
+    descriptors, if there is an OCO overlay.
+out_data_dir: set to a specific directory, for the automatically generated
+    subset h5 file. Skipping this field is equivalent to setting it to an
+    empty string, in which case the file is created in the current dir.
+out_data_name: set to a specific filename to control the output h5 data
+    filename. Skipping this field is equivalent to setting it to an empty
+    string, which means a default file name is constructed, matching the
+    default plot name.
+
+Overlay specification:
+
+Required Fields
+---------------
+file: full path to OCO data file; this can be a Lite CO2 or SIF, or any of the 
+    operational products (L1bSc, L2ABP, etc.)
+variable: string variable name with full path (for example, "xco2" or 
+    "Retrieval/xco2" in a LtCO2 netCDF4).
+lat_name: string variable name for latitude; this controls whether the
+    overlay data is plotted with circles (using sounding_latitude), or the
+    polygon vertices (using vertex_latitude)
+lon_name: string variable name for longitude; this controls whether the
+    overlay data is plotted with circles (using sounding_longitude), or the
+    polygon vertices (using vertex_longitude)
+orbit: integer orbit number. This is primarily used when LtSIF or LtCO2 are
+    used, since the orbit number must be used to extract the correct subset
+    of data from the daily Lite file.
+
+Optional Fields:
+----------------
+band_number: for some variables that have an extra per-band axis, this
+    variable can be used to extract the desired OCO band. Right now this only
+    used for Retrieval/reduced_chi_squared_per_band in older Lite file formats.
+variable_plot_lims: this can be set to a two element numeric list, to directly
+    specify the color map plot range; or to "autoscale_by_orbit", to pick the 
+    color map plot range by the min/max value seen in the orbit; or
+    "autoscale_by_overlay" to use the min/max value seen in the data actually
+    used in the overlay plot.
+    Skipping this field, or specifying an empty string, will use the
+    "autoscale_by_orbit" as a default.
+cmap: string containing the matplotlib colormap name. If skipped or set to an
+    empty string, the default colormap will be the matplotlib viridis
+    colormap, or, one of the default colormaps, according to a set of
+    colormaps set for individual variable types (xco2, sif, etc.)
+transparency: set to a value to control the transparency of the overlay data,
+    where 0 is transparent and 1.0 is completely opaque. Skipping this value,
+    or setting to an empty string, will use the default value of 1.0
+lite_qf: set to "all", "good", or "bad", to control what soundings are used
+    in the overlay, according to the Lite file quality flag. Skipping this
+    value, or setting to an empty string, will use the default value of "all".
+lite_warn_lims: set to a two element list of integers with the inclusive warn
+    level range to apply to the data used in the overlay. Skipping this value,
+    or setting this to an empty string will use the default value of [0,20],
+    which will use all data.
+footprint: set to a two element list of integers, or a scalar integer, or
+    "all", to limit the displayed footprints. Skipping this value, or setting
+    to an empty string, will use the default of "all", or equivalently,
+    [1,8], meaning all footprints are used.
+lat_shift: set to a floating point value, that is added to the overlay
+    dataset's latitude this can be used to force an ad-hoc shift to the
+    overlay data's position.
+    Skipping this value will use a default value of 0.0, equivalent to no shift.
+lon_shift: longitude shift (see lat_shift description)
+frame_limit_min: set to an integer frame number (0-indexed) to use a frame
+    subset from an L1b or L2ABP/L2IDP file (any of the files with (nframe,8)
+    array shapes); this will be the first frame from the selection.
+frame_limit_max: set to an integer frame number (0-indexed) to use a frame
+    subset from an L1b or L2ABP/L2IDP file (any of the files with (nframe,8)
+    array shapes); this will be the last frame from the selection.
+    Note that if one of the frame_limit values is set, but the other is
+    skipped, this will act as a 1-sided interval. For example, to use all
+    frames from number 1000 to the end of the file, set frame_limit_min to
+    1000 and do not specify the max value.
+make_background_image: set to 1, to make an additional plot containing the
+    background image without the overlay data. This is useful to be able
+    to "blink" between an image with and without the overlay, as an alternative
+    to using transparency as a way to see both the overlay data and the RGB
+    background image. If the field is skipped, or set to zero, then only
+    the full overlay data image is created.

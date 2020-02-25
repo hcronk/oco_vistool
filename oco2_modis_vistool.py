@@ -33,6 +33,8 @@ import collections
 import datetime
 
 from OCO2FileOps import *
+from default_cmaps import default_cmaps
+
 import h5py
 
 import numpy as np
@@ -44,7 +46,7 @@ import cartopy.feature as cfeature
 import shapefile
 from shapely.geometry import LineString, Point, Polygon
 import matplotlib as mpl
-mpl.use('agg')
+#mpl.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.gridspec as gridspec
@@ -61,6 +63,10 @@ import re
 if sys.version_info < (3,):
     import future
     from builtins import range
+
+# Note: there is a conditional import of the satpy module below;
+# this is to reduce import time, for cases when it is not used
+# import satpy_overlay_plots
 
 class ConfigFile:
 
@@ -215,15 +221,22 @@ def _process_overlay_dict(input_dict):
     else:
         ovr_d['var_lims'] = 'autoscale_by_orbit'
 
-    ovr_d['cmap'] = input_dict.get('cmap', 'jet')
-    if ovr_d['cmap'] == "":
-        ovr_d['cmap'] = 'jet'
+    ovr_d['cmap'] = input_dict.get('cmap', '')
+    if ovr_d['cmap'] == '':
+        if ovr_d['var_name'] in default_cmaps:
+            ovr_d['cmap'] = default_cmaps[ovr_d['var_name']]
+            print('Using default cmap ' + ovr_d['cmap'] +
+                  ' for var_name: ' + ovr_d['var_name'])
+        else:
+            ovr_d['cmap'] = 'viridis'
+            print('Using generic default cmap '+ovr_d['cmap'])
+
     # make sure this is a valid colormap OR color string.
     if ( (ovr_d['cmap'] not in plt.colormaps()) and
          (ovr_d['cmap'] not in mpl.colors.cnames.keys()) ):
         print(ovr_d['cmap']  + " is not a recognized color or colormap. "+
-              "Data will be displayed in jet colormap")
-        ovr_d['cmap'] = 'jet'
+              "Data will be displayed in viridis colormap")
+        ovr_d['cmap'] = 'viridis'
 
     ovr_d['alpha'] = input_dict.get('transparency', 1)
     if ovr_d['alpha'] == "":
@@ -309,6 +322,22 @@ def _process_overlay_dict(input_dict):
         # (the scalar will generate a TypeError on len().)
         ovr_d['footprint_lims'] = [ovr_d['footprint_lims']]
         
+
+    # an optional setting to shift the overlay lat/lon (e.g., "fixing"
+    # a geolocation error.)
+    # Note here we are breaking with the pattern above, because it is 
+    # starting to feel cumbersome. Instead, use the pythonic pattern of
+    # dict.get('key', 'default'); then the value could be checked after
+    # to be within some valid range or datatype.
+    ovr_d['lat_shift'] = input_dict.get('lat_shift', 0.0)
+    ovr_d['lon_shift'] = input_dict.get('lon_shift', 0.0)
+
+    # another optional setting to extract a frame range before subsetting
+    # (this helps with TG mode, where the soundings overlap, esp. for OCO-3.)
+    # use the dict.get() method.
+    ovr_d['frame_limit_min'] = input_dict.get('frame_limit_min', None)
+    ovr_d['frame_limit_max'] = input_dict.get('frame_limit_max', None)
+
     for ft in ovr_d['footprint_lims']:
         if ft not in np.arange(1, 9):
             print("Unexpected footprint specification. Limits must be within [1, 8].")
@@ -335,11 +364,16 @@ def _process_overlay_dict(input_dict):
         ovr_d['qf_file_tag'] = ""
         ovr_d['wl_file_tag'] = ""
     else:
-        print("The command line usage of this tool accommodates official CO2 or SIF lite files only.")
-        print("Expected filename convention: oco2_LtNNN_YYYYMMDD_B8xxxxx_rxx*.nc, where NNN is CO2 or SIF")
-        print("Other data will need to be plotted by importing the tool as a Python module.")
-        print("Exiting")
-        sys.exit()
+        #print("The command line usage of this tool accommodates official CO2 or SIF lite files only.")
+        #print("Expected filename convention: oco2_LtNNN_YYYYMMDD_B8xxxxx_rxx*.nc, where NNN is CO2 or SIF")
+        #print("Other data will need to be plotted by importing the tool as a Python module.")
+        print("Warning, input file does not appear to be Lite SIF or CO2")
+        print("proceeding with experimental L1/L2 data process.")
+        ovr_d['sif_or_co2'] = None 
+        ovr_d['qf_file_tag'] = ""
+        ovr_d['wl_file_tag'] = ""
+        #print("Exiting")
+        #sys.exit()
 
     ovr_d['version_file_tag'] = re.search(
         "_B[0-9a-z]{,5}_", os.path.basename(ovr_d['var_file'])).group()[:-1]
@@ -352,6 +386,8 @@ def _process_overlay_dict(input_dict):
         else:
             print("Output plot will include "+ovr_d['lite_quality']+" quality soundings\n")
 
+    ovr_d['make_background_image'] = input_dict.get(
+        'make_background_image', False)
 
     return ovr_d
 
@@ -382,6 +418,11 @@ def process_config_dict(input_dict):
     ground_site: lat, lon of ground site to label
     city_labels: color to use for city labels, or None, ""
     datetime: python datetime object for date.
+    sensor: a string with the sensor data to use for the background image.
+        options: "MODIS" or "GOES16_ABI"
+    resample_method: a string with a resample method sent to satpy based
+        image display (e.g., only for GOES16_ABI at the moment)
+    data_home: a string path to local data archive (needed for GOES16_ABI)
 
     overlay_dict: a dictionary containing information related to the
         OCO-2 data overlay for the plot
@@ -473,7 +514,20 @@ def process_config_dict(input_dict):
     if not cfg_d['out_data_dir'] or not glob(cfg_d['out_data_dir']):
         print("Either there was no output data location specified or the one specified "+
               "does not exist. Data output will go in the code directory. \n")
+
+    cfg_d['data_home'] = input_dict.get('data_home', None)
+    cfg_d['sensor'] = input_dict.get('sensor', 'MODIS')
+    if cfg_d['sensor'] == "":
+        cfg_d['sensor'] = 'MODIS'
+    valid_sensor_names = ('MODIS', 'GOES16_ABI_C', 'GOES16_ABI_F')
+    if cfg_d['sensor'] not in valid_sensor_names:
+        raise ValueError('sensor name: ' + cfg_d['sensor'] + ' is not valid')
     
+    cfg_d['resample_method'] = input_dict.get(
+        'resample_method', 'native_bilinear')
+    if cfg_d['resample_method'] == "":
+        cfg_d['resample_method'] = 'native_bilinear'
+
     if 'oco2_overlay_info' in input_dict:
         ovr_d = _process_overlay_dict(input_dict['oco2_overlay_info'])
         # copy the geo corners
@@ -601,6 +655,101 @@ def _compute_ll_msk(lat_data, lon_data, lat_ul, lat_lr, lon_ul, lon_lr):
     return ll_msk
     
 
+def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
+    
+    # data dictionary that will be constructed.
+    dd = collections.OrderedDict()
+
+    ### Prep OCO-2 Variable ###
+
+    h5 = h5py.File(ovr_d['var_file'], "r")
+
+    if ovr_d['frame_limit_max'] is None:
+        frame_slice = slice(ovr_d['frame_limit_min'],None)
+    else:
+        frame_slice = slice(ovr_d['frame_limit_min'],
+                            ovr_d['frame_limit_max']+1)
+
+    lat_data = h5[ovr_d['lat_name']][frame_slice,...]
+    lon_data = h5[ovr_d['lon_name']][frame_slice,...]
+    var_data = h5[ovr_d['var_name']][frame_slice,...]
+    sounding_id = h5['SoundingGeometry/sounding_id'][frame_slice, ...]
+    timestamps = h5['SoundingGeometry/sounding_time_tai93'][frame_slice,...]
+    sounding_qf = h5['SoundingGeometry/sounding_qual_flag'][frame_slice,...]
+    dt = datetime.datetime(1993,1,1) - datetime.datetime(1970,1,1)
+    timestamps += dt.total_seconds()
+
+    lat_data += ovr_d['lat_shift']
+    lon_data += ovr_d['lon_shift']
+
+    if load_view_geom:
+        solar_azi = h5['SoundingGeometry/sounding_solar_azimuth'][frame_slice,...]
+        solar_zen = h5['SoundingGeometry/sounding_solar_zenith'][frame_slice,...]
+        sensor_azi = h5['SoundingGeometry/sounding_azimuth'][frame_slice,...]
+        sensor_zen = h5['SoundingGeometry/sounding_zenith'][frame_slice,...]
+
+    dd['data_long_name'] = ovr_d['var_name'].split('/')[-1]
+
+    try:
+        dd['data_units'] = h5[ovr_d['var_name']].attrs['Units'][0].decode()
+    except KeyError:
+        # probably need a better solution here?
+        dd['data_units'] = ''
+        print('cannot read Units attribute')
+
+    h5.close()
+
+    if len(ovr_d['footprint_lims']) == 2:
+        fpi = slice(ovr_d['footprint_lims'][0]-1,
+                    ovr_d['footprint_lims'][1])
+    else:
+        fpi = [ovr_d['footprint_lims'][0]-1]
+
+    if lat_data.ndim == 2:
+        lat_data = lat_data[:,fpi].flatten()
+        lon_data = lon_data[:,fpi].flatten()
+        lat_centers = lat_data
+        lon_centers = lon_data
+    else:
+        lat_data = lat_data[:,fpi,0,:]
+        lon_data = lon_data[:,fpi,0,:]
+        shape2D = (lat_data.shape[0] * lat_data.shape[1], 4)
+        lat_data = np.reshape(lat_data, shape2D)
+        lon_data = np.reshape(lon_data, shape2D)
+
+
+    var_data = var_data[:,fpi].flatten()
+    sounding_id = sounding_id[:,fpi].flatten()
+    timestamps = timestamps[:,fpi].flatten()
+    sounding_qf = sounding_qf[:,fpi].flatten()
+
+    # now apply the latlon mask, and proceed to do the
+    # subsetting.
+    ll_msk = _compute_ll_msk(lat_data, lon_data,
+                             ovr_d['lat_ul'], ovr_d['lat_lr'],
+                             ovr_d['lon_ul'], ovr_d['lon_lr'])
+    combined_msk = np.logical_and(ll_msk, sounding_qf==0)
+
+    dd['var_data'] = var_data[combined_msk]
+    dd['orbit_var_lims'] = np.ma.min(dd['var_data']), np.ma.max(dd['var_data'])
+
+    # note the ellipsis will work equally well for 1D or 2D (vertex) data
+    dd['lat'] = lat_data[combined_msk, ...]
+    dd['lon'] = lon_data[combined_msk, ...]
+    dd['sounding_id'] = sounding_id[combined_msk]
+    dd['time'] = timestamps[combined_msk]
+
+    dd['data_fill'] = -999999.0
+
+    if load_view_geom:
+        dd['solar_zen'] = solar_zen[:,fpi].flatten()[combined_msk]
+        dd['solar_azi'] = solar_azi[:,fpi].flatten()[combined_msk]
+        dd['sensor_zen'] = sensor_zen[:,fpi].flatten()[combined_msk]
+        dd['sensor_azi'] = sensor_azi[:,fpi].flatten()[combined_msk]
+
+    return dd
+
+
 def load_OCO2_Lite_overlay_data(ovr_d):
     """
     loads OCO2 Lite data, given the processed overlay dictionary as input
@@ -690,6 +839,9 @@ def load_OCO2_Lite_overlay_data(ovr_d):
     if lat_data.ndim != lon_data.ndim:
         print(ovr_d['lat_name']+" and "+ovr_d['lon_name']+" have different dimensions. Exiting")
         sys.exit()
+
+    lat_data += ovr_d['lat_shift']
+    lon_data += ovr_d['lon_shift']
 
     if ovr_d['var_name'] == "Retrieval/reduced_chi_squared_per_band":
         if not ovr_d['band_number']:
@@ -783,7 +935,8 @@ def do_modis_overlay_plot(
     var_lat, var_lon, var_vals, var_vals_missing=None, lite_sid=np.empty([]),
     var_lims=None, interest_pt=None,
     cmap='jet', alpha=1, lat_name=None, lon_name=None, var_name=None,
-    out_plot="vistool_output.png", out_data="vistool_output.h5", var_label=None, cities=None):
+    out_plot="vistool_output.png", var_label=None, cities=None,
+    var_file=None):
 
     lat_ul = geo_upper_left[0]
     lon_ul = geo_upper_left[1]
@@ -969,6 +1122,17 @@ def do_modis_overlay_plot(
         else:
             ax.scatter(var_lon, var_lat, c=cmap, edgecolor='none', s=2)
 
+    todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
+    if var_file:
+        ax.set_title('Overlay data from '+
+                     os.path.split(ovr_d['var_file'])[1] +
+                     '\nbackground image from MODIS-Aqua on Worldview' +
+                     '\nplot created on ' + todays_date,
+                     size='x-small')
+    else:
+        ax.set_title('background image from MODIS-Aqua on Worldview' +
+                     '\nplot created on ' + todays_date,
+                     size='x-small')
 
     # during testing, it appears that sometimes the scatter
     # could cause MPL to shift the axis range - I think because one
@@ -1030,34 +1194,78 @@ if __name__ == "__main__":
         print('The expected configuration file '+ args.config_file_loc + ' DNE in ' + code_dir)
         print('Exiting')
         sys.exit()
-
+    
     cfg_d, ovr_d = process_config_dict(input_dict)
 
-    # with no overlay data requested, simply generate the MODIS image by itself and exit.
-    if not ovr_d:
-
-        if not cfg_d['out_plot_name']:
-            if cfg_d['region']:
-                out_plot_name = ("MODISimagery_" + cfg_d['region'] +
-                                 "_" + cfg_d['straight_up_date'] + ".png")
-            else:
-                out_plot_name = ("MODISimagery_" + cfg_d['straight_up_date'] + ".png")
-            out_plot_name = os.path.join(cfg_d['out_plot_dir'], out_plot_name)
+    if ovr_d:
+        if ovr_d['sif_or_co2']:
+            odat = load_OCO2_Lite_overlay_data(ovr_d)
         else:
-            out_plot_name = os.path.join(cfg_d['out_plot_dir'], 
-                                         cfg_d['out_plot_name'])
+            odat = load_OCO2_L1L2_overlay_data(ovr_d)
+    
+    # construct the auto-generated filename - it is easiest to do this
+    # once here (since it gets reused in multiple places)
+    if ovr_d:
+        output_file_root = ovr_d['var_name_only']
+        if cfg_d['region']:
+            output_file_root = output_file_root + "_" + cfg_d['region']
+        output_file_root = (output_file_root + "_" +
+                            cfg_d['straight_up_date'] + 
+                            ovr_d['version_file_tag']+
+                            ovr_d['qf_file_tag']+
+                            ovr_d['wl_file_tag']+
+                            ovr_d['fp_file_tag'])
+    else:
+        output_file_root = cfg_d['straight_up_date']
 
-        do_modis_overlay_plot(cfg_d['geo_upper_left'],
-                              cfg_d['geo_lower_right'],
-                              cfg_d['date'], np.array([]), np.array([]), np.array([]), np.array([]),
-                              interest_pt=cfg_d['ground_site'], cmap='black',
-                              out_plot=out_plot_name, cities=cfg_d['city_labels'])
+    if cfg_d['out_plot_name']:
+        out_plot_name = cfg_d['out_plot_name']
+    else:
+        out_plot_name = output_file_root + '.png'
 
+    if cfg_d['out_data_name']:
+        out_data_name = cfg_d['out_data_name']
+    else:
+        out_data_name = output_file_root + '.h5'
+
+    # if there is no overlay data present, or the 'background image'
+    # flag is set, then generate the image without overlay data.
+    if ovr_d:
+        make_background_image = ovr_d['make_background_image']
+        # there can be an overlay dict, but it might have no data.
+        if len(odat['time']) > 0:
+            dt = datetime.datetime.fromtimestamp(np.mean(odat['time']))
+            cfg_d['datetime'] = dt
+    else:
+        make_background_image = True
+
+    if make_background_image:
+
+        out_plot_fullpath = os.path.join(
+            cfg_d['out_plot_dir'], 
+            cfg_d['sensor']+"_imagery_" + out_plot_name)
+
+        if cfg_d['sensor'] == 'MODIS':
+            do_modis_overlay_plot(
+                cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
+                cfg_d['date'], np.array([]), np.array([]),
+                np.array([]), np.array([]),
+                interest_pt=cfg_d['ground_site'], cmap='black',
+                out_plot=out_plot_fullpath, cities=cfg_d['city_labels'])
+        elif cfg_d['sensor'].startswith('GOES16_ABI'):
+            import satpy_overlay_plots
+            GOES_domain = cfg_d['sensor'].split('_')[-1]
+            satpy_overlay_plots.GOES_ABI_overlay_plot(
+                cfg_d, None, None, domain = GOES_domain,
+                out_plot_name=out_plot_fullpath)
+        else:
+            raise ValueError('Unknown sensor: '+cfg_d['sensor'])
+
+
+    # at this point, if there is no overlay to process, can exit here.
+    if len(ovr_d) == 0:
         sys.exit()
 
-
-    odat = load_OCO2_Lite_overlay_data(ovr_d)
-    
     # here, handle the var limit options.
     # if specific limits were input, via a 2-element list,
     # that will be passed directly to do_modis_overlay_plot().
@@ -1091,52 +1299,37 @@ if __name__ == "__main__":
         cbar_name = ""
 
     # construct filenames for the plot and optional h5 output file.
-    if not cfg_d['out_plot_name']:
-        out_plot_name = ovr_d['var_name_only']
-        if cfg_d['region']:
-            out_plot_name = out_plot_name + "_" + cfg_d['region']
-        out_plot_name = (out_plot_name + "_" +
-                         cfg_d['straight_up_date'] + 
-                         ovr_d['version_file_tag']+
-                         ovr_d['qf_file_tag']+
-                         ovr_d['wl_file_tag']+
-                         ovr_d['fp_file_tag']+".png")
-        out_plot_name = os.path.join(cfg_d['out_plot_dir'], out_plot_name)
-    else:
-        out_plot_name = os.path.join(cfg_d['out_plot_dir'], 
-                                     cfg_d['out_plot_name'])
+    out_plot_fullpath = os.path.join(cfg_d['out_plot_dir'], out_plot_name)
+    out_data_fullpath = os.path.join(cfg_d['out_data_dir'], out_data_name)
 
-    if not cfg_d['out_data_name']:
-        out_data_name = ovr_d['var_name_only']
-        if cfg_d['region']:
-            out_data_name = out_data_name + "_" + cfg_d['region']
-        out_data_name = (out_data_name + "_" +
-                         cfg_d['straight_up_date'] + 
-                         ovr_d['version_file_tag']+
-                         ovr_d['qf_file_tag']+
-                         ovr_d['wl_file_tag']+
-                         ovr_d['fp_file_tag']+".h5")
-        out_data_name = os.path.join(cfg_d['out_data_dir'], out_data_name)
+    if cfg_d['sensor'] == 'MODIS':
+        do_modis_overlay_plot(
+            cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
+            cfg_d['date'], odat['lat'], odat['lon'], odat['var_data'],
+            var_vals_missing=odat['data_fill'],
+            lite_sid=odat['sounding_id'],
+            var_lims=ovr_d['var_lims'], interest_pt=cfg_d['ground_site'],
+            cmap=ovr_d['cmap'], alpha=ovr_d['alpha'],
+            lat_name=ovr_d['lat_name'], lon_name=ovr_d['lon_name'],
+            var_name=ovr_d['var_name'],
+            out_plot=out_plot_fullpath,
+            var_label=cbar_name, cities=cfg_d['city_labels'],
+            var_file=os.path.split(ovr_d['var_file'])[1])
+    elif cfg_d['sensor'].startswith('GOES16_ABI'):
+        import satpy_overlay_plots
+        GOES_domain = cfg_d['sensor'].split('_')[-1]
+        satpy_overlay_plots.GOES_ABI_overlay_plot(
+            cfg_d, ovr_d, odat, var_label=cbar_name,
+            domain=GOES_domain,
+            out_plot_name=out_plot_fullpath)
     else:
-        out_data_name = os.path.join(cfg_d['out_data_dir'], 
-                                     cfg_d['out_data_name'])
-
-    do_modis_overlay_plot(cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
-                          cfg_d['date'], odat['lat'], odat['lon'], odat['var_data'],
-                          var_vals_missing=odat['data_fill'],
-                          lite_sid=odat['sounding_id'],
-                          var_lims=ovr_d['var_lims'], interest_pt=cfg_d['ground_site'],
-                          cmap=ovr_d['cmap'], alpha=ovr_d['alpha'],
-                          lat_name=ovr_d['lat_name'], lon_name=ovr_d['lon_name'],
-                          var_name=ovr_d['var_name'],
-                          out_plot=out_plot_name, out_data=out_data_name,
-                          var_label=cbar_name, cities=cfg_d['city_labels'])
+        raise ValueError('Unknown sensor: '+cfg_d['sensor'])
 
     ### Write data to hdf5 file ###
     if odat['var_data'].shape[0] == 0:
         print("\nThere is no valid data for the given subset criteria.")
     else:
         write_h5_data_subset(
-            out_data_name, odat['sounding_id'],
+            out_data_fullpath, odat['sounding_id'],
             odat['lat'], odat['lon'], odat['var_data'],
             ovr_d['lat_name'], ovr_d['lon_name'], ovr_d['var_name'])

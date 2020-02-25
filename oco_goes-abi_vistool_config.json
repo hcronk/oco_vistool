@@ -1,0 +1,23 @@
+{
+	"date": "2019-10-08",
+	"sensor":"GOES16_ABI_C",
+        "data_home":"/home/merrelli/data_dir/goes16",
+	"geo_upper_left": [47.0, -92.5],
+	"geo_lower_right": [45.0, -89.0],
+	"region": "ParkFalls",
+	"oco2_overlay_info": {
+		"file": "oco_L1bScSC_191008_B99999_sampledata.h5",
+		"variable": "SoundingMeasurements/rad_continuum_o2",
+		"variable_plot_lims":[0.8e20, 1.2e20],
+		"lat_name": "/FootprintGeometry/footprint_vertex_latitude",
+		"lon_name": "/FootprintGeometry/footprint_vertex_longitude",
+		"orbit": 11111,
+		"make_background_image":1
+	},
+	"ground_site": "",
+	"city_labels": "", 
+	"out_plot_dir": "",
+	"out_plot_name": "",
+	"out_data_dir": "",
+	"out_data_name": ""
+}
