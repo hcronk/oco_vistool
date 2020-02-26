@@ -89,8 +89,13 @@ def update_GIBS_xml(date, xml_file):
     root = tree.getroot()
 
     url = root[0][0].text
-
-    old_date = re.split('/', url)[6]
+    
+    if re.match("https", url):
+        #<ServerUrl>https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/MODIS_Aqua_CorrectedReflectance_TrueColor/default/2016-07-27/250m/${z}/${y}/${x}.jpg</ServerUrl>
+        old_date = re.split('/', url)[8]
+    else:
+        #<ServerUrl>http://map1.vis.earthdata.nasa.gov/wmts-geo/MODIS_Aqua_CorrectedReflectance_TrueColor/default/2015-07-04/EPSG4326_250m/${z}/${y}/${x}.jpg</ServerUrl>
+        old_date = re.split('/', url)[6]
 
     new_url = re.sub(old_date, date, url)
 
