@@ -476,6 +476,7 @@ def process_config_dict(input_dict):
     if cfg_d['city_labels'] == "":
         cfg_d['city_labels'] = None
 
+    cfg_d['out_plot_title'] = input_dict.get('plot_title', '')
     cfg_d['out_plot_dir'] = input_dict.get('out_plot_dir', '')
     cfg_d['out_plot_name'] = input_dict.get('out_plot_name', '')
     cfg_d['out_data_dir'] = input_dict.get('out_data_dir', '')
@@ -932,7 +933,7 @@ def load_OCO2_Lite_overlay_data(ovr_d):
 
 def do_modis_overlay_plot(
     geo_upper_left, geo_lower_right, date,
-    var_lat, var_lon, var_vals, var_vals_missing=None, lite_sid=np.empty([]),
+    var_lat, var_lon, var_vals, plot_title, var_vals_missing=None, lite_sid=np.empty([]),
     var_lims=None, interest_pt=None,
     cmap='jet', alpha=1, lat_name=None, lon_name=None, var_name=None,
     out_plot="vistool_output.png", var_label=None, cities=None,
@@ -1123,16 +1124,17 @@ def do_modis_overlay_plot(
             ax.scatter(var_lon, var_lat, c=cmap, edgecolor='none', s=2)
 
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
-    if var_file:
-        ax.set_title('Overlay data from '+
-                     os.path.split(ovr_d['var_file'])[1] +
-                     '\nbackground image from MODIS-Aqua on Worldview' +
-                     '\nplot created on ' + todays_date,
-                     size='x-small')
-    else:
-        ax.set_title('background image from MODIS-Aqua on Worldview' +
-                     '\nplot created on ' + todays_date,
-                     size='x-small')
+    ax.set_title(plot_title)
+#    if var_file:
+#        ax.set_title('Overlay data from '+
+#                     os.path.split(ovr_d['var_file'])[1] +
+#                     '\nbackground image from MODIS-Aqua on Worldview' +
+#                     '\nplot created on ' + todays_date,
+#                     size='x-small')
+#    else:
+#        ax.set_title('background image from MODIS-Aqua on Worldview' +
+#                     '\nplot created on ' + todays_date,
+#                     size='x-small')
 
     # during testing, it appears that sometimes the scatter
     # could cause MPL to shift the axis range - I think because one
@@ -1306,6 +1308,7 @@ if __name__ == "__main__":
         do_modis_overlay_plot(
             cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
             cfg_d['date'], odat['lat'], odat['lon'], odat['var_data'],
+            cfg_d['out_plot_title'],
             var_vals_missing=odat['data_fill'],
             lite_sid=odat['sounding_id'],
             var_lims=ovr_d['var_lims'], interest_pt=cfg_d['ground_site'],
