@@ -5,7 +5,10 @@ Top level JSON specification:
 
 Required fields
 ---------------
-date:	year-month-day "YYYY-MM-DD" format
+date:	year-month-day "YYYY-MM-DD" format, optionally with hours-minutes-
+    seconds in "YYYY-MM-DD hh:mm:ss" format. The full format (with h:m:s)
+    is useful for ABI-derived images, when a specific time is needed
+    (unlike the MODIS-Aqua RGB which is once per day).
 sensor: string sensor name, one of: "MODIS" to retrieve MODIS-Aqua RGB
     imagery from NASA Worldview; GOES16_ABI_C or GOES16_ABI_F for ABI
     RGB imagery from GOES-16, from (C)ONUS or (F)ull disk data.

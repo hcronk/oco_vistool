@@ -483,9 +483,13 @@ def process_config_dict(input_dict):
 
     # now do various checks.
     try:
-        cfg_d['datetime'] = datetime.datetime.strptime(cfg_d['date'], '%Y-%m-%d')
+        if len(cfg_d['date']) == 10:
+            cfg_d['datetime'] = datetime.datetime.strptime(cfg_d['date'], '%Y-%m-%d')
+        else:
+            cfg_d['datetime'] = datetime.datetime.strptime(cfg_d['date'], '%Y-%m-%d %H:%M:%S')
     except:
-        raise ValueError('input field "date" has incorrect format, expecting YYYY-MM-DD')
+        raise ValueError('input field "date" has incorrect format, '+
+                         'expecting "YYYY-MM-DD" or "YYYY-MM-DD hh:mm:ss"')
 
     
     if cfg_d['ground_site']:
