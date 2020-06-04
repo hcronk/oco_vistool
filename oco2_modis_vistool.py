@@ -469,6 +469,7 @@ def process_config_dict(input_dict):
 
     cfg_d['region'] = input_dict.get('region', '')
 
+    cfg_d['plot_title'] = input_dict.get('plot_title', 'auto')
     cfg_d['ground_site'] = input_dict.get('ground_site', None)
     if cfg_d['ground_site'] == "":
         cfg_d['ground_site'] = None
@@ -1127,16 +1128,19 @@ def do_modis_overlay_plot(
             ax.scatter(var_lon, var_lat, c=cmap, edgecolor='none', s=2)
 
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
-    if var_file:
-        ax.set_title('Overlay data from '+
-                     os.path.split(ovr_d['var_file'])[1] +
-                     '\nbackground image from MODIS-Aqua on Worldview' +
-                     '\nplot created on ' + todays_date,
-                     size='x-small')
+    if cfg_d['plot_title'] == 'auto':
+        if var_file:
+            ax.set_title('Overlay data from '+
+                         os.path.split(ovr_d['var_file'])[1] +
+                         '\nbackground image from MODIS-Aqua on Worldview' +
+                         '\nplot created on ' + todays_date,
+                         size='x-small')
+        else:
+            ax.set_title('background image from MODIS-Aqua on Worldview' +
+                         '\nplot created on ' + todays_date,
+                         size='x-small')
     else:
-        ax.set_title('background image from MODIS-Aqua on Worldview' +
-                     '\nplot created on ' + todays_date,
-                     size='x-small')
+        ax.set_title(cfg_d['plot_title'], size='x-small')
 
     # during testing, it appears that sometimes the scatter
     # could cause MPL to shift the axis range - I think because one

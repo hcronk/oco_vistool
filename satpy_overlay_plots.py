@@ -604,6 +604,9 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     center_lat = (cfg_d['lat_lr'] + cfg_d['lat_ul']) / 2.0
     file_list, time_offsets = get_ABI_files(
         dt, center_lat, cfg_d['data_home'], domain=domain)
+    if len(file_list) == 0:
+        raise ValueError('No ABI files were found for requested date in '+
+                         cfg_d['data_home'])
 
     # convert the LL box corners (in degrees LL) to an extent box
     # [min_lon, min_lat, max_lon, max_lat]
@@ -636,28 +639,32 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     mean_time_offset = np.mean(time_offsets)/60.0
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
 
-    if ovr_d:
-        title_string = (
-            'Overlay data from {0:s}' +
-            '\nBackground from {1:s}, '+
-            '\nOverlay time = {2:s},   '+
-            'mean time offset = {3:4.1f} min.,  '+
-            'plot created on {4:s}' )
-        title_string = title_string.format(
-            os.path.split(ovr_d['var_file'])[1],
-            os.path.split(file_list[1])[1], 
-            dt.strftime('%Y-%m-%d %H:%M:%S'), mean_time_offset,
-            todays_date)
+    if cfg_d['plot_title'] == 'auto':
+        if ovr_d:
+            title_string = (
+                'Overlay data from {0:s}' +
+                '\nBackground from {1:s}, '+
+                '\nOverlay time = {2:s},   '+
+                'mean time offset = {3:4.1f} min.,  '+
+                'plot created on {4:s}' )
+            title_string = title_string.format(
+                os.path.split(ovr_d['var_file'])[1],
+                os.path.split(file_list[1])[1], 
+                dt.strftime('%Y-%m-%d %H:%M:%S'), mean_time_offset,
+                todays_date)
+        else:
+            title_string = (
+                'Background from  {0:s}' + 
+                '\n Request time = {1:s},   '+
+                'mean time offset = {2:4.1f} min.,  '+
+                'plot created on {3:s}' )
+            title_string = title_string.format(
+                os.path.split(file_list[1])[1],
+                dt.strftime('%Y-%m-%d %H:%M:%S'),
+                mean_time_offset, todays_date)
     else:
-        title_string = (
-            'Background from  {0:s}' + 
-            '\n Request time = {1:s},   '+
-            'mean time offset = {2:4.1f} min.,  '+
-            'plot created on {3:s}' )
-        title_string = title_string.format(
-            os.path.split(file_list[1])[1],
-            dt.strftime('%Y-%m-%d %H:%M:%S'),
-            mean_time_offset, todays_date)
+        title_string = cfg_d['plot_title']
+
 
     ax.set_title(title_string, size='x-small')
     ax.coastlines(resolution='10m', color='lightgray') 
