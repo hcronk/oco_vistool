@@ -266,7 +266,7 @@ def _process_overlay_dict(input_dict):
         sys.exit()
 
     ovr_d['version_number'] =  re.sub(
-        "[A-Za-z_]", "", re.search("_B[0-9a-z]{,5}_",os.path.basename(ovr_d['var_file'])).group())
+        "[A-Za-z_]", "", re.search("_B[0-9a-z]{0,6}_",os.path.basename(ovr_d['var_file'])).group())
 
     if int(ovr_d['version_number']) < 9000:
         try:
@@ -376,7 +376,7 @@ def _process_overlay_dict(input_dict):
         #sys.exit()
 
     ovr_d['version_file_tag'] = re.search(
-        "_B[0-9a-z]{,5}_", os.path.basename(ovr_d['var_file'])).group()[:-1]
+        "_B[0-9a-z]{0,6}_", os.path.basename(ovr_d['var_file'])).group()[:-1]
 
     if ovr_d['sif_or_co2'] == "CO2":
         if ovr_d['warn']:
@@ -669,29 +669,78 @@ def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
 
     h5 = h5py.File(ovr_d['var_file'], "r")
 
-    if ovr_d['frame_limit_max'] is None:
-        frame_slice = slice(ovr_d['frame_limit_min'],None)
-    else:
-        frame_slice = slice(ovr_d['frame_limit_min'],
-                            ovr_d['frame_limit_max']+1)
+    # SoundingGeometry means this is L1b, or L2 preprocessor,
+    # and the data is 2D [nframe, 8]/
+    if 'SoundingGeometry' in h5:
 
-    lat_data = h5[ovr_d['lat_name']][frame_slice,...]
-    lon_data = h5[ovr_d['lon_name']][frame_slice,...]
-    var_data = h5[ovr_d['var_name']][frame_slice,...]
-    sounding_id = h5['SoundingGeometry/sounding_id'][frame_slice, ...]
-    timestamps = h5['SoundingGeometry/sounding_time_tai93'][frame_slice,...]
-    sounding_qf = h5['SoundingGeometry/sounding_qual_flag'][frame_slice,...]
+        if ovr_d['frame_limit_max'] is None:
+            frame_slice = slice(ovr_d['frame_limit_min'],None)
+        else:
+            frame_slice = slice(ovr_d['frame_limit_min'],
+                                ovr_d['frame_limit_max']+1)
+
+        lat_data = h5[ovr_d['lat_name']][frame_slice,...]
+        lon_data = h5[ovr_d['lon_name']][frame_slice,...]
+        var_data = h5[ovr_d['var_name']][frame_slice,...]
+
+        hgrp = h5['SoundingGeometry']
+        sounding_id = hgrp['sounding_id'][frame_slice, ...]
+        timestamps = hgrp['sounding_time_tai93'][frame_slice,...]
+        sounding_qf = hgrp['sounding_qual_flag'][frame_slice,...]
+        if load_view_geom:
+            solar_azi = hgrp['sounding_solar_azimuth'][frame_slice,...]
+            solar_zen = hgrp['sounding_solar_zenith'][frame_slice,...]
+            sensor_azi = hgrp['sounding_azimuth'][frame_slice,...]
+            sensor_zen = hgrp['sounding_zenith'][frame_slice,...]
+
+    elif ('RetrievalGeometry' in h5) and ('RetrievalHeader' in h5):
+
+        # Otherwise this is L2Std. Here, we need to translate the frame range
+        # into L2 index range; the latter is flattened (1D) sparse subsample
+        # of the original L1 grid.
+        # note we also make a fake 2nd dimen with 1 element (the np.newaxis)
+        hgrp = h5['RetrievalHeader']
+        frame_index = hgrp['frame_index'][:]
+        if ovr_d['frame_limit_min'] is None:
+            start_idx = None
+        else:
+            start_idx = frame_index.searchsorted(ovr_d['frame_limit_min'])
+
+        if ovr_d['frame_limit_max'] is None:
+            stop_idx = None
+        else:
+            stop_idx = frame_index.searchsorted(ovr_d['frame_limit_max']+1)
+
+        frame_slice = slice(start_idx, stop_idx)
+
+        lat_data = h5[ovr_d['lat_name']][:][frame_slice,np.newaxis]
+        lon_data = h5[ovr_d['lon_name']][:][frame_slice,np.newaxis]
+        var_data = h5[ovr_d['var_name']][:][frame_slice,np.newaxis]
+
+        sounding_id = hgrp['sounding_id'][:][frame_slice,np.newaxis]
+        timestamps = hgrp['retrieval_time_tai93'][:][frame_slice,np.newaxis]
+        # in this case, there are no sounding_QF>1 (bad) samples, those
+        # are not sent to L2Std for processing.
+        sounding_qf = np.zeros(sounding_id.shape, np.bool)
+
+        if load_view_geom:
+            hgrp = h5['RetrievalGeometry']
+            solar_azi = hgrp['retrieval_solar_azimuth'][:][frame_slice,np.newaxis]
+            solar_zen = hgrp['retrieval_solar_zenith'][:][frame_slice,np.newaxis]
+            sensor_azi = hgrp['retrieval_azimuth'][:][frame_slice,np.newaxis]
+            sensor_zen = hgrp['retrieval_zenith'][:][frame_slice,np.newaxis]
+            
+    else:
+        h5.close()
+        raise ValueError('Cannot locate Geometry data, is this a normal L1/L2 file?')
+        
+
     dt = datetime.datetime(1993,1,1) - datetime.datetime(1970,1,1)
     timestamps += dt.total_seconds()
 
     lat_data += ovr_d['lat_shift']
     lon_data += ovr_d['lon_shift']
 
-    if load_view_geom:
-        solar_azi = h5['SoundingGeometry/sounding_solar_azimuth'][frame_slice,...]
-        solar_zen = h5['SoundingGeometry/sounding_solar_zenith'][frame_slice,...]
-        sensor_azi = h5['SoundingGeometry/sounding_azimuth'][frame_slice,...]
-        sensor_zen = h5['SoundingGeometry/sounding_zenith'][frame_slice,...]
 
     dd['data_long_name'] = ovr_d['var_name'].split('/')[-1]
 
