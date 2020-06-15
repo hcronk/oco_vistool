@@ -597,7 +597,7 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     # to get the data.
     # otherwise, use the datetime object
     if ovr_d:
-        dt = datetime.datetime.fromtimestamp(np.mean(odat['time']))
+        dt = datetime.datetime.utcfromtimestamp(np.mean(odat['time']))
     else:
         dt = cfg_d['datetime']
 

@@ -1242,7 +1242,7 @@ if __name__ == "__main__":
         make_background_image = ovr_d['make_background_image']
         # there can be an overlay dict, but it might have no data.
         if len(odat['time']) > 0:
-            dt = datetime.datetime.fromtimestamp(np.mean(odat['time']))
+            dt = datetime.datetime.utcfromtimestamp(np.mean(odat['time']))
             cfg_d['datetime'] = dt
     else:
         make_background_image = True
