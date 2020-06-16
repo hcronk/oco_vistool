@@ -470,7 +470,6 @@ def process_config_dict(input_dict):
 
     cfg_d['region'] = input_dict.get('region', '')
 
-    cfg_d['plot_title'] = input_dict.get('plot_title', 'auto')
     cfg_d['ground_site'] = input_dict.get('ground_site', None)
     if cfg_d['ground_site'] == "":
         cfg_d['ground_site'] = None

@@ -649,7 +649,7 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     mean_time_offset = np.mean(time_offsets)/60.0
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
 
-    if cfg_d['plot_title'] == 'auto':
+    if cfg_d['out_plot_title'] == 'auto':
         if ovr_d:
             title_string = (
                 'Overlay data from {0:s}' +
@@ -673,7 +673,7 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
                 dt.strftime('%Y-%m-%d %H:%M:%S'),
                 mean_time_offset, todays_date)
     else:
-        title_string = cfg_d['plot_title']
+        title_string = cfg_d['out_plot_title']
 
 
     ax.set_title(title_string, size='x-small')

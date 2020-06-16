@@ -119,9 +119,11 @@ make_background_image: set to 1, to make an additional plot containing the
     background image. If the field is skipped, or set to zero, then only
     the full overlay data image is created.
 plot_title: this is an arbitrary string, that will be directly used as the
-    plot title for the produced image. The default setting is "auto", which 
-    will automatically create a plot title that has key information about 
-    the matchup. For a MODIS background, the title will include the filename
+    plot title for the produced image. By default this is an empty string,
+    which means no plot title will be included in the image.
+    If this is set to "auto", then the code will automatically create a plot
+    title that has key information about the matchup.
+    For a MODIS background, the title will include the filename
     containing the overlay data (if used), a label that describes the source
     (MODIS-Aqua on Worldview), and the image file creation date.
     For a GOES-ABI background, this includes similar information, but also
