@@ -419,10 +419,11 @@ def process_config_dict(input_dict):
     city_labels: color to use for city labels, or None, ""
     datetime: python datetime object for date.
     sensor: a string with the sensor data to use for the background image.
-        options: "MODIS" or "GOES16_ABI"
+        options: "MODIS" or GOES16, 17, (C)ONUS or (F)ull disk, specified
+        as GOESNN_ABI_M; NN is 16 or 17, M is "C" or "F".
     resample_method: a string with a resample method sent to satpy based
-        image display (e.g., only for GOES16_ABI at the moment)
-    data_home: a string path to local data archive (needed for GOES16_ABI)
+        image display (used for the GOES imagery handled by satpy)
+    data_home: a string path to local data archive (needed for GOES ABI)
 
     overlay_dict: a dictionary containing information related to the
         OCO-2 data overlay for the plot
@@ -524,7 +525,9 @@ def process_config_dict(input_dict):
     cfg_d['sensor'] = input_dict.get('sensor', 'MODIS')
     if cfg_d['sensor'] == "":
         cfg_d['sensor'] = 'MODIS'
-    valid_sensor_names = ('MODIS', 'GOES16_ABI_C', 'GOES16_ABI_F')
+    valid_sensor_names = ('MODIS', 'GOES16_ABI_C', 'GOES16_ABI_F',
+                          'GOES17_ABI_C', 'GOES17_ABI_F',)
+
     if cfg_d['sensor'] not in valid_sensor_names:
         raise ValueError('sensor name: ' + cfg_d['sensor'] + ' is not valid')
     
@@ -1309,12 +1312,10 @@ if __name__ == "__main__":
                 np.array([]), np.array([]),
                 interest_pt=cfg_d['ground_site'], cmap='black',
                 out_plot=out_plot_fullpath, cities=cfg_d['city_labels'])
-        elif cfg_d['sensor'].startswith('GOES16_ABI'):
+        elif cfg_d['sensor'].startswith('GOES'):
             import satpy_overlay_plots
-            GOES_domain = cfg_d['sensor'].split('_')[-1]
             satpy_overlay_plots.GOES_ABI_overlay_plot(
-                cfg_d, None, None, domain = GOES_domain,
-                out_plot_name=out_plot_fullpath)
+                cfg_d, None, None, out_plot_name=out_plot_fullpath)
         else:
             raise ValueError('Unknown sensor: '+cfg_d['sensor'])
 
@@ -1372,12 +1373,10 @@ if __name__ == "__main__":
             out_plot=out_plot_fullpath,
             var_label=cbar_name, cities=cfg_d['city_labels'],
             var_file=os.path.split(ovr_d['var_file'])[1])
-    elif cfg_d['sensor'].startswith('GOES16_ABI'):
+    elif cfg_d['sensor'].startswith('GOES'):
         import satpy_overlay_plots
-        GOES_domain = cfg_d['sensor'].split('_')[-1]
         satpy_overlay_plots.GOES_ABI_overlay_plot(
             cfg_d, ovr_d, odat, var_label=cbar_name,
-            domain=GOES_domain,
             out_plot_name=out_plot_fullpath)
     else:
         raise ValueError('Unknown sensor: '+cfg_d['sensor'])

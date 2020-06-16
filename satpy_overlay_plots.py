@@ -71,7 +71,7 @@ def _approx_scanline_time(stime, etime, lat, domain):
 
 
 def get_ABI_files(datetime_utc, center_lat, data_home,
-                  domain='C', verbose=False):
+                  sensor, verbose=False):
     """
     find the file list for an ABI domain, given an input date.
     this will find the images (for bands 1,2,3) closest to the UTC
@@ -80,8 +80,8 @@ def get_ABI_files(datetime_utc, center_lat, data_home,
     inputs:
     datetime_utc: a python datetime object (in UTC) with the requested time.
     data_home: string containing path to local ABI file archive
-    domain: "C" or "F", to use either the CONUS or FD (Full Disk) ABI
-        imagery. Defaults to CONUS.
+    sensor: string containing GOES sensor and mode, (C)ONUS or (F)ull disk.
+        examples: GOES16_ABI_C or GOES17_ABI_F
     verbose: set to True to print more information to console
     
     returns:
@@ -144,14 +144,26 @@ def get_ABI_files(datetime_utc, center_lat, data_home,
 
     """
 
+    domain = sensor[-1]
+    platform = sensor.split('_')[0]
+
     valid_domains = 'C', 'F'
     if domain not in valid_domains:
         raise ValueError('domain must be in '+str(valid_domains))
+    valid_platforms = 'GOES16', 'GOES17'
+    if platform not in valid_platforms:
+        raise ValueError('platform must be in '+str(valid_platforms))
+    # code used in filename is G16 or G17 for GOES16, GOES17.
+    platform = platform.replace('GOES','G')
 
     # search within hour of input datetime, and +/-1 hour
     flists = collections.defaultdict(list)
     band_list = (1,2,3)
     hour_offsets = (-1,0,1)
+
+    # makes a glob string to match by s-time (I think, start time.)
+    glob_fstr = ('OR_ABI-L1b-Rad{0:1s}'+
+                 '-M?C{1:02d}_{2:s}_s{3:s}_e*_c*.nc')
 
     for hour_offset, band in itertools.product(hour_offsets, band_list):
 
@@ -173,10 +185,8 @@ def get_ABI_files(datetime_utc, center_lat, data_home,
             print('Data dir not found: '+ddir)
             continue
 
-        # makes a glob string to match by s-time (I think, start time.)
-        glob_fstr = ('OR_ABI-L1b-Rad' + domain +
-                    '-M?C{0:02d}_G16_s{1:s}_e*_c*.nc')
-        glob_str = os.path.join(ddir,glob_fstr.format(band, stimestamp))
+        glob_str = os.path.join(ddir,glob_fstr.format(
+            domain, band, platform, stimestamp))
         if verbose:
             print('glob: '+glob_str)
 
@@ -571,7 +581,7 @@ def overlay_data(ax, cb_ax, odata, var_label=None, **kw):
 
 
 def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
-                          var_label=None, domain='C', fignum=10):
+                          var_label=None, fignum=10):
     """
     make a GOES ABI overlay plot. This is function to integrate with the
     vistool plot data flow.
@@ -603,7 +613,7 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
 
     center_lat = (cfg_d['lat_lr'] + cfg_d['lat_ul']) / 2.0
     file_list, time_offsets = get_ABI_files(
-        dt, center_lat, cfg_d['data_home'], domain=domain)
+        dt, center_lat, cfg_d['data_home'], cfg_d['sensor'])
     if len(file_list) == 0:
         raise ValueError('No ABI files were found for requested date in '+
                          cfg_d['data_home'])
