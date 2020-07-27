@@ -270,7 +270,7 @@ def _process_overlay_dict(input_dict):
         sys.exit()
 
     ovr_d['version_number'] =  re.sub(
-        "[A-Za-z_]", "", re.search("_B[0-9a-z]{,5}_",os.path.basename(ovr_d['var_file'])).group())
+        "[A-Za-z_]", "", re.search("_B[0-9a-z]{0,6}_",os.path.basename(ovr_d['var_file'])).group())
 
     if int(ovr_d['version_number']) < 9000:
         try:
@@ -380,7 +380,7 @@ def _process_overlay_dict(input_dict):
         #sys.exit()
 
     ovr_d['version_file_tag'] = re.search(
-        "_B[0-9a-z]{,5}_", os.path.basename(ovr_d['var_file'])).group()[:-1]
+        "_B[0-9a-z]{0,6}_", os.path.basename(ovr_d['var_file'])).group()[:-1]
 
     if ovr_d['sif_or_co2'] == "CO2":
         if ovr_d['warn']:
@@ -423,10 +423,11 @@ def process_config_dict(input_dict):
     city_labels: color to use for city labels, or None, ""
     datetime: python datetime object for date.
     sensor: a string with the sensor data to use for the background image.
-        options: "MODIS" or "GOES16_ABI"
+        options: "MODIS" or GOES16, 17, (C)ONUS or (F)ull disk, specified
+        as GOESNN_ABI_M; NN is 16 or 17, M is "C" or "F".
     resample_method: a string with a resample method sent to satpy based
-        image display (e.g., only for GOES16_ABI at the moment)
-    data_home: a string path to local data archive (needed for GOES16_ABI)
+        image display (used for the GOES imagery handled by satpy)
+    data_home: a string path to local data archive (needed for GOES ABI)
 
     overlay_dict: a dictionary containing information related to the
         OCO-2 data overlay for the plot
@@ -480,6 +481,7 @@ def process_config_dict(input_dict):
     if cfg_d['city_labels'] == "":
         cfg_d['city_labels'] = None
 
+    cfg_d['out_plot_title'] = input_dict.get('plot_title', '')
     cfg_d['out_plot_dir'] = input_dict.get('out_plot_dir', '')
     cfg_d['out_plot_name'] = input_dict.get('out_plot_name', '')
     cfg_d['out_data_dir'] = input_dict.get('out_data_dir', '')
@@ -487,9 +489,13 @@ def process_config_dict(input_dict):
 
     # now do various checks.
     try:
-        cfg_d['datetime'] = datetime.datetime.strptime(cfg_d['date'], '%Y-%m-%d')
+        if len(cfg_d['date']) == 10:
+            cfg_d['datetime'] = datetime.datetime.strptime(cfg_d['date'], '%Y-%m-%d')
+        else:
+            cfg_d['datetime'] = datetime.datetime.strptime(cfg_d['date'], '%Y-%m-%d %H:%M:%S')
     except:
-        raise ValueError('input field "date" has incorrect format, expecting YYYY-MM-DD')
+        raise ValueError('input field "date" has incorrect format, '+
+                         'expecting "YYYY-MM-DD" or "YYYY-MM-DD hh:mm:ss"')
 
     
     if cfg_d['ground_site']:
@@ -523,7 +529,9 @@ def process_config_dict(input_dict):
     cfg_d['sensor'] = input_dict.get('sensor', 'MODIS')
     if cfg_d['sensor'] == "":
         cfg_d['sensor'] = 'MODIS'
-    valid_sensor_names = ('MODIS', 'GOES16_ABI_C', 'GOES16_ABI_F')
+    valid_sensor_names = ('MODIS', 'GOES16_ABI_C', 'GOES16_ABI_F',
+                          'GOES17_ABI_C', 'GOES17_ABI_F',)
+
     if cfg_d['sensor'] not in valid_sensor_names:
         raise ValueError('sensor name: ' + cfg_d['sensor'] + ' is not valid')
     
@@ -668,29 +676,78 @@ def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
 
     h5 = h5py.File(ovr_d['var_file'], "r")
 
-    if ovr_d['frame_limit_max'] is None:
-        frame_slice = slice(ovr_d['frame_limit_min'],None)
-    else:
-        frame_slice = slice(ovr_d['frame_limit_min'],
-                            ovr_d['frame_limit_max']+1)
+    # SoundingGeometry means this is L1b, or L2 preprocessor,
+    # and the data is 2D [nframe, 8]/
+    if 'SoundingGeometry' in h5:
 
-    lat_data = h5[ovr_d['lat_name']][frame_slice,...]
-    lon_data = h5[ovr_d['lon_name']][frame_slice,...]
-    var_data = h5[ovr_d['var_name']][frame_slice,...]
-    sounding_id = h5['SoundingGeometry/sounding_id'][frame_slice, ...]
-    timestamps = h5['SoundingGeometry/sounding_time_tai93'][frame_slice,...]
-    sounding_qf = h5['SoundingGeometry/sounding_qual_flag'][frame_slice,...]
+        if ovr_d['frame_limit_max'] is None:
+            frame_slice = slice(ovr_d['frame_limit_min'],None)
+        else:
+            frame_slice = slice(ovr_d['frame_limit_min'],
+                                ovr_d['frame_limit_max']+1)
+
+        lat_data = h5[ovr_d['lat_name']][frame_slice,...]
+        lon_data = h5[ovr_d['lon_name']][frame_slice,...]
+        var_data = h5[ovr_d['var_name']][frame_slice,...]
+
+        hgrp = h5['SoundingGeometry']
+        sounding_id = hgrp['sounding_id'][frame_slice, ...]
+        timestamps = hgrp['sounding_time_tai93'][frame_slice,...]
+        sounding_qf = hgrp['sounding_qual_flag'][frame_slice,...]
+        if load_view_geom:
+            solar_azi = hgrp['sounding_solar_azimuth'][frame_slice,...]
+            solar_zen = hgrp['sounding_solar_zenith'][frame_slice,...]
+            sensor_azi = hgrp['sounding_azimuth'][frame_slice,...]
+            sensor_zen = hgrp['sounding_zenith'][frame_slice,...]
+
+    elif ('RetrievalGeometry' in h5) and ('RetrievalHeader' in h5):
+
+        # Otherwise this is L2Std. Here, we need to translate the frame range
+        # into L2 index range; the latter is flattened (1D) sparse subsample
+        # of the original L1 grid.
+        # note we also make a fake 2nd dimen with 1 element (the np.newaxis)
+        hgrp = h5['RetrievalHeader']
+        frame_index = hgrp['frame_index'][:]
+        if ovr_d['frame_limit_min'] is None:
+            start_idx = None
+        else:
+            start_idx = frame_index.searchsorted(ovr_d['frame_limit_min'])
+
+        if ovr_d['frame_limit_max'] is None:
+            stop_idx = None
+        else:
+            stop_idx = frame_index.searchsorted(ovr_d['frame_limit_max']+1)
+
+        frame_slice = slice(start_idx, stop_idx)
+
+        lat_data = h5[ovr_d['lat_name']][:][frame_slice,np.newaxis]
+        lon_data = h5[ovr_d['lon_name']][:][frame_slice,np.newaxis]
+        var_data = h5[ovr_d['var_name']][:][frame_slice,np.newaxis]
+
+        sounding_id = hgrp['sounding_id'][:][frame_slice,np.newaxis]
+        timestamps = hgrp['retrieval_time_tai93'][:][frame_slice,np.newaxis]
+        # in this case, there are no sounding_QF>1 (bad) samples, those
+        # are not sent to L2Std for processing.
+        sounding_qf = np.zeros(sounding_id.shape, np.bool)
+
+        if load_view_geom:
+            hgrp = h5['RetrievalGeometry']
+            solar_azi = hgrp['retrieval_solar_azimuth'][:][frame_slice,np.newaxis]
+            solar_zen = hgrp['retrieval_solar_zenith'][:][frame_slice,np.newaxis]
+            sensor_azi = hgrp['retrieval_azimuth'][:][frame_slice,np.newaxis]
+            sensor_zen = hgrp['retrieval_zenith'][:][frame_slice,np.newaxis]
+            
+    else:
+        h5.close()
+        raise ValueError('Cannot locate Geometry data, is this a normal L1/L2 file?')
+        
+
     dt = datetime.datetime(1993,1,1) - datetime.datetime(1970,1,1)
     timestamps += dt.total_seconds()
 
     lat_data += ovr_d['lat_shift']
     lon_data += ovr_d['lon_shift']
 
-    if load_view_geom:
-        solar_azi = h5['SoundingGeometry/sounding_solar_azimuth'][frame_slice,...]
-        solar_zen = h5['SoundingGeometry/sounding_solar_zenith'][frame_slice,...]
-        sensor_azi = h5['SoundingGeometry/sounding_azimuth'][frame_slice,...]
-        sensor_zen = h5['SoundingGeometry/sounding_zenith'][frame_slice,...]
 
     dd['data_long_name'] = ovr_d['var_name'].split('/')[-1]
 
@@ -936,7 +993,7 @@ def load_OCO2_Lite_overlay_data(ovr_d):
 
 def do_modis_overlay_plot(
     geo_upper_left, geo_lower_right, date,
-    var_lat, var_lon, var_vals, var_vals_missing=None, lite_sid=np.empty([]),
+    var_lat, var_lon, var_vals, plot_title, var_vals_missing=None, lite_sid=np.empty([]),
     var_lims=None, interest_pt=None,
     cmap='jet', alpha=1, lat_name=None, lon_name=None, var_name=None,
     out_plot="vistool_output.png", var_label=None, cities=None,
@@ -1127,16 +1184,21 @@ def do_modis_overlay_plot(
             ax.scatter(var_lon, var_lat, c=cmap, edgecolor='none', s=2)
 
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
-    if var_file:
-        ax.set_title('Overlay data from '+
-                     os.path.split(ovr_d['var_file'])[1] +
-                     '\nbackground image from MODIS-Aqua on Worldview' +
-                     '\nplot created on ' + todays_date,
-                     size='x-small')
+    
+    if plot_title == 'auto':
+        if var_file:
+            ax.set_title('Overlay data from '+
+                         os.path.split(ovr_d['var_file'])[1] +
+                         '\nbackground image from MODIS-Aqua on Worldview' +
+                         '\nplot created on ' + todays_date,
+                         size='x-small')
+        else:
+            ax.set_title('background image from MODIS-Aqua on Worldview' +
+                         '\nplot created on ' + todays_date,
+                         size='x-small')
     else:
-        ax.set_title('background image from MODIS-Aqua on Worldview' +
-                     '\nplot created on ' + todays_date,
-                     size='x-small')
+        ax.set_title(plot_title, size='x-small')
+
 
     # during testing, it appears that sometimes the scatter
     # could cause MPL to shift the axis range - I think because one
@@ -1238,7 +1300,7 @@ if __name__ == "__main__":
         make_background_image = ovr_d['make_background_image']
         # there can be an overlay dict, but it might have no data.
         if len(odat['time']) > 0:
-            dt = datetime.datetime.fromtimestamp(np.mean(odat['time']))
+            dt = datetime.datetime.utcfromtimestamp(np.mean(odat['time']))
             cfg_d['datetime'] = dt
     else:
         make_background_image = True
@@ -1256,12 +1318,10 @@ if __name__ == "__main__":
                 np.array([]), np.array([]),
                 interest_pt=cfg_d['ground_site'], cmap='black',
                 out_plot=out_plot_fullpath, cities=cfg_d['city_labels'])
-        elif cfg_d['sensor'].startswith('GOES16_ABI'):
+        elif cfg_d['sensor'].startswith('GOES'):
             import satpy_overlay_plots
-            GOES_domain = cfg_d['sensor'].split('_')[-1]
             satpy_overlay_plots.GOES_ABI_overlay_plot(
-                cfg_d, None, None, domain = GOES_domain,
-                out_plot_name=out_plot_fullpath)
+                cfg_d, None, None, out_plot_name=out_plot_fullpath)
         else:
             raise ValueError('Unknown sensor: '+cfg_d['sensor'])
 
@@ -1310,6 +1370,7 @@ if __name__ == "__main__":
         do_modis_overlay_plot(
             cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
             cfg_d['date'], odat['lat'], odat['lon'], odat['var_data'],
+            cfg_d['out_plot_title'],
             var_vals_missing=odat['data_fill'],
             lite_sid=odat['sounding_id'],
             var_lims=ovr_d['var_lims'], interest_pt=cfg_d['ground_site'],
@@ -1319,12 +1380,10 @@ if __name__ == "__main__":
             out_plot=out_plot_fullpath,
             var_label=cbar_name, cities=cfg_d['city_labels'],
             var_file=os.path.split(ovr_d['var_file'])[1])
-    elif cfg_d['sensor'].startswith('GOES16_ABI'):
+    elif cfg_d['sensor'].startswith('GOES'):
         import satpy_overlay_plots
-        GOES_domain = cfg_d['sensor'].split('_')[-1]
         satpy_overlay_plots.GOES_ABI_overlay_plot(
             cfg_d, ovr_d, odat, var_label=cbar_name,
-            domain=GOES_domain,
             out_plot_name=out_plot_fullpath)
     else:
         raise ValueError('Unknown sensor: '+cfg_d['sensor'])

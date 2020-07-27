@@ -5,7 +5,10 @@ Top level JSON specification:
 
 Required fields
 ---------------
-date:	year-month-day "YYYY-MM-DD" format
+date:	year-month-day "YYYY-MM-DD" format, optionally with hours-minutes-
+    seconds in "YYYY-MM-DD hh:mm:ss" format. The full format (with h:m:s)
+    is useful for ABI-derived images, when a specific time is needed
+    (unlike the MODIS-Aqua RGB which is once per day).
 sensor: string sensor name, one of: "MODIS" to retrieve MODIS-Aqua RGB
     imagery from NASA Worldview; GOES16_ABI_C or GOES16_ABI_F for ABI
     RGB imagery from GOES-16, from (C)ONUS or (F)ull disk data.
@@ -115,3 +118,14 @@ make_background_image: set to 1, to make an additional plot containing the
     to using transparency as a way to see both the overlay data and the RGB
     background image. If the field is skipped, or set to zero, then only
     the full overlay data image is created.
+plot_title: this is an arbitrary string, that will be directly used as the
+    plot title for the produced image. By default this is an empty string,
+    which means no plot title will be included in the image.
+    If this is set to "auto", then the code will automatically create a plot
+    title that has key information about the matchup.
+    For a MODIS background, the title will include the filename
+    containing the overlay data (if used), a label that describes the source
+    (MODIS-Aqua on Worldview), and the image file creation date.
+    For a GOES-ABI background, this includes similar information, but also
+    includes the ABI filename used for the background, as well as the time
+    offset to the overlay data.
