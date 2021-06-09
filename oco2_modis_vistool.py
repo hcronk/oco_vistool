@@ -102,7 +102,7 @@ def update_GIBS_xml(date, xml_file):
     root[0][0].text = new_url
     tree.write(xml_file)
 
-def pull_Aqua_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr, xml_file, tif_file, xsize=1200, ysize=1000):
+def pull_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr, xml_file, tif_file, xsize=1200, ysize=1000):
 
     """
     Pulls the Aqua RGB imagery from WorldView using GIBS and puts it in specified tif file with associated metadata
@@ -447,7 +447,7 @@ def process_config_dict(input_dict):
     cfg_d = collections.OrderedDict()
 
     # check for required keys
-    required_keys = ('date', 'geo_upper_left', 'geo_lower_right')
+    required_keys = ('date', 'geo_upper_left', 'geo_lower_right', 'layer')
     for k in required_keys:
         if k not in input_dict:
             raise ValueError('Config file is missing required key: '+k)
@@ -460,6 +460,13 @@ def process_config_dict(input_dict):
 
     cfg_d['geo_upper_left'] = input_dict['geo_upper_left']
     cfg_d['geo_lower_right'] = input_dict['geo_lower_right']
+    
+    try:
+        cfg_d['layer'] = int(input_dict['layer'])
+    except ValueError:
+        raise ValueError('layer code must be an integer')
+    if (cfg_d['layer'] < 0 or cfg_d['layer'] >= layers_num):
+            raise ValueError('layer code value out of bounds')
 
     try:
         cfg_d['lat_ul'] = float(input_dict['geo_upper_left'][0])
@@ -1010,7 +1017,7 @@ def do_modis_overlay_plot(
 
     print("Pulling RGB")
     try:
-        pull_Aqua_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr,  xml_file, code_dir+'/intermediate_RGB.tif')
+        pull_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr,  xml_file, code_dir+'/intermediate_RGB.tif')
     except:
         print("Problem pulling RGB. Check that the geolocation bounds specified in the configuration file are for the upper left hand corner and the lower right hand corner")
 
@@ -1238,7 +1245,9 @@ def do_modis_overlay_plot(
 ### Static Defnitions
 
 code_dir = os.path.dirname(os.path.realpath(__file__))
-xml_file = code_dir+'/GIBS_Aqua_MODIS_truecolor.xml'
+layers_encoding = pd.read_csv(code_dir + '/Encoding.csv', header = 0)
+layers_num = len(layers_encoding.index)
+xml_file = code_dir
 
 if __name__ == "__main__":
 
@@ -1254,7 +1263,7 @@ if __name__ == "__main__":
 
     if config_file.exists():
         input_dict = config_file.get_contents()
-        for k in input_dict.keys():
+        for k in list(input_dict.keys()):
             input_dict[k.lower()] = input_dict.pop(k)
     else:
         print('The expected configuration file '+ args.config_file_loc + ' DNE in ' + code_dir)
@@ -1268,6 +1277,9 @@ if __name__ == "__main__":
             odat = load_OCO2_Lite_overlay_data(ovr_d)
         else:
             odat = load_OCO2_L1L2_overlay_data(ovr_d)
+     
+    layer_name = layers_encoding[layers_encoding['Code'] == cfg_d['layer']]['Name'].values[0]
+    xml_file = xml_file + '/' + layer_name + '.xml'
     
     # construct the auto-generated filename - it is easiest to do this
     # once here (since it gets reused in multiple places)

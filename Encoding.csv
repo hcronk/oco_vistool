@@ -1,0 +1,9 @@
+﻿Name,Code
+OMPS_SO2_Lower_Troposphere,0
+MODIS_Terra_AOD_Deep_Blue_Land,1
+MODIS_Aqua_AOD_Deep_Blue_Land,2
+MODIS_Terra_AOD_Deep_Blue_Combined,3
+MODIS_Aqua_AOD_Deep_Blue_Combined,4
+MODIS_Combined_MAIAC_L2G_AerosolOpticalDepth,5
+MODIS_Combined_MAIAC_L2G_BidirectionalReflectance_Bands143,6
+MODIS_Aqua_CorrectedReflectance_TrueColor,7
