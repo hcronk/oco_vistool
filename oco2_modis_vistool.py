@@ -269,8 +269,8 @@ def _process_overlay_dict(input_dict):
         print("Exiting")
         sys.exit()
 
-    ovr_d['version_number'] =  re.sub(
-        "[A-Za-z_]", "", re.search("_B[0-9a-z]{0,6}_",os.path.basename(ovr_d['var_file'])).group())
+    ovr_d['version_number'] = re.sub("[A-Za-z_]", "", 
+             re.search("_B[0-9A-Za-z]{0,8}_", os.path.basename(ovr_d['var_file'])).group())
 
     if int(ovr_d['version_number']) < 9000:
         try:
@@ -380,7 +380,7 @@ def _process_overlay_dict(input_dict):
         #sys.exit()
 
     ovr_d['version_file_tag'] = re.search(
-        "_B[0-9a-z]{0,6}_", os.path.basename(ovr_d['var_file'])).group()[:-1]
+        "_B[0-9A-Za-z]{0,8}_", os.path.basename(ovr_d['var_file'])).group()[:-1]
 
     if ovr_d['sif_or_co2'] == "CO2":
         if ovr_d['warn']:
