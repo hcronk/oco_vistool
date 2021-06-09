@@ -41,6 +41,8 @@ import numpy as np
 import math
 import pandas as pd
 
+from matplotlib import patheffects
+from owslib.wmts import WebMapTileService
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import shapefile
@@ -79,37 +81,37 @@ class ConfigFile:
     def get_contents(self):
         return(json.load(open(self.cf)))
 
-def update_GIBS_xml(date, xml_file):
+# def update_GIBS_xml(date, xml_file):
 
-    """
-    Puts the date of interest into the GIBS XML file
-    """
+#     """
+#     Puts the date of interest into the GIBS XML file
+#     """
 
-    tree = ET.parse(xml_file)
-    root = tree.getroot()
+#     tree = ET.parse(xml_file)
+#     root = tree.getroot()
 
-    url = root[0][0].text
+#     url = root[0][0].text
     
-    if re.match("https", url):
-        #<ServerUrl>https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/MODIS_Aqua_CorrectedReflectance_TrueColor/default/2016-07-27/250m/${z}/${y}/${x}.jpg</ServerUrl>
-        old_date = re.split('/', url)[8]
-    else:
-        #<ServerUrl>http://map1.vis.earthdata.nasa.gov/wmts-geo/MODIS_Aqua_CorrectedReflectance_TrueColor/default/2015-07-04/EPSG4326_250m/${z}/${y}/${x}.jpg</ServerUrl>
-        old_date = re.split('/', url)[6]
+#     if re.match("https", url):
+#         #<ServerUrl>https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/MODIS_Aqua_CorrectedReflectance_TrueColor/default/2016-07-27/250m/${z}/${y}/${x}.jpg</ServerUrl>
+#         old_date = re.split('/', url)[8]
+#     else:
+#         #<ServerUrl>http://map1.vis.earthdata.nasa.gov/wmts-geo/MODIS_Aqua_CorrectedReflectance_TrueColor/default/2015-07-04/EPSG4326_250m/${z}/${y}/${x}.jpg</ServerUrl>
+#         old_date = re.split('/', url)[6]
 
-    new_url = re.sub(old_date, date, url)
+#     new_url = re.sub(old_date, date, url)
 
-    root[0][0].text = new_url
-    tree.write(xml_file)
+#     root[0][0].text = new_url
+#     tree.write(xml_file)
 
-def pull_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr, xml_file, tif_file, xsize=1200, ysize=1000):
+# def pull_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr, xml_file, tif_file, xsize=1200, ysize=1000):
 
-    """
-    Pulls the Aqua RGB imagery from WorldView using GIBS and puts it in specified tif file with associated metadata
-    """
-    gdal_path = os.popen("which gdal_translate").read().strip()
-    cmd = gdal_path + " -of GTiff -outsize "+str(xsize)+" "+str(ysize)+" -projwin "+str(lon_ul)+" "+str(lat_ul)+" "+str(lon_lr)+" "+str(lat_lr)+" "+xml_file+" "+tif_file
-    os.system(cmd)
+#     """
+#     Pulls the Aqua RGB imagery from WorldView using GIBS and puts it in specified tif file with associated metadata
+#     """
+#     gdal_path = os.popen("which gdal_translate").read().strip()
+#     cmd = gdal_path + " -of GTiff -outsize "+str(xsize)+" "+str(ysize)+" -projwin "+str(lon_ul)+" "+str(lat_ul)+" "+str(lon_lr)+" "+str(lat_lr)+" "+xml_file+" "+tif_file
+#     os.system(cmd)
 
 def read_shp(filename):
     """Read shapefile to dataframe w/ geometry.
@@ -999,49 +1001,49 @@ def load_OCO2_Lite_overlay_data(ovr_d):
 
 
 def do_modis_overlay_plot(
-    geo_upper_left, geo_lower_right, date,
+    geo_upper_left, geo_lower_right, date, layer_name,
     var_lat, var_lon, var_vals, plot_title, var_vals_missing=None, lite_sid=np.empty([]),
     var_lims=None, interest_pt=None,
     cmap='jet', alpha=1, lat_name=None, lon_name=None, var_name=None,
     out_plot="vistool_output.png", var_label=None, cities=None,
     var_file=None):
 
-    lat_ul = geo_upper_left[0]
-    lon_ul = geo_upper_left[1]
-    lat_lr = geo_lower_right[0]
-    lon_lr = geo_lower_right[1]
+    lat_ul = geo_upper_left[0] #21
+    lon_ul = geo_upper_left[1] #-159
+    lat_lr = geo_lower_right[0] #17
+    lon_lr = geo_lower_right[1] #-154
 
     ### Pull Aqua-MODIS RGB from GIBS ###
 
-    update_GIBS_xml(date, xml_file)
+#     update_GIBS_xml(date, xml_file)
 
-    print("Pulling RGB")
-    try:
-        pull_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr,  xml_file, code_dir+'/intermediate_RGB.tif')
-    except:
-        print("Problem pulling RGB. Check that the geolocation bounds specified in the configuration file are for the upper left hand corner and the lower right hand corner")
+#     print("Pulling RGB")
+#     try:
+#         pull_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr,  xml_file, code_dir+'/intermediate_RGB.tif')
+#     except:
+#         print("Problem pulling RGB. Check that the geolocation bounds specified in the configuration file are for the upper left hand corner and the lower right hand corner")
 
 
-    ### Pull in and prep RGB tif file ###
+#     ### Pull in and prep RGB tif file ###
 
-    ds = gdal.Open(code_dir+'/intermediate_RGB.tif')
+#     ds = gdal.Open(code_dir+'/intermediate_RGB.tif')
 
-    data = ds.ReadAsArray()
-    gt = ds.GetGeoTransform()
-    proj = ds.GetProjection()
+#     data = ds.ReadAsArray()
+#     gt = ds.GetGeoTransform()
+#     proj = ds.GetProjection()
 
-    inproj = osr.SpatialReference()
-    inproj.ImportFromWkt(proj)
+#     inproj = osr.SpatialReference()
+#     inproj.ImportFromWkt(proj)
 
-    width = ds.RasterXSize
-    height = ds.RasterYSize
+#     width = ds.RasterXSize
+#     height = ds.RasterYSize
 
     #Calculate lat/lon lims of RGB
-    minx = gt[0]
-    miny = gt[3] + width*gt[4] + height*gt[5]
-    maxx = gt[0] + width*gt[1] + height*gt[2]
-    maxy = gt[3]
-
+    minx = lon_ul
+    miny = lat_lr
+    maxx = lon_lr
+    maxy = lat_ul
+    
 
     #Check if color is single or map
 
@@ -1054,22 +1056,22 @@ def do_modis_overlay_plot(
         cmap = 'red'
         color_or_cmap = "color"
 
-    fig_x = abs(gt[1])
-    fig_y = abs(gt[5])
+#     fig_x = abs(gt[1])
+#     fig_y = abs(gt[5])
 
-    while fig_x < 1 and fig_y < 1:
-        fig_x *= 10
-        fig_y *= 10
+#     while fig_x < 1 and fig_y < 1:
+#         fig_x *= 10
+#         fig_y *= 10
 
-    while fig_x < 5 or fig_y < 5:
-        if fig_x < 10 and fig_y < 10:
-            fig_x *= 1.1
-            fig_y *= 1.1
-        else:
-            break
+#     while fig_x < 5 or fig_y < 5:
+#         if fig_x < 10 and fig_y < 10:
+#             fig_x *= 1.1
+#             fig_y *= 1.1
+#         else:
+#             break
 
-    if color_or_cmap == "cmap":
-        fig_x += 2
+#     if color_or_cmap == "cmap":
+#         fig_x += 2
 
     # note - if var_vals.shape is zero, the var_lims are not needed, since
     # the colorbar and scatter or polygon collection will not be plotted.
@@ -1089,11 +1091,26 @@ def do_modis_overlay_plot(
 #        fig = plt.figure(figsize=(fig_x + 1,fig_y))
 #    else:
 #        fig = plt.figure(figsize=(fig_x,fig_y))
-
-    fig = plt.figure(figsize=(fig_x + 1,fig_y))
+    
+    deltax = maxx - minx
+    deltay = maxy - miny
+    
+    #fig = plt.figure(figsize=(2 * deltax, 2 * deltay))
+    fig = plt.figure(figsize=(16 * deltax / deltay, 8))
     gs =  gridspec.GridSpec(16, 16)
+    
+    layers = [layer_name]
+    for layer, offset in zip(layers, [0, 0.5]):
+        ax = fig.add_axes([offset, 0, 0.5, 1], projection=plot_crs)
+        ax.set_xlim((x0, x1))
+        ax.set_ylim((y0, y1))
+        ax.add_wmts(wmts, layer, wmts_kwargs={'time': date})
+        txt = ax.text(minx, miny, wmts[layer].title, fontsize=18, color='wheat',
+                      transform=geodetic_crs)
+        txt.set_path_effects([patheffects.withStroke(linewidth=5,
+                                                     foreground='black')])
 
-    img = plt.imread(code_dir+'/intermediate_RGB.tif')
+    ax.coastlines(resolution = '10m', color = 'white')
     img_extent = (minx, maxx, miny, maxy)
 
     ax = plt.subplot(gs[0:-1, 3:-2], projection=ccrs.PlateCarree())
@@ -1243,7 +1260,8 @@ def do_modis_overlay_plot(
 
 
 ### Static Defnitions
-
+url = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi'
+wmts = WebMapTileService(url)
 code_dir = os.path.dirname(os.path.realpath(__file__))
 layers_encoding = pd.read_csv(code_dir + '/Encoding.csv', header = 0)
 layers_num = len(layers_encoding.index)
