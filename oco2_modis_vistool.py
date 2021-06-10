@@ -104,7 +104,7 @@ class ConfigFile:
 #     root[0][0].text = new_url
 #     tree.write(xml_file)
 
-# def pull_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr, xml_file, tif_file, xsize=1200, ysize=1000):
+# def pull_Aqua_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr, xml_file, tif_file, xsize=1200, ysize=1000):
 
 #     """
 #     Pulls the Aqua RGB imagery from WorldView using GIBS and puts it in specified tif file with associated metadata
@@ -469,7 +469,7 @@ def process_config_dict(input_dict):
         raise ValueError('layer code must be an integer')
     if (cfg_d['layer'] < 0 or cfg_d['layer'] >= layers_num):
             raise ValueError('layer code value out of bounds')
-
+            
     try:
         cfg_d['lat_ul'] = float(input_dict['geo_upper_left'][0])
         cfg_d['lon_ul'] = float(input_dict['geo_upper_left'][1])
@@ -1001,17 +1001,17 @@ def load_OCO2_Lite_overlay_data(ovr_d):
 
 
 def do_modis_overlay_plot(
-    geo_upper_left, geo_lower_right, date, layer_name,
+    geo_upper_left, geo_lower_right, date, layer_name, 
     var_lat, var_lon, var_vals, plot_title, var_vals_missing=None, lite_sid=np.empty([]),
     var_lims=None, interest_pt=None,
     cmap='jet', alpha=1, lat_name=None, lon_name=None, var_name=None,
     out_plot="vistool_output.png", var_label=None, cities=None,
     var_file=None):
 
-    lat_ul = geo_upper_left[0] #21
-    lon_ul = geo_upper_left[1] #-159
-    lat_lr = geo_lower_right[0] #17
-    lon_lr = geo_lower_right[1] #-154
+    lat_ul = geo_upper_left[0]
+    lon_ul = geo_upper_left[1]
+    lat_lr = geo_lower_right[0]
+    lon_lr = geo_lower_right[1]
 
     ### Pull Aqua-MODIS RGB from GIBS ###
 
@@ -1019,12 +1019,12 @@ def do_modis_overlay_plot(
 
 #     print("Pulling RGB")
 #     try:
-#         pull_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr,  xml_file, code_dir+'/intermediate_RGB.tif')
+#         pull_Aqua_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr,  xml_file, code_dir+'/intermediate_RGB.tif')
 #     except:
 #         print("Problem pulling RGB. Check that the geolocation bounds specified in the configuration file are for the upper left hand corner and the lower right hand corner")
 
 
-#     ### Pull in and prep RGB tif file ###
+    ### Pull in and prep RGB tif file ###
 
 #     ds = gdal.Open(code_dir+'/intermediate_RGB.tif')
 
@@ -1043,10 +1043,14 @@ def do_modis_overlay_plot(
     miny = lat_lr
     maxx = lon_lr
     maxy = lat_ul
+
+    deltax = maxx - minx
+    deltay = maxy - miny
+
+    fig_y = 8
+    fig_x = fig_y * deltax / deltay
     
-
     #Check if color is single or map
-
     if cmap in plt.colormaps():
         color_or_cmap = "cmap"
     elif cmap in mpl.colors.cnames.keys():
@@ -1070,8 +1074,8 @@ def do_modis_overlay_plot(
 #         else:
 #             break
 
-#     if color_or_cmap == "cmap":
-#         fig_x += 2
+    if color_or_cmap == "cmap":
+        fig_x += 2
 
     # note - if var_vals.shape is zero, the var_lims are not needed, since
     # the colorbar and scatter or polygon collection will not be plotted.
@@ -1087,36 +1091,35 @@ def do_modis_overlay_plot(
 
 
     ### Plot the image ###
-#    if var_vals.shape:
-#        fig = plt.figure(figsize=(fig_x + 1,fig_y))
-#    else:
-#        fig = plt.figure(figsize=(fig_x,fig_y))
-    
-    deltax = maxx - minx
-    deltay = maxy - miny
-    
-    #fig = plt.figure(figsize=(2 * deltax, 2 * deltay))
-    fig = plt.figure(figsize=(16 * deltax / deltay, 8))
+    if var_vals.shape:
+        fig = plt.figure(figsize = (fig_x + 1, fig_y), dpi = 150)
+    else:
+        fig = plt.figure(figsize = (fig_x, fig_y), dpi = 150)
+
     gs =  gridspec.GridSpec(16, 16)
     
+    url = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi'
+    wmts = WebMapTileService(url)
     layers = [layer_name]
     for layer, offset in zip(layers, [0, 0.5]):
-        ax = fig.add_axes([offset, 0, 0.5, 1], projection=plot_crs)
-        ax.set_xlim((x0, x1))
-        ax.set_ylim((y0, y1))
+        ax = fig.add_axes([offset, 0, 0.5, 1], projection=ccrs.PlateCarree())
+        ax.set_xlim((minx, maxx))
+        ax.set_ylim((miny, maxy))
         ax.add_wmts(wmts, layer, wmts_kwargs={'time': date})
         txt = ax.text(minx, miny, wmts[layer].title, fontsize=18, color='wheat',
-                      transform=geodetic_crs)
+                      transform=ccrs.Geodetic())
         txt.set_path_effects([patheffects.withStroke(linewidth=5,
                                                      foreground='black')])
 
-    ax.coastlines(resolution = '10m', color = 'white')
-    img_extent = (minx, maxx, miny, maxy)
+    ax.coastlines(resolution = '10m', color = 'white', linewidth = 1)
 
-    ax = plt.subplot(gs[0:-1, 3:-2], projection=ccrs.PlateCarree())
-    ax_pos = ax.get_position()
-    ax.imshow(img, origin='upper', transform=ccrs.PlateCarree(), extent=img_extent, aspect='auto')
-    ax.coastlines(resolution='10m', color='black', linewidth=1)
+#     img = plt.imread(code_dir+'/intermediate_RGB.tif')
+#     img_extent = (minx, maxx, miny, maxy)
+#     ax = plt.subplot(gs[0:-1, 3:-2], projection=ccrs.PlateCarree())
+#     ax_pos = ax.get_position()
+#     ax.imshow(img, origin='upper', transform=ccrs.PlateCarree(), extent=img_extent, aspect='auto')
+#     ax.coastlines(resolution='10m', color='black', linewidth=1)
+    
     ax.add_feature(states_provinces, edgecolor='black', linewidth=1)
     ax.add_feature(cfeature.BORDERS, edgecolor='black', linewidth=1)
 
@@ -1209,26 +1212,30 @@ def do_modis_overlay_plot(
 
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
     
-    if plot_title == 'auto':
-        if var_file:
-            ax.set_title('Overlay data from '+
-                         os.path.split(ovr_d['var_file'])[1] +
-                         '\nbackground image from MODIS-Aqua on Worldview' +
-                         '\nplot created on ' + todays_date,
-                         size='x-small')
-        else:
-            ax.set_title('background image from MODIS-Aqua on Worldview' +
-                         '\nplot created on ' + todays_date,
-                         size='x-small')
-    else:
-        ax.set_title(plot_title, size='x-small')
+#     if plot_title == 'auto':
+#         if var_file:
+#             ax.set_title('Overlay data from '+
+#                          os.path.split(ovr_d['var_file'])[1] +
+#                          '\nbackground image from MODIS-Aqua on Worldview' +
+#                          '\nplot created on ' + todays_date,
+#                          size='x-small')
+#         else:
+#             ax.set_title('background image from MODIS-Aqua on Worldview' +
+#                          '\nplot created on ' + todays_date,
+#                          size='x-small')
 
+
+#     elif (not np.isscalar(plot_title)):
+#         pass
+#     else:
+#         ax.set_title(plot_title, size='x-small')
 
     # during testing, it appears that sometimes the scatter
     # could cause MPL to shift the axis range - I think because one
     # scatter point goes slightly out of the display range.
     # so, here force it back to the original domain.
-    ax.axis(img_extent)
+    img_extent = (minx, maxx, miny, maxy)
+    #ax.axis(img_extent)
 
     inset_extent_x = [minx, maxx]
     inset_extent_y = [miny, maxy]
@@ -1255,22 +1262,21 @@ def do_modis_overlay_plot(
 
     fig.savefig(out_plot, dpi=150, bbox_inches='tight')
     print("\nFigure saved at "+out_plot)
+    
     #print("code directory in subroutine:", code_dir)
-    os.remove(code_dir+'/intermediate_RGB.tif')
+    #os.remove(code_dir+'/intermediate_RGB.tif')
 
 
-### Static Defnitions
-url = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi'
-wmts = WebMapTileService(url)
+### Static Definitions
+
 code_dir = os.path.dirname(os.path.realpath(__file__))
 layers_encoding = pd.read_csv(code_dir + '/Encoding.csv', header = 0)
 layers_num = len(layers_encoding.index)
-xml_file = code_dir
+#xml_file = code_dir+'/GIBS_Aqua_MODIS_truecolor.xml'
 
 if __name__ == "__main__":
 
     ### Dynamic Definitions: get information from config file ###
-
     parser = argparse.ArgumentParser(description="Get configuration file")
     parser.add_argument(
         'config_file_loc', type=str,
@@ -1295,9 +1301,8 @@ if __name__ == "__main__":
             odat = load_OCO2_Lite_overlay_data(ovr_d)
         else:
             odat = load_OCO2_L1L2_overlay_data(ovr_d)
-     
+    
     layer_name = layers_encoding[layers_encoding['Code'] == cfg_d['layer']]['Name'].values[0]
-    xml_file = xml_file + '/' + layer_name + '.xml'
     
     # construct the auto-generated filename - it is easiest to do this
     # once here (since it gets reused in multiple places)
@@ -1336,7 +1341,6 @@ if __name__ == "__main__":
         make_background_image = True
 
     if make_background_image:
-
         out_plot_fullpath = os.path.join(
             cfg_d['out_plot_dir'], 
             cfg_d['sensor']+"_imagery_" + out_plot_name)
@@ -1344,7 +1348,7 @@ if __name__ == "__main__":
         if cfg_d['sensor'] == 'MODIS':
             do_modis_overlay_plot(
                 cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
-                cfg_d['date'], np.array([]), np.array([]),
+                cfg_d['date'], layer_name, np.array([]), np.array([]),
                 np.array([]), np.array([]),
                 interest_pt=cfg_d['ground_site'], cmap='black',
                 out_plot=out_plot_fullpath, cities=cfg_d['city_labels'])
@@ -1399,7 +1403,7 @@ if __name__ == "__main__":
     if cfg_d['sensor'] == 'MODIS':
         do_modis_overlay_plot(
             cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
-            cfg_d['date'], odat['lat'], odat['lon'], odat['var_data'],
+            cfg_d['date'], layer_name, odat['lat'], odat['lon'], odat['var_data'],
             cfg_d['out_plot_title'],
             var_vals_missing=odat['data_fill'],
             lite_sid=odat['sounding_id'],
