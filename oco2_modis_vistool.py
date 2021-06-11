@@ -48,15 +48,12 @@ import cartopy.feature as cfeature
 import shapefile
 from shapely.geometry import LineString, Point, Polygon
 import matplotlib as mpl
-#mpl.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.gridspec as gridspec
 
-from osgeo import gdal, osr
 import shapely.geometry as sgeom
 
-import xml.etree.ElementTree as ET
 import json
 import argparse
 
@@ -80,38 +77,6 @@ class ConfigFile:
 
     def get_contents(self):
         return(json.load(open(self.cf)))
-
-# def update_GIBS_xml(date, xml_file):
-
-#     """
-#     Puts the date of interest into the GIBS XML file
-#     """
-
-#     tree = ET.parse(xml_file)
-#     root = tree.getroot()
-
-#     url = root[0][0].text
-    
-#     if re.match("https", url):
-#         #<ServerUrl>https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/MODIS_Aqua_CorrectedReflectance_TrueColor/default/2016-07-27/250m/${z}/${y}/${x}.jpg</ServerUrl>
-#         old_date = re.split('/', url)[8]
-#     else:
-#         #<ServerUrl>http://map1.vis.earthdata.nasa.gov/wmts-geo/MODIS_Aqua_CorrectedReflectance_TrueColor/default/2015-07-04/EPSG4326_250m/${z}/${y}/${x}.jpg</ServerUrl>
-#         old_date = re.split('/', url)[6]
-
-#     new_url = re.sub(old_date, date, url)
-
-#     root[0][0].text = new_url
-#     tree.write(xml_file)
-
-# def pull_Aqua_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr, xml_file, tif_file, xsize=1200, ysize=1000):
-
-#     """
-#     Pulls the Aqua RGB imagery from WorldView using GIBS and puts it in specified tif file with associated metadata
-#     """
-#     gdal_path = os.popen("which gdal_translate").read().strip()
-#     cmd = gdal_path + " -of GTiff -outsize "+str(xsize)+" "+str(ysize)+" -projwin "+str(lon_ul)+" "+str(lat_ul)+" "+str(lon_lr)+" "+str(lat_lr)+" "+xml_file+" "+tif_file
-#     os.system(cmd)
 
 def read_shp(filename):
     """Read shapefile to dataframe w/ geometry.
@@ -1007,42 +972,12 @@ def do_modis_overlay_plot(
     cmap='jet', alpha=1, lat_name=None, lon_name=None, var_name=None,
     out_plot="vistool_output.png", var_label=None, cities=None,
     var_file=None):
-
-    lat_ul = geo_upper_left[0]
-    lon_ul = geo_upper_left[1]
-    lat_lr = geo_lower_right[0]
-    lon_lr = geo_lower_right[1]
-
-    ### Pull Aqua-MODIS RGB from GIBS ###
-
-#     update_GIBS_xml(date, xml_file)
-
-#     print("Pulling RGB")
-#     try:
-#         pull_Aqua_RGB_GIBS(lat_ul, lon_ul, lat_lr, lon_lr,  xml_file, code_dir+'/intermediate_RGB.tif')
-#     except:
-#         print("Problem pulling RGB. Check that the geolocation bounds specified in the configuration file are for the upper left hand corner and the lower right hand corner")
-
-
-    ### Pull in and prep RGB tif file ###
-
-#     ds = gdal.Open(code_dir+'/intermediate_RGB.tif')
-
-#     data = ds.ReadAsArray()
-#     gt = ds.GetGeoTransform()
-#     proj = ds.GetProjection()
-
-#     inproj = osr.SpatialReference()
-#     inproj.ImportFromWkt(proj)
-
-#     width = ds.RasterXSize
-#     height = ds.RasterYSize
-
+    
     #Calculate lat/lon lims of RGB
-    minx = lon_ul
-    miny = lat_lr
-    maxx = lon_lr
-    maxy = lat_ul
+    maxy = geo_upper_left[0]
+    minx = geo_upper_left[1]
+    miny = geo_lower_right[0]
+    maxx = geo_lower_right[1]
 
     deltax = maxx - minx
     deltay = maxy - miny
@@ -1059,20 +994,6 @@ def do_modis_overlay_plot(
         print(cmap + " is not a recognized color or colormap. Data will be displayed in red")
         cmap = 'red'
         color_or_cmap = "color"
-
-#     fig_x = abs(gt[1])
-#     fig_y = abs(gt[5])
-
-#     while fig_x < 1 and fig_y < 1:
-#         fig_x *= 10
-#         fig_y *= 10
-
-#     while fig_x < 5 or fig_y < 5:
-#         if fig_x < 10 and fig_y < 10:
-#             fig_x *= 1.1
-#             fig_y *= 1.1
-#         else:
-#             break
 
     if color_or_cmap == "cmap":
         fig_x += 2
@@ -1100,43 +1021,30 @@ def do_modis_overlay_plot(
     
     url = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi'
     wmts = WebMapTileService(url)
-    layers = [layer_name]
-    for layer, offset in zip(layers, [0, 0.5]):
-        ax = fig.add_axes([offset, 0, 0.5, 1], projection=ccrs.PlateCarree())
-        ax.set_xlim((minx, maxx))
-        ax.set_ylim((miny, maxy))
-        ax.add_wmts(wmts, layer, wmts_kwargs={'time': date})
-        txt = ax.text(minx, miny, wmts[layer].title, fontsize=18, color='wheat',
-                      transform=ccrs.Geodetic())
-        txt.set_path_effects([patheffects.withStroke(linewidth=5,
-                                                     foreground='black')])
+    layer = layer_name
+
+    ax = plt.subplot(gs[0:-1, 3:-2], projection=ccrs.PlateCarree())
+    ax.set_xlim((minx, maxx))
+    ax.set_ylim((miny, maxy))
+    ax.add_wmts(wmts, layer, wmts_kwargs={'time': date})
+    txt = ax.text(minx, miny, wmts[layer].title, fontsize=12, color='wheat',
+                  transform=ccrs.Geodetic())
+    txt.set_path_effects([patheffects.withStroke(linewidth=5,
+                                                 foreground='black')])
 
     ax.coastlines(resolution = '10m', color = 'white', linewidth = 1)
-
-#     img = plt.imread(code_dir+'/intermediate_RGB.tif')
-#     img_extent = (minx, maxx, miny, maxy)
-#     ax = plt.subplot(gs[0:-1, 3:-2], projection=ccrs.PlateCarree())
-#     ax_pos = ax.get_position()
-#     ax.imshow(img, origin='upper', transform=ccrs.PlateCarree(), extent=img_extent, aspect='auto')
-#     ax.coastlines(resolution='10m', color='black', linewidth=1)
-    
     ax.add_feature(states_provinces, edgecolor='black', linewidth=1)
     ax.add_feature(cfeature.BORDERS, edgecolor='black', linewidth=1)
 
     if cities is not None:
-
         populated_places_filename = code_dir+'/natural_earth/ne_10m_populated_places'
-
         df = read_shp(populated_places_filename)
-
         relevant_places = df[(df['LATITUDE'] <= maxy) &
                           (df['LATITUDE']>= miny) &
                           (df['LONGITUDE']<= maxx) &
                           (df['LONGITUDE']>= minx)]
-
+        
         for idx, p in relevant_places.iterrows():
-
-            #print p['NAME'], p['LATITUDE'], p['LONGITUDE']
             ax.text(p['LONGITUDE'], p['LATITUDE'], p['NAME'], fontsize=7, color=cities, va='bottom', ha='center', transform=ccrs.Geodetic())
 
     if interest_pt is not None:
@@ -1212,30 +1120,25 @@ def do_modis_overlay_plot(
 
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
     
-#     if plot_title == 'auto':
-#         if var_file:
-#             ax.set_title('Overlay data from '+
-#                          os.path.split(ovr_d['var_file'])[1] +
-#                          '\nbackground image from MODIS-Aqua on Worldview' +
-#                          '\nplot created on ' + todays_date,
-#                          size='x-small')
-#         else:
-#             ax.set_title('background image from MODIS-Aqua on Worldview' +
-#                          '\nplot created on ' + todays_date,
-#                          size='x-small')
+    if plot_title == 'auto':
+        if var_file:
+            ax.set_title('Overlay data from '+
+                         os.path.split(ovr_d['var_file'])[1] +
+                         '\nbackground image from MODIS-Aqua on Worldview' +
+                         '\nplot created on ' + todays_date,
+                         size='x-small')
+        else:
+            ax.set_title('background image from MODIS-Aqua on Worldview' +
+                         '\nplot created on ' + todays_date,
+                         size='x-small')
 
-
-#     elif (not np.isscalar(plot_title)):
-#         pass
-#     else:
-#         ax.set_title(plot_title, size='x-small')
 
     # during testing, it appears that sometimes the scatter
     # could cause MPL to shift the axis range - I think because one
     # scatter point goes slightly out of the display range.
     # so, here force it back to the original domain.
     img_extent = (minx, maxx, miny, maxy)
-    #ax.axis(img_extent)
+    ax.axis(img_extent)
 
     inset_extent_x = [minx, maxx]
     inset_extent_y = [miny, maxy]
@@ -1272,7 +1175,7 @@ def do_modis_overlay_plot(
 code_dir = os.path.dirname(os.path.realpath(__file__))
 layers_encoding = pd.read_csv(code_dir + '/Encoding.csv', header = 0)
 layers_num = len(layers_encoding.index)
-#xml_file = code_dir+'/GIBS_Aqua_MODIS_truecolor.xml'
+
 
 if __name__ == "__main__":
 
@@ -1376,7 +1279,6 @@ if __name__ == "__main__":
         ovr_d['var_lims'] = None
 
     ### Plot prep ###
-
     # create a compact colorbar label, including var name and units.
     if odat['data_long_name']:
         oco2_data_long_name = re.sub("_", " ", odat['data_long_name'])

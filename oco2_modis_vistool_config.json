@@ -3,7 +3,7 @@
 	"geo_upper_left": [21, -159],
 	"geo_lower_right": [17, -154],
 	"region": "",
-    "layer": 7,
+    "layer": 0,
 	"oco2_overlay_info": {
 		"file": "oco2_LtCO2_180711_B10206Ar_200730024539s.nc4",
 		"variable": "xco2",
