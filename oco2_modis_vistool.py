@@ -647,7 +647,6 @@ def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
     dd = collections.OrderedDict()
 
     ### Prep OCO-2 Variable ###
-
     h5 = h5py.File(ovr_d['var_file'], "r")
 
     # SoundingGeometry means this is L1b, or L2 preprocessor,
@@ -1026,7 +1025,7 @@ def do_modis_overlay_plot(
     ax = plt.subplot(gs[0:-1, 3:-2], projection=ccrs.PlateCarree())
     ax.set_xlim((minx, maxx))
     ax.set_ylim((miny, maxy))
-    ax.add_wmts(wmts, layer, wmts_kwargs={'time': date})
+    im = ax.add_wmts(wmts, layer, wmts_kwargs={'time': date})
     txt = ax.text(minx, miny, wmts[layer].title, fontsize=12, color='wheat',
                   transform=ccrs.Geodetic())
     txt.set_path_effects([patheffects.withStroke(linewidth=5,
@@ -1034,6 +1033,8 @@ def do_modis_overlay_plot(
 
     ax.coastlines(resolution = '10m', color = 'white', linewidth = 1)
     ax.add_feature(states_provinces, edgecolor='black', linewidth=1)
+    ax.add_feature(cfeature.LAND, edgecolor='black', linewidth=1)
+    ax.add_feature(cfeature.OCEAN, edgecolor='black', linewidth=1)
     ax.add_feature(cfeature.BORDERS, edgecolor='black', linewidth=1)
 
     if cities is not None:
