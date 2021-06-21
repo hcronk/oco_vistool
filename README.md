@@ -1,8 +1,7 @@
 # oco2_modis_vistool.py
 
-The purpose of this script is to pull Aqua-MODIS RGB images from Worldview
-using the NASA GIBS API and overlay various OCO-2 data fields for case study 
-analysis in support of OCO-2 cloud and aerosol screening validation.
+The purpose of this script is to pull different RGB images (depending on the user's choice from Encoding.csv) from Worldview using the NASA GIBS API and overlay various OCO-2 data fields for 
+case study analysis in support of OCO-2 cloud and aerosol screening validation.
 
 It can be used as a command line tool to plot any data in the OCO-2 CO2 or SIF Lite file, filtered by warn level, quality flag, and/or footprint number where applicable.  
 It can also be called as a function from within another Python program for expanded use with other datasets.
@@ -41,7 +40,6 @@ It can also be called as a function from within another Python program for expan
 
     The conda installs required on top of what comes with Anaconda 5.2 for both Python 2.7 and Python 3.6 are as follows:
     + conda install -c conda-forge cartopy
-    + conda install -c conda-forge gdal=2.2.4
     + conda install -c conda-forge ncurses
     + conda install -c conda-forge hdf5
     + conda install -c conda-forge future
@@ -67,6 +65,12 @@ It can also be called as a function from within another Python program for expan
      **geo_lower_right** (list, format:[lat, lon]):  
          The latitude and longitude coordinates of the lower right hand corner of your area of 
          interest.
+     
+     **layer** (integer, format: integer between 0 and maximum code number in Encoding.csv)
+         The code of the background layer to be used by the vistool. Each layer is given its code (encoded) 
+         in the Encoding.csv file in the code directory. The file contains the relation: layer name (by the
+         NASA Worldview standards) - code (generated unique number). So, when adding new
+         layers to the CSV, use the above standards.
 
    #### Optional:
 	**region** (string, default: none):  

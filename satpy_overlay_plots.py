@@ -24,6 +24,7 @@ import matplotlib as mpl
 import matplotlib.patches as mpatches
 
 import netCDF4
+import h5py
 
 from oco2_modis_vistool import read_shp
 
@@ -176,6 +177,7 @@ def get_ABI_files(datetime_utc, center_lat, data_home,
         # four "?" for the MMSS, and then one more for a character at
         # the end, I am not sure about (frac second?)
         stimestamp = dt.strftime('%Y%j%H') + '????' + '?'
+        #print(data_home)
         ddir = os.path.join(data_home, y_dir, ymdd_dir,
                             'abi', 'L1b', 'Rad'+domain)
         if verbose:
@@ -272,7 +274,8 @@ def get_scene_obj(file_list, latlon_extent, width=750, height=750,
         scn = Scene(reader='abi_l1b', filenames=cached_file_list)
     else:
         scn = Scene(reader='abi_l1b', filenames=file_list)
-
+    
+    print(scn.all_dataset_names())
     scn.load(['true_color'])
 
     my_area = pyresample.create_area_def(
@@ -634,7 +637,8 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
         fignum, crs, create_colorbar_axis=cbar_needed)
 
     im = plot_scene_obj(ax, scn)
-
+    
+    #print(overlay_present)
     if overlay_present:
         if ovr_d['var_lims']:
             vmin, vmax = ovr_d['var_lims']

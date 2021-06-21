@@ -32,10 +32,13 @@ from six import string_types
 import collections
 import datetime
 
+import netCDF4
+
+import xml.etree.ElementTree as ET
+import urllib.request
+
 from OCO2FileOps import *
 from default_cmaps import default_cmaps
-
-import h5py
 
 import numpy as np
 import math
@@ -508,7 +511,7 @@ def process_config_dict(input_dict):
 
     if cfg_d['sensor'] not in valid_sensor_names:
         raise ValueError('sensor name: ' + cfg_d['sensor'] + ' is not valid')
-    
+    #print(cfg_d)
     cfg_d['resample_method'] = input_dict.get(
         'resample_method', 'native_bilinear')
     if cfg_d['resample_method'] == "":
@@ -966,7 +969,7 @@ def load_OCO2_Lite_overlay_data(ovr_d):
 
 def do_modis_overlay_plot(
     geo_upper_left, geo_lower_right, date, layer_name, 
-    var_lat, var_lon, var_vals, plot_title, var_vals_missing=None, lite_sid=np.empty([]),
+    var_lat, var_lon, var_vals, plot_title, layer_url, var_vals_missing=None, lite_sid=np.empty([]),
     var_lims=None, interest_pt=None,
     cmap='jet', alpha=1, lat_name=None, lon_name=None, var_name=None,
     out_plot="vistool_output.png", var_label=None, cities=None,
@@ -981,7 +984,7 @@ def do_modis_overlay_plot(
     deltax = maxx - minx
     deltay = maxy - miny
 
-    fig_y = 8
+    fig_y = 7.1
     fig_x = fig_y * deltax / deltay
     
     #Check if color is single or map
@@ -1026,7 +1029,7 @@ def do_modis_overlay_plot(
     ax.set_xlim((minx, maxx))
     ax.set_ylim((miny, maxy))
     im = ax.add_wmts(wmts, layer, wmts_kwargs={'time': date})
-    txt = ax.text(minx, miny, wmts[layer].title, fontsize=12, color='wheat',
+    txt = ax.text(minx, miny, wmts[layer].title, fontsize=10, color='wheat',
                   transform=ccrs.Geodetic())
     txt.set_path_effects([patheffects.withStroke(linewidth=5,
                                                  foreground='black')])
@@ -1091,18 +1094,91 @@ def do_modis_overlay_plot(
         else:
             ax.scatter(var_lon, var_lat, c=var_vals,
                        cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
-            
         cb_ax1 = plt.subplot(gs[0:-1, -1])
-        norm = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
-        cmap_obj = mpl.cm.get_cmap(cmap)
-        cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap_obj, orientation = 'vertical', norm = norm)
+        norm1 = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
+        cmap_obj1 = mpl.cm.get_cmap(cmap)
+        cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap_obj1, orientation = 'vertical', norm = norm1)
         if var_label:
             cb1_lab = cb1.ax.set_xlabel(var_label, labelpad=8, fontweight='bold')
-            cb1_lab.set_fontsize(14)
+            cb1_lab.set_fontsize(12)
             cb1.ax.xaxis.set_label_position("top")
         for t in cb1.ax.yaxis.get_ticklabels():
             t.set_weight("bold")
             t.set_fontsize(12)
+        
+        if (layer_url != 'Null'):
+            response = urllib.request.urlopen(layer_url).read()
+            root = ET.fromstring(response)
+            bounds_list = list()
+            df_list = list()
+            ticks_list = list()
+            units = None
+            for color_map in root.findall("ColorMap"):
+                if ('units' in color_map.attrib):
+                    units = color_map.attrib.get('units')
+                for legend in color_map.findall("Legend"):
+                    if (legend.attrib.get('type') == 'continuous'):
+                        num_entries = len(legend.findall("LegendEntry"))
+                        for entry in legend.findall("LegendEntry"): 
+                            if ('<' in entry.attrib.get('tooltip')):
+                                tmp_upper = float(entry.attrib.get('tooltip').split('<')[1].strip())
+                                # –
+                                if ('-' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
+                                    next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split('-')
+                                elif ('–' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
+                                    next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split('–')
+                                tmp_diff = float(next_range[1].strip()) - float(next_range[0].strip())
+                                tmp_lower = tmp_upper - tmp_diff
+                                bounds_list.append(tmp_lower)
+
+                                df_list.append(list(map(lambda i: int(i)/255, entry.attrib.get('rgb').split(','))))
+
+                                if ('showTick' in entry.attrib):
+                                    ticks_list.append(tmp_upper)
+                            elif ('≥' in entry.attrib.get('tooltip')):
+                                tmp_lower = float(entry.attrib.get('tooltip').split('≥')[1].strip())
+                                if('-' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
+                                    prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split('-')
+                                elif ('–' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
+                                    prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split('–')
+                                tmp_diff = float(prev_range[1].strip()) - float(prev_range[0].strip())
+                                tmp_upper = tmp_lower + tmp_diff
+                                bounds_list.append(tmp_lower)
+                                bounds_list.append(tmp_upper)
+
+                                df_list.append(list(map(lambda i: int(i)/255, entry.attrib.get('rgb').split(','))))
+
+                                if ('showTick' in entry.attrib):
+                                    ticks_list.append(tmp_lower)
+                            else:
+                                if ('-' in entry.attrib.get('tooltip')):
+                                    tmp_lower = (float(entry.attrib.get('tooltip').split('-')[0].strip()))
+                                elif ('–' in entry.attrib.get('tooltip')):
+                                    tmp_lower = (float(entry.attrib.get('tooltip').split('–')[0].strip()))
+
+                                bounds_list.append(tmp_lower)
+                                df_list.append(list(map(lambda i: int(i)/255, entry.attrib.get('rgb').split(','))))
+
+                                if ('showTick' in entry.attrib):
+                                    ticks_list.append(tmp_lower)
+
+
+            cmap_df = pd.DataFrame(df_list, columns = ['r','g','b'])
+            cmap_list = list(zip(cmap_df.r, cmap_df.g, cmap_df.b))
+            cmap = mpl.colors.LinearSegmentedColormap.from_list("gibs_cmap", cmap_list, len(cmap_list))
+            norm = mpl.colors.BoundaryNorm(bounds_list, cmap.N)
+
+            ax2 = plt.subplot(gs[-1, 2:-2])
+            cb2 = mpl.colorbar.ColorbarBase(ax2, cmap=cmap, norm=norm, orientation = 'horizontal',
+                                            ticks = ticks_list + [bounds_list[0]] + [bounds_list[-1]])
+            #cb2.ax.set_xticklabels(rotation=45)
+            for t in cb2.ax.xaxis.get_ticklabels():
+                t.set_weight("bold")
+                t.set_fontsize(8)
+                t.set_rotation(45)
+            
+            if (units != None):
+                cb2.ax.set_xlabel('# in ' + units, fontdict=dict(weight='bold'))
 
     if color_or_cmap == "color" and var_vals.shape[0] > 0:
 
@@ -1177,7 +1253,7 @@ code_dir = os.path.dirname(os.path.realpath(__file__))
 layers_encoding = pd.read_csv(code_dir + '/Encoding.csv', header = 0)
 layers_num = len(layers_encoding.index)
 
-
+layers_url = pd.read_csv(code_dir + '/Layer_xml.csv', header = 0)
 if __name__ == "__main__":
 
     ### Dynamic Definitions: get information from config file ###
@@ -1207,6 +1283,8 @@ if __name__ == "__main__":
             odat = load_OCO2_L1L2_overlay_data(ovr_d)
     
     layer_name = layers_encoding[layers_encoding['Code'] == cfg_d['layer']]['Name'].values[0]
+    layer_url = layers_url[layers_url['Name'] == layer_name]['Url'].values[0]
+    
     
     # construct the auto-generated filename - it is easiest to do this
     # once here (since it gets reused in multiple places)
@@ -1243,17 +1321,16 @@ if __name__ == "__main__":
             cfg_d['datetime'] = dt
     else:
         make_background_image = True
-
     if make_background_image:
         out_plot_fullpath = os.path.join(
             cfg_d['out_plot_dir'], 
             cfg_d['sensor']+"_imagery_" + out_plot_name)
-
+    
         if cfg_d['sensor'] == 'MODIS':
             do_modis_overlay_plot(
                 cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
                 cfg_d['date'], layer_name, np.array([]), np.array([]),
-                np.array([]), np.array([]),
+                np.array([]), np.array([]), layer_url,
                 interest_pt=cfg_d['ground_site'], cmap='black',
                 out_plot=out_plot_fullpath, cities=cfg_d['city_labels'])
         elif cfg_d['sensor'].startswith('GOES'):
@@ -1302,12 +1379,12 @@ if __name__ == "__main__":
     # construct filenames for the plot and optional h5 output file.
     out_plot_fullpath = os.path.join(cfg_d['out_plot_dir'], out_plot_name)
     out_data_fullpath = os.path.join(cfg_d['out_data_dir'], out_data_name)
-
+    
     if cfg_d['sensor'] == 'MODIS':
         do_modis_overlay_plot(
             cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
             cfg_d['date'], layer_name, odat['lat'], odat['lon'], odat['var_data'],
-            cfg_d['out_plot_title'],
+            cfg_d['out_plot_title'], layer_url,
             var_vals_missing=odat['data_fill'],
             lite_sid=odat['sounding_id'],
             var_lims=ovr_d['var_lims'], interest_pt=cfg_d['ground_site'],
