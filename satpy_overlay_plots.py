@@ -275,7 +275,6 @@ def get_scene_obj(file_list, latlon_extent, width=750, height=750,
     else:
         scn = Scene(reader='abi_l1b', filenames=file_list)
     
-    print(scn.all_dataset_names())
     scn.load(['true_color'])
 
     my_area = pyresample.create_area_def(

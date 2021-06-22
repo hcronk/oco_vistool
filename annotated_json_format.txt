@@ -18,6 +18,7 @@ geo_upper_left: two element lat, lon values for upper left corner of
     background image (MODIS or GOES-ABI)
 geo_lower_right: two element lat, lon values for lower right corner of
     background image (MODIS or GOES-ABI)
+layer: layer code (from Encoding.csv) of the desired background layer
 
 
 Optional Fields

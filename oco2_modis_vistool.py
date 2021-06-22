@@ -728,6 +728,7 @@ def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
     dd['data_long_name'] = ovr_d['var_name'].split('/')[-1]
 
     try:
+        #print(h5[ovr_d['var_name']].attrs['Units'][0])
         dd['data_units'] = h5[ovr_d['var_name']].attrs['Units'][0].decode()
     except KeyError:
         # probably need a better solution here?
@@ -1106,6 +1107,7 @@ def do_modis_overlay_plot(
             t.set_weight("bold")
             t.set_fontsize(12)
         
+        # if exists the XML file for the chosen layer
         if (layer_url != 'Null'):
             response = urllib.request.urlopen(layer_url).read()
             root = ET.fromstring(response)
@@ -1120,9 +1122,10 @@ def do_modis_overlay_plot(
                     if (legend.attrib.get('type') == 'continuous'):
                         num_entries = len(legend.findall("LegendEntry"))
                         for entry in legend.findall("LegendEntry"): 
+                            # if no lower bound specified
                             if ('<' in entry.attrib.get('tooltip')):
                                 tmp_upper = float(entry.attrib.get('tooltip').split('<')[1].strip())
-                                # –
+                                # differently encoded dashes check
                                 if ('-' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
                                     next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split('-')
                                 elif ('–' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
@@ -1130,11 +1133,13 @@ def do_modis_overlay_plot(
                                 tmp_diff = float(next_range[1].strip()) - float(next_range[0].strip())
                                 tmp_lower = tmp_upper - tmp_diff
                                 bounds_list.append(tmp_lower)
-
+                                   
+                                # convert and get to the needed integer form each rgb code
                                 df_list.append(list(map(lambda i: int(i)/255, entry.attrib.get('rgb').split(','))))
 
                                 if ('showTick' in entry.attrib):
                                     ticks_list.append(tmp_upper)
+                            # symmetrical with above
                             elif ('≥' in entry.attrib.get('tooltip')):
                                 tmp_lower = float(entry.attrib.get('tooltip').split('≥')[1].strip())
                                 if('-' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
@@ -1150,11 +1155,14 @@ def do_modis_overlay_plot(
 
                                 if ('showTick' in entry.attrib):
                                     ticks_list.append(tmp_lower)
+                            # range with defined bounds or single value
                             else:
                                 if ('-' in entry.attrib.get('tooltip')):
                                     tmp_lower = (float(entry.attrib.get('tooltip').split('-')[0].strip()))
                                 elif ('–' in entry.attrib.get('tooltip')):
                                     tmp_lower = (float(entry.attrib.get('tooltip').split('–')[0].strip()))
+                                else:
+                                    tmp_lower = (float(entry.attrib.get('tooltip').strip()))
 
                                 bounds_list.append(tmp_lower)
                                 df_list.append(list(map(lambda i: int(i)/255, entry.attrib.get('rgb').split(','))))
@@ -1162,7 +1170,7 @@ def do_modis_overlay_plot(
                                 if ('showTick' in entry.attrib):
                                     ticks_list.append(tmp_lower)
 
-
+            # prepare color map and bounds/ticks for plotting
             cmap_df = pd.DataFrame(df_list, columns = ['r','g','b'])
             cmap_list = list(zip(cmap_df.r, cmap_df.g, cmap_df.b))
             cmap = mpl.colors.LinearSegmentedColormap.from_list("gibs_cmap", cmap_list, len(cmap_list))
@@ -1171,12 +1179,13 @@ def do_modis_overlay_plot(
             ax2 = plt.subplot(gs[-1, 2:-2])
             cb2 = mpl.colorbar.ColorbarBase(ax2, cmap=cmap, norm=norm, orientation = 'horizontal',
                                             ticks = ticks_list + [bounds_list[0]] + [bounds_list[-1]])
-            #cb2.ax.set_xticklabels(rotation=45)
+
             for t in cb2.ax.xaxis.get_ticklabels():
                 t.set_weight("bold")
                 t.set_fontsize(8)
                 t.set_rotation(45)
             
+            # if units were stated in the XML
             if (units != None):
                 cb2.ax.set_xlabel('# in ' + units, fontdict=dict(weight='bold'))
 
@@ -1248,12 +1257,13 @@ def do_modis_overlay_plot(
 
 
 ### Static Definitions
-
 code_dir = os.path.dirname(os.path.realpath(__file__))
+# dataframe with layers' names and their codes (generated for easier use by us)
 layers_encoding = pd.read_csv(code_dir + '/Encoding.csv', header = 0)
 layers_num = len(layers_encoding.index)
-
+# dataframe with layers' names and their XML urls (parsed by our parser)
 layers_url = pd.read_csv(code_dir + '/Layer_xml.csv', header = 0)
+
 if __name__ == "__main__":
 
     ### Dynamic Definitions: get information from config file ###
@@ -1282,6 +1292,7 @@ if __name__ == "__main__":
         else:
             odat = load_OCO2_L1L2_overlay_data(ovr_d)
     
+    # defining both name and XML url of the chosen layer (from the user's code)
     layer_name = layers_encoding[layers_encoding['Code'] == cfg_d['layer']]['Name'].values[0]
     layer_url = layers_url[layers_url['Name'] == layer_name]['Url'].values[0]
     
