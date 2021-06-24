@@ -18,17 +18,6 @@ It can also be called as a function from within another Python program for expan
 
 2) Make sure you have the necessary system and Python requirements.
     #### Option 1: DIY   
-    
-    ##### System Requirements:
-    GDAL version 1.9.1 or greater with cURL support enabled.  
-        
-    To check if cURL is enabled for GDAL, use the command `gdalinfo --format WMS`  
-    If cURL is enabled you will see information about the WMS format, if not, 
-    you will get an error message and you will need to reconfigure GDAL to support cURL.  
-    **NOTE:** If this comes with your Anaconda distribution of Python, you may need
-    to set an environmental variable called GDAL_DATA in your bash profile that points to
-    gdal within your Anaconda folder.
-    (Ex: `export GDAL_DATA="/local/home/hcronk/anaconda/share/gdal"`)
 
     ##### Python requirements:
     Python 2.7 or higher
@@ -65,8 +54,11 @@ It can also be called as a function from within another Python program for expan
      **geo_lower_right** (list, format:[lat, lon]):  
          The latitude and longitude coordinates of the lower right hand corner of your area of 
          interest.
-     
-     **layer** (integer, format: integer between 0 and maximum code number in Encoding.csv)
+     **sensor** (string):
+         The sensor name that is desired to be used for the background image. Supported sensors at the moment are: 
+         "Worldview", "GOES16_ABI_C", "GOES16_ABI_F", "GOES17_ABI_C", "GOES17_ABI_F".
+   #### Required if the sensor field, required above, is "Worldview" (otherwise, not needed):
+     **layer** (integer, format: integer between 0 and maximum code number in Encoding.csv):
          The code of the background layer to be used by the vistool. Each layer is given its code (encoded) 
          in the Encoding.csv file in the code directory. The file contains the relation: layer name (by the
          NASA Worldview standards) - code (generated unique number). So, when adding new
@@ -153,6 +145,11 @@ It can also be called as a function from within another Python program for expan
 
 GIBS developer documentation:  https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+API+for+Developers
 
+#### WMTS Capabilities File and Its Parser
+There is a script in the code directory called "parse_wmts.py" which parses the wmts.xml capabilities file. The
+reason of this Python parser is to get the relation, layer name - layer specifications XML url, for all NASA Worldview
+layers (as of June 2021) into a separate CSV file. This relation CSV file is used for plotting and styling the output image.
+The parser used a copy of the wmts capabilities file which was downloaded into the code directory from: https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi?SERVICE=WMTS&REQUEST=GetCapabilities
 
 Minimum command line call:  
 `python oco2_modis_vistool.py`
@@ -166,7 +163,6 @@ do_modis_overlay_plot([lat_of_upper_lefthand_corner, lon_of_upper_lefthand_corne
                       [lat_of_lower_righthand_corner, lon_of_lower_righthand_corner], 
 		      date, lat_data, lon_data, variable_data)
 ```  
-
 
 ## A Note about Questions, Suggestions, and Issues
 
