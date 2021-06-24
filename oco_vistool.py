@@ -1149,6 +1149,22 @@ def do_overlay_plot(
 
     if var_lat.ndim == 2:
         zip_it = np.ma.dstack([var_lon, var_lat])
+    
+    # if the XML file exists for the chosen layer
+    if (layer_url != 'Null'):
+        cmap2, norm2, ticks_list, bounds_list, units = get_layer_colorbar_params(layer_url)
+        ax2 = plt.subplot(gs[-1, 2:-2])
+        cb2 = mpl.colorbar.ColorbarBase(ax2, cmap=cmap2, norm=norm2, orientation = 'horizontal',
+                                        ticks = ticks_list + [bounds_list[0], bounds_list[-1]])
+
+        for t in cb2.ax.xaxis.get_ticklabels():
+            t.set_weight("bold")
+            t.set_fontsize(8)
+            t.set_rotation(45)
+
+        # if units were stated in the XML
+        if (units != None):
+            cb2.ax.set_xlabel('# in ' + units, fontdict=dict(weight='bold'))
 
     if color_or_cmap == "cmap" and var_vals.shape[0] > 0:
     
@@ -1178,22 +1194,6 @@ def do_overlay_plot(
         for t in cb1.ax.yaxis.get_ticklabels():
             t.set_weight("bold")
             t.set_fontsize(12)
-        
-        # if the XML file exists for the chosen layer
-        if (layer_url != 'Null'):
-            cmap, norm, ticks_list, bounds_list, units = get_layer_colorbar_params(layer_url)
-            ax2 = plt.subplot(gs[-1, 2:-2])
-            cb2 = mpl.colorbar.ColorbarBase(ax2, cmap=cmap, norm=norm, orientation = 'horizontal',
-                                            ticks = ticks_list + [bounds_list[0], bounds_list[-1]])
-
-            for t in cb2.ax.xaxis.get_ticklabels():
-                t.set_weight("bold")
-                t.set_fontsize(8)
-                t.set_rotation(45)
-            
-            # if units were stated in the XML
-            if (units != None):
-                cb2.ax.set_xlabel('# in ' + units, fontdict=dict(weight='bold'))
 
     if color_or_cmap == "color" and var_vals.shape[0] > 0:
 
