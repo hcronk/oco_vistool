@@ -26,7 +26,7 @@ import matplotlib.patches as mpatches
 import netCDF4
 import h5py
 
-from oco2_modis_vistool import read_shp
+from oco_vistool import read_shp
 
 # to get the location of the city data (a subdir from where the
 # code is located).
@@ -221,8 +221,26 @@ def get_ABI_files(datetime_utc, center_lat, data_home,
         
     return flist, time_offset
 
+def get_AHI_files(datetime_utc, data_home):
+    year = str(datetime_utc.year)
+    month = str(datetime_utc.month).zfill(2)
+    day_m = str(datetime_utc.day).zfill(2)
+    day_y = str(datetime_utc.timetuple().tm_yday).zfill(3)
+    
+    hour = str(datetime_utc.hour).zfill(2)
+    orig_minutes = datetime_utc.minute
+    seconds = datetime_utc.second
+    minutes = str(int(round(orig_minutes + seconds/60, -1))%60).zfill(2)
+    
+    bands_list = [1, 2, 3, 4]
+    files = list()
+    for band in bands_list:
+        files.extend(glob.glob(data_home + "/" + year + "/" + year + "_" + month + "_" + day_m + "_" + day_y + "/" + hour + 
+                               minutes + "/HS_H08_" + year + month + day_m + "_" + hour + minutes +"_B" + str(band).zfill(2) +
+                              "_FLDK_*.DAT"))
+    return files
 
-def get_scene_obj(file_list, latlon_extent, width=750, height=750,
+def get_scene_obj(file_list, latlon_extent, sensor, width=750, height=750,
                   tmp_cache=False, resample_method='native_bilinear'):
     """Get Scene object, apply the resample area, to a small box 
     centered on the lat lon point.
@@ -271,9 +289,9 @@ def get_scene_obj(file_list, latlon_extent, width=750, height=750,
             dst_f = os.path.join(tdir, os.path.split(f)[-1])
             shutil.copyfile(src_f, dst_f)
             cached_file_list.append(dst_f)
-        scn = Scene(reader='abi_l1b', filenames=cached_file_list)
+        scn = Scene(reader=sensor, filenames=cached_file_list)
     else:
-        scn = Scene(reader='abi_l1b', filenames=file_list)
+        scn = Scene(reader=sensor, filenames=file_list)
     
     scn.load(['true_color'])
 
@@ -582,7 +600,7 @@ def overlay_data(ax, cb_ax, odata, var_label=None, **kw):
             t.set_fontsize(12)
 
 
-def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
+def nonworldview_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
                           var_label=None, fignum=10):
     """
     make a GOES ABI overlay plot. This is function to integrate with the
@@ -614,8 +632,13 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
         dt = cfg_d['datetime']
 
     center_lat = (cfg_d['lat_lr'] + cfg_d['lat_ul']) / 2.0
-    file_list, time_offsets = get_ABI_files(
-        dt, center_lat, cfg_d['data_home'], cfg_d['sensor'])
+    if (cfg_d['sensor'].startswith('GOES')):
+        file_list, time_offsets = get_ABI_files(
+            dt, center_lat, cfg_d['data_home'], cfg_d['sensor'])
+        mean_time_offset = np.mean(time_offsets)/60.0
+    else:
+        file_list = get_AHI_files(
+            dt, cfg_d['data_home'])
     if len(file_list) == 0:
         raise ValueError('No ABI files were found for requested date in '+
                          cfg_d['data_home'])
@@ -625,8 +648,12 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     latlon_extent = [cfg_d['lon_ul'], cfg_d['lat_lr'], 
                      cfg_d['lon_lr'], cfg_d['lat_ul']]
 
-    scn = get_scene_obj(file_list, latlon_extent,
-                        resample_method=cfg_d['resample_method'])
+    if (cfg_d['sensor'].startswith('GOES')):
+        scn = get_scene_obj(file_list, latlon_extent, 'abi_l1b',
+                            resample_method=cfg_d['resample_method'])
+    else:
+        scn = get_scene_obj(file_list, latlon_extent, 'ahi_hsd',
+                            resample_method=cfg_d['resample_method'])
     crs = scn['true_color'].attrs['area'].to_cartopy_crs()
 
     overlay_present = ovr_d is not None
@@ -649,32 +676,53 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
                          var_label=var_label, alpha=ovr_d['alpha'])
 
     make_inset_map(inset_ax, cfg_d['geo_upper_left'], cfg_d['geo_lower_right'])
-    mean_time_offset = np.mean(time_offsets)/60.0
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
 
     if cfg_d['out_plot_title'] == 'auto':
-        if ovr_d:
-            title_string = (
-                'Overlay data from {0:s}' +
-                '\nBackground from {1:s}, '+
-                '\nOverlay time = {2:s},   '+
-                'mean time offset = {3:4.1f} min.,  '+
-                'plot created on {4:s}' )
-            title_string = title_string.format(
-                os.path.split(ovr_d['var_file'])[1],
-                os.path.split(file_list[1])[1], 
-                dt.strftime('%Y-%m-%d %H:%M:%S'), mean_time_offset,
-                todays_date)
+        if cfg_d['sensor'].startswith('GOES'):
+            if ovr_d:
+                title_string = (
+                    'Overlay data from {0:s}' +
+                    '\nBackground from {1:s}, '+
+                    '\nOverlay time = {2:s},   '+
+                    'mean time offset = {3:4.1f} min.,  '+
+                    'plot created on {4:s}' )
+                title_string = title_string.format(
+                    os.path.split(ovr_d['var_file'])[1],
+                    os.path.split(file_list[1])[1], 
+                    dt.strftime('%Y-%m-%d %H:%M:%S'), mean_time_offset,
+                    todays_date)
+            else:
+                title_string = (
+                    'Background from  {0:s}' + 
+                    '\n Request time = {1:s},   '+
+                    'mean time offset = {2:4.1f} min.,  '+
+                    'plot created on {3:s}' )
+                title_string = title_string.format(
+                    os.path.split(file_list[1])[1],
+                    dt.strftime('%Y-%m-%d %H:%M:%S'),
+                    mean_time_offset, todays_date)
         else:
-            title_string = (
-                'Background from  {0:s}' + 
-                '\n Request time = {1:s},   '+
-                'mean time offset = {2:4.1f} min.,  '+
-                'plot created on {3:s}' )
-            title_string = title_string.format(
-                os.path.split(file_list[1])[1],
-                dt.strftime('%Y-%m-%d %H:%M:%S'),
-                mean_time_offset, todays_date)
+            if ovr_d:
+                title_string = (
+                    'Overlay data from {0:s}' +
+                    '\nBackground from {1:s}, '+
+                    '\nOverlay time = {2:s},   '+
+                    'plot created on {3:s}' )
+                title_string = title_string.format(
+                    os.path.split(ovr_d['var_file'])[1],
+                    os.path.split(file_list[1])[1], 
+                    dt.strftime('%Y-%m-%d %H:%M:%S'),
+                    todays_date)
+            else:
+                title_string = (
+                    'Background from  {0:s}' + 
+                    '\n Request time = {1:s},   '+
+                    'plot created on {2:s}' )
+                title_string = title_string.format(
+                    os.path.split(file_list[1])[1],
+                    dt.strftime('%Y-%m-%d %H:%M:%S'), todays_date)
+            
     else:
         title_string = cfg_d['out_plot_title']
 

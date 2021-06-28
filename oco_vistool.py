@@ -435,7 +435,7 @@ def process_config_dict(input_dict):
     
     cfg_d['sensor'] = input_dict.get('sensor')
     valid_sensor_names = ('Worldview', 'GOES16_ABI_C', 'GOES16_ABI_F',
-                          'GOES17_ABI_C', 'GOES17_ABI_F',)
+                          'GOES17_ABI_C', 'GOES17_ABI_F', 'Himawari-08',)
 
     if cfg_d['sensor'] not in valid_sensor_names:
         raise ValueError('sensor name: ' + cfg_d['sensor'] + ' is not valid')
@@ -732,7 +732,7 @@ def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
 
     try:
         #print(h5[ovr_d['var_name']].attrs['Units'][0])
-        dd['data_units'] = h5[ovr_d['var_name']].attrs['Units'][0].decode()
+        dd['data_units'] = h5[ovr_d['var_name']].attrs['Units'][0]#.decode()
     except KeyError:
         # probably need a better solution here?
         dd['data_units'] = ''
@@ -1263,6 +1263,7 @@ def do_overlay_plot(
 
 
 ### Static Definitions
+
 code_dir = os.path.dirname(os.path.realpath(__file__))
 # dataframe with layers' names and their codes (generated for easier use by us)
 layers_encoding = pd.read_csv(code_dir + '/Encoding.csv', header = 0)
@@ -1298,8 +1299,9 @@ if __name__ == "__main__":
             odat = load_OCO2_L1L2_overlay_data(ovr_d)
     
     # defining both name and XML url of the chosen layer (from the user's code)
-    layer_name = layers_encoding[layers_encoding['Code'] == cfg_d['layer']]['Name'].values[0]
-    layer_url = layers_url[layers_url['Name'] == layer_name]['Url'].values[0]
+    if (cfg_d['sensor'] == 'Worldview'): 
+        layer_name = layers_encoding[layers_encoding['Code'] == cfg_d['layer']]['Name'].values[0]
+        layer_url = layers_url[layers_url['Name'] == layer_name]['Url'].values[0]
     
     
     # construct the auto-generated filename - it is easiest to do this
@@ -1337,24 +1339,25 @@ if __name__ == "__main__":
             cfg_d['datetime'] = dt
     else:
         make_background_image = True
+        
     if make_background_image:
         out_plot_fullpath = os.path.join(
             cfg_d['out_plot_dir'], 
             cfg_d['sensor']+"_imagery_" + out_plot_name)
-    
-        if cfg_d['sensor'] == 'Worldview':
-            do_overlay_plot(
+        if (cfg_d['sensor'] == 'Worldview'):
+            do_modis_overlay_plot(
                 cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
-                cfg_d['date'], layer_name, np.array([]), np.array([]),
-                np.array([]), np.array([]), layer_url,
+                cfg_d['date'], np.array([]), np.array([]),
+                np.array([]), np.array([]),
                 interest_pt=cfg_d['ground_site'], cmap='black',
                 out_plot=out_plot_fullpath, cities=cfg_d['city_labels'])
-        elif cfg_d['sensor'].startswith('GOES'):
+        elif (cfg_d['sensor'].startswith('GOES') or cfg_d['sensor'].startswith('Himawari')):
             import satpy_overlay_plots
-            satpy_overlay_plots.GOES_ABI_overlay_plot(
+            satpy_overlay_plots.nonworldview_overlay_plot(
                 cfg_d, None, None, out_plot_name=out_plot_fullpath)
         else:
             raise ValueError('Unknown sensor: '+cfg_d['sensor'])
+
 
 
     # at this point, if there is no overlay to process, can exit here.
@@ -1396,11 +1399,11 @@ if __name__ == "__main__":
     out_plot_fullpath = os.path.join(cfg_d['out_plot_dir'], out_plot_name)
     out_data_fullpath = os.path.join(cfg_d['out_data_dir'], out_data_name)
     
-    if cfg_d['sensor'] == 'Worldview':
-        do_overlay_plot(
+    if (cfg_d['sensor'] == 'Worldview'):
+        do_modis_overlay_plot(
             cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
-            cfg_d['date'], layer_name, odat['lat'], odat['lon'], odat['var_data'],
-            cfg_d['out_plot_title'], layer_url,
+            cfg_d['date'], odat['lat'], odat['lon'], odat['var_data'],
+            cfg_d['out_plot_title'],
             var_vals_missing=odat['data_fill'],
             lite_sid=odat['sounding_id'],
             var_lims=ovr_d['var_lims'], interest_pt=cfg_d['ground_site'],
@@ -1410,9 +1413,9 @@ if __name__ == "__main__":
             out_plot=out_plot_fullpath,
             var_label=cbar_name, cities=cfg_d['city_labels'],
             var_file=os.path.split(ovr_d['var_file'])[1])
-    elif cfg_d['sensor'].startswith('GOES'):
+    elif (cfg_d['sensor'].startswith('GOES') or cfg_d['sensor'].startswith('Himawari')):
         import satpy_overlay_plots
-        satpy_overlay_plots.GOES_ABI_overlay_plot(
+        satpy_overlay_plots.nonworldview_overlay_plot(
             cfg_d, ovr_d, odat, var_label=cbar_name,
             out_plot_name=out_plot_fullpath)
     else:
