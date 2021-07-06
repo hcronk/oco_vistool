@@ -1,28 +1,29 @@
 {
-	"date": "2021-06-12",
-    "sensor":"Himawari-08",
-    "data_home":"/arcdata/nongoes/jma/himawari08/ahi",
-	"geo_upper_left": [15.65, 119.9],
-	"geo_lower_right": [13.95, 121.85],
+	"date": "2021-06-15",
+	"geo_upper_left": [15.75, 120],
+	"geo_lower_right": [14, 121.75],
 	"region": "",
-	"oco2_overlay_info": {
+    "layer": 18,
+    "oco2_overlay_info": {
 		"file": "/data/OCO3_product/OCO3_L2_Standard.EarlyR/2021/166/oco3_L2StdSC_11976a_210615_B10211_210616050548.h5",
 		"variable": "/RetrievalResults/xco2",
-	    "variable_plot_lims":[],
+        "band_number":"",
+		"variable_plot_lims":[],
 		"lat_name": "/RetrievalGeometry/retrieval_vertex_latitude",
 		"lon_name": "/RetrievalGeometry/retrieval_vertex_longitude",
 		"orbit": 11976,
-		"lite_QF": "all",
+        "lite_QF": "all",
 		"lite_warn_lims": [0, 15],
 		"footprint": [1, 8], 
-		"cmap": "",
+		"cmap": "jet",
 		"transparency":"",
 		"make_background_image":1
 	},
-	"ground_site": [14.6,120.97],
+    "sensor": "Worldview",
+	"ground_site": [],
 	"city_labels": "", 
 	"out_plot_dir": "",
-	"out_plot_name": "HIMA.png",
+	"out_plot_name": "",
 	"out_data_dir": "",
-	"out_data_name": "HIMA.h5"
+	"out_data_name": ""
 }

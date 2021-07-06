@@ -1,4 +1,4 @@
-# oco2_modis_vistool.py
+# oco_vistool.py
 
 The purpose of this script is to pull different RGB images (depending on the user's choice from Encoding.csv) from Worldview using the NASA GIBS API and overlay various OCO-2 data fields for 
 case study analysis in support of OCO-2 cloud and aerosol screening validation.

@@ -225,7 +225,7 @@ def get_AHI_files(datetime_utc, data_home):
     year = str(datetime_utc.year)
     month = str(datetime_utc.month).zfill(2)
     day_m = str(datetime_utc.day).zfill(2)
-    day_y = str(datetime_utc.timetuple().tm_yday).zfill(3)
+    day_y = str(datetime_utc.timetuple().tm_yday)#.zfill(3)
     
     hour = str(datetime_utc.hour).zfill(2)
     orig_minutes = datetime_utc.minute
@@ -238,6 +238,7 @@ def get_AHI_files(datetime_utc, data_home):
         files.extend(glob.glob(data_home + "/" + year + "/" + year + "_" + month + "_" + day_m + "_" + day_y + "/" + hour + 
                                minutes + "/HS_H08_" + year + month + day_m + "_" + hour + minutes +"_B" + str(band).zfill(2) +
                               "_FLDK_*.DAT"))
+
     return files
 
 def get_scene_obj(file_list, latlon_extent, sensor, width=750, height=750,
@@ -640,7 +641,7 @@ def nonworldview_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
         file_list = get_AHI_files(
             dt, cfg_d['data_home'])
     if len(file_list) == 0:
-        raise ValueError('No ABI files were found for requested date in '+
+        raise ValueError('No files were found for requested date in '+
                          cfg_d['data_home'])
 
     # convert the LL box corners (in degrees LL) to an extent box

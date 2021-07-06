@@ -988,10 +988,10 @@ def get_layer_colorbar_params(layer_url):
                     if ('<' in entry.attrib.get('tooltip')):
                         tmp_upper = float(entry.attrib.get('tooltip').split('<')[1].strip())
                         # differently encoded dashes check (ranges case)
-                        if ('-' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
-                            next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split('-')
-                        elif ('–' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
-                            next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split('–')
+                        if (' - ' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
+                            next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split(' - ')
+                        elif (' – ' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
+                            next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split(' – ')
                         tmp_diff = float(next_range[1].strip()) - float(next_range[0].strip())
                         tmp_lower = tmp_upper - tmp_diff
                         bounds_list.append(tmp_lower)
@@ -1001,13 +1001,47 @@ def get_layer_colorbar_params(layer_url):
 
                         if ('showTick' in entry.attrib):
                             ticks_list.append(tmp_upper)
+                    
+                    elif ('≤' in entry.attrib.get('tooltip')):
+                        tmp_upper = float(entry.attrib.get('tooltip').split('≤')[1].strip())
+                        # differently encoded dashes check (ranges case)
+                        if (' - ' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
+                            next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split(' - ')
+                        elif (' – ' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
+                            next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split(' – ')
+                        tmp_diff = float(next_range[1].strip()) - float(next_range[0].strip())
+                        tmp_lower = tmp_upper - tmp_diff
+                        bounds_list.append(tmp_lower)
+
+                        # convert and get each rgb code to the needed integer form
+                        df_list.append(list(map(lambda i: int(i)/255, entry.attrib.get('rgb').split(','))))
+
+                        if ('showTick' in entry.attrib):
+                            ticks_list.append(tmp_upper)
+                            
+                    # symmetrical with above but when there is no upper bound specified
+                    elif ('>' in entry.attrib.get('tooltip')):
+                        tmp_lower = float(entry.attrib.get('tooltip').split('>')[1].strip())
+                        if(' - ' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
+                            prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split(' - ')
+                        elif (' – ' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
+                            prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split(' – ')
+                        tmp_diff = float(prev_range[1].strip()) - float(prev_range[0].strip())
+                        tmp_upper = tmp_lower + tmp_diff
+                        bounds_list.append(tmp_lower)
+                        bounds_list.append(tmp_upper)
+
+                        df_list.append(list(map(lambda i: int(i)/255, entry.attrib.get('rgb').split(','))))
+
+                        if ('showTick' in entry.attrib):
+                            ticks_list.append(tmp_lower)
                     # symmetrical with above but when there is no upper bound specified
                     elif ('≥' in entry.attrib.get('tooltip')):
                         tmp_lower = float(entry.attrib.get('tooltip').split('≥')[1].strip())
-                        if('-' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
-                            prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split('-')
-                        elif ('–' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
-                            prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split('–')
+                        if(' - ' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
+                            prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split(' - ')
+                        elif (' – ' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
+                            prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split(' – ')
                         tmp_diff = float(prev_range[1].strip()) - float(prev_range[0].strip())
                         tmp_upper = tmp_lower + tmp_diff
                         bounds_list.append(tmp_lower)
@@ -1019,10 +1053,10 @@ def get_layer_colorbar_params(layer_url):
                             ticks_list.append(tmp_lower)
                     # range with defined bounds or a single value/bound
                     else:
-                        if ('-' in entry.attrib.get('tooltip')):
-                            tmp_lower = (float(entry.attrib.get('tooltip').split('-')[0].strip()))
-                        elif ('–' in entry.attrib.get('tooltip')):
-                            tmp_lower = (float(entry.attrib.get('tooltip').split('–')[0].strip()))
+                        if (' - ' in entry.attrib.get('tooltip')):
+                            tmp_lower = (float(entry.attrib.get('tooltip').split(' - ')[0].strip()))
+                        elif (' – ' in entry.attrib.get('tooltip')):
+                            tmp_lower = (float(entry.attrib.get('tooltip').split(' – ')[0].strip()))
                         else:
                             tmp_lower = (float(entry.attrib.get('tooltip').strip()))
 
@@ -1097,7 +1131,7 @@ def do_overlay_plot(
     url = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi'
     wmts = WebMapTileService(url)
     layer = layer_name
-
+    date = date.strftime('%Y-%m-%dT%H:%M:%SZ')
     ax = plt.subplot(gs[0:-1, 3:-2], projection=ccrs.PlateCarree())
     ax.set_xlim((minx, maxx))
     ax.set_ylim((miny, maxy))
@@ -1339,16 +1373,16 @@ if __name__ == "__main__":
             cfg_d['datetime'] = dt
     else:
         make_background_image = True
-        
+    
     if make_background_image:
         out_plot_fullpath = os.path.join(
             cfg_d['out_plot_dir'], 
             cfg_d['sensor']+"_imagery_" + out_plot_name)
         if (cfg_d['sensor'] == 'Worldview'):
-            do_modis_overlay_plot(
+            do_overlay_plot(
                 cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
-                cfg_d['date'], np.array([]), np.array([]),
-                np.array([]), np.array([]),
+                cfg_d['datetime'], layer_name, np.array([]), np.array([]),
+                np.array([]), np.array([]), layer_url,
                 interest_pt=cfg_d['ground_site'], cmap='black',
                 out_plot=out_plot_fullpath, cities=cfg_d['city_labels'])
         elif (cfg_d['sensor'].startswith('GOES') or cfg_d['sensor'].startswith('Himawari')):
@@ -1400,19 +1434,18 @@ if __name__ == "__main__":
     out_data_fullpath = os.path.join(cfg_d['out_data_dir'], out_data_name)
     
     if (cfg_d['sensor'] == 'Worldview'):
-        do_modis_overlay_plot(
-            cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
-            cfg_d['date'], odat['lat'], odat['lon'], odat['var_data'],
-            cfg_d['out_plot_title'],
-            var_vals_missing=odat['data_fill'],
-            lite_sid=odat['sounding_id'],
-            var_lims=ovr_d['var_lims'], interest_pt=cfg_d['ground_site'],
-            cmap=ovr_d['cmap'], alpha=ovr_d['alpha'],
-            lat_name=ovr_d['lat_name'], lon_name=ovr_d['lon_name'],
-            var_name=ovr_d['var_name'],
-            out_plot=out_plot_fullpath,
-            var_label=cbar_name, cities=cfg_d['city_labels'],
-            var_file=os.path.split(ovr_d['var_file'])[1])
+        do_overlay_plot(cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
+                cfg_d['datetime'], layer_name, odat['lat'], odat['lon'], odat['var_data'],
+                cfg_d['out_plot_title'], layer_url,
+                var_vals_missing=odat['data_fill'],
+                lite_sid=odat['sounding_id'],
+                var_lims=ovr_d['var_lims'], interest_pt=cfg_d['ground_site'],
+                cmap=ovr_d['cmap'], alpha=ovr_d['alpha'],
+                lat_name=ovr_d['lat_name'], lon_name=ovr_d['lon_name'],
+                var_name=ovr_d['var_name'],
+                out_plot=out_plot_fullpath,
+                var_label=cbar_name, cities=cfg_d['city_labels'],
+                var_file=os.path.split(ovr_d['var_file'])[1])
     elif (cfg_d['sensor'].startswith('GOES') or cfg_d['sensor'].startswith('Himawari')):
         import satpy_overlay_plots
         satpy_overlay_plots.nonworldview_overlay_plot(
