@@ -1305,8 +1305,10 @@ if __name__ == "__main__":
             odat = load_OCO2_L1L2_overlay_data(ovr_d)
     
     # defining both name and XML url of the chosen layer (from the user's code)
-    layer_name = layers_encoding[layers_encoding['Code'] == cfg_d['layer']]['Name'].values[0]
-    layer_url = layers_url[layers_url['Name'] == layer_name]['Url'].values[0]
+    # this happens only for Worldview layers
+    if cfg_d['sensor'] == 'Worldview':
+        layer_name = layers_encoding[layers_encoding['Code'] == cfg_d['layer']]['Name'].values[0]
+        layer_url = layers_url[layers_url['Name'] == layer_name]['Url'].values[0]
     
     
     # construct the auto-generated filenames. These are of the form:
