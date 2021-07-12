@@ -131,14 +131,17 @@ It can also be called as a function from within another Python program for expan
 	**out_plot_dir** (string, default: the directory that you are running the code in):  
     	The full output directory path for the output plot.
 
-	**out_plot_name** (string, default example: xco2_Amazon_20150701_all_quality_WL_0to20.png):  
+	**out_plot_name** (string, default example: MODIS_Aqua_CorrectedReflectance_TrueColor_xco2_Amazon_20150701_B7302b_QF_good_WL_0to20.png):  
     	The name of the output plot.
 
 	**out_data_dir** (string, default: the directory that you are running the code in):  
     	The full output directory path for the output data file.
 
-	**out_data_name** (string, default example: xco2_Amazon_20150701_all_quality_WL_0to20.h5):  
+	**out_data_name** (string, default example: xco2_Amazon_20150701_B7302b_QF_good_WL_0to20.h5):  
     	The name of the output data file.
+
+	**out_background_name** (string, default example: MODIS_Aqua_CorrectedReflectance_TrueColor_Amazon_20150701.png):  
+    	The name of the output background file, created if no overlay data is present or make_background_image is enabled.
 
 
 ## Other Information
