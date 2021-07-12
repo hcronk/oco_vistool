@@ -252,7 +252,7 @@ def get_AHI_files(datetime_utc, data_home = None):
         for hima_file in hima_files:
             for band in bands_list:
                 if '_B0' + str(band) + '_' in hima_file.key:
-                    if not os.path.isfile('Hima/' + hima_file.key[:-4]):
+                    if not (os.path.isfile('Hima/' + hima_file.key[:-4]) and os.path.isfile('Hima/' + hima_file.key)):
                         if not os.path.isdir(os.path.dirname('Hima/' + hima_file.key)):
                             os.makedirs(os.path.dirname('Hima/' + hima_file.key))
                         hima_bucket.download_file(hima_file.key, 'Hima/' + hima_file.key)
@@ -265,6 +265,8 @@ def get_AHI_files(datetime_utc, data_home = None):
             open(newfilename, 'wb').write(data) # write a uncompressed file
             os.remove(filename)
             files.extend(glob.glob(newfilename))
+        files = list(set(files))
+        print(len(files))
     return files
 
 def get_scene_obj(file_list, latlon_extent, sensor, width=750, height=750,
