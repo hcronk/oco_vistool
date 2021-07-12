@@ -3,7 +3,8 @@
 	"geo_upper_left": [15.75, 120],
 	"geo_lower_right": [14, 121.75],
 	"region": "",
-    "layer": 18,
+    "sensor": "Himawari-08",
+    "files_loc": "aws",
     "oco2_overlay_info": {
 		"file": "/data/OCO3_product/OCO3_L2_Standard.EarlyR/2021/166/oco3_L2StdSC_11976a_210615_B10211_210616050548.h5",
 		"variable": "/RetrievalResults/xco2",
@@ -19,7 +20,6 @@
 		"transparency":"",
 		"make_background_image":1
 	},
-    "sensor": "Worldview",
 	"ground_site": [],
 	"city_labels": "", 
 	"out_plot_dir": "",

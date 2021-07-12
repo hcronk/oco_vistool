@@ -1,4 +1,6 @@
 *.png
+Keys.csv
+Hima
 *.h5
 *~
 __pycache__

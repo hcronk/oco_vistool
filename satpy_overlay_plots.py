@@ -6,10 +6,12 @@ module implementing satpy based plots with OCO-2 data overlays.
 intended to integrate with oco2_modis_vistool.py
 """
 
-import os.path, glob, datetime, collections, itertools
+import os, glob, datetime, collections, itertools
 import tempfile, shutil
+import bz2
 
 import numpy as np
+import pandas as pd
 
 from satpy import Scene 
 from satpy.writers import get_enhanced_image
@@ -25,6 +27,9 @@ import matplotlib.patches as mpatches
 
 import netCDF4
 import h5py
+
+import boto3
+import botocore
 
 from oco_vistool import read_shp
 
@@ -221,12 +226,11 @@ def get_ABI_files(datetime_utc, center_lat, data_home,
         
     return flist, time_offset
 
-def get_AHI_files(datetime_utc, data_home):
+def get_AHI_files(datetime_utc, data_home = None):
     year = str(datetime_utc.year)
     month = str(datetime_utc.month).zfill(2)
     day_m = str(datetime_utc.day).zfill(2)
-    day_y = str(datetime_utc.timetuple().tm_yday)#.zfill(3)
-    
+    day_y = str(datetime_utc.timetuple().tm_yday).zfill(3)
     hour = str(datetime_utc.hour).zfill(2)
     orig_minutes = datetime_utc.minute
     seconds = datetime_utc.second
@@ -234,11 +238,33 @@ def get_AHI_files(datetime_utc, data_home):
     
     bands_list = [1, 2, 3, 4]
     files = list()
-    for band in bands_list:
-        files.extend(glob.glob(data_home + "/" + year + "/" + year + "_" + month + "_" + day_m + "_" + day_y + "/" + hour + 
-                               minutes + "/HS_H08_" + year + month + day_m + "_" + hour + minutes +"_B" + str(band).zfill(2) +
-                              "_FLDK_*.DAT"))
-
+    if (data_home is not None):
+        for band in bands_list:
+            files.extend(glob.glob(data_home + "/" + year + "/" + year + "_" + month + "_" + day_m + "_" + day_y + "/" + hour + 
+                                   minutes + "/HS_H08_" + year + month + day_m + "_" + hour + minutes +"_B" + str(band).zfill(2) +
+                                  "_FLDK_*.DAT"))  
+    else:
+        aws_keys = pd.read_csv('Keys.csv', header = 0)
+        s3 = boto3.resource('s3', aws_access_key_id = aws_keys['aws_access_key_id'].values[0], aws_secret_access_key = aws_keys['aws_secret_access_key'].values[0])
+        hima_bucket = s3.Bucket('noaa-himawari8')
+        hima_path = 'AHI-L1b-FLDK/' + year + '/' + month + '/' + day_m +'/' + hour + minutes + '/'
+        hima_files = hima_bucket.objects.filter(Prefix=hima_path)
+        for hima_file in hima_files:
+            for band in bands_list:
+                if '_B0' + str(band) + '_' in hima_file.key:
+                    if not os.path.isfile('Hima/' + hima_file.key[:-4]):
+                        if not os.path.isdir(os.path.dirname('Hima/' + hima_file.key)):
+                            os.makedirs(os.path.dirname('Hima/' + hima_file.key))
+                        hima_bucket.download_file(hima_file.key, 'Hima/' + hima_file.key)
+                    else:
+                        files.extend(glob.glob('Hima/' + hima_file.key[:-4]))
+        for filename in glob.glob('Hima/' + hima_path + '*.bz2'):
+            zipfile = bz2.BZ2File(filename) # open the file
+            data = zipfile.read() # get the decompressed data
+            newfilename = filename[:-4] # assuming the filepath ends with .bz2
+            open(newfilename, 'wb').write(data) # write a uncompressed file
+            os.remove(filename)
+            files.extend(glob.glob(newfilename))
     return files
 
 def get_scene_obj(file_list, latlon_extent, sensor, width=750, height=750,
@@ -638,11 +664,13 @@ def nonworldview_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
             dt, center_lat, cfg_d['data_home'], cfg_d['sensor'])
         mean_time_offset = np.mean(time_offsets)/60.0
     else:
-        file_list = get_AHI_files(
-            dt, cfg_d['data_home'])
+        if (cfg_d['files_loc'] == 'local'):
+            file_list = get_AHI_files(
+                dt, cfg_d['data_home'])
+        else:
+            file_list = get_AHI_files(dt)
     if len(file_list) == 0:
-        raise ValueError('No files were found for requested date in '+
-                         cfg_d['data_home'])
+        raise ValueError('No files were found for requested date')
 
     # convert the LL box corners (in degrees LL) to an extent box
     # [min_lon, min_lat, max_lon, max_lat]

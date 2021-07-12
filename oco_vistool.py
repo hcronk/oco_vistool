@@ -448,8 +448,21 @@ def process_config_dict(input_dict):
             if (cfg_d['layer'] < 0 or cfg_d['layer'] >= layers_num):
                     raise ValueError('layer code value out of bounds')
         else:
-            raise ValueError("Worldview sensor is chosen, but the layer code isn't provided in the config file")
-            
+            raise ValueError("Worldview sensor is chosen, but the layer code from the config file isn't provided")
+    else:
+        if ('files_loc' in input_dict):
+            valid_files_locs = ('local', 'aws',)
+            cfg_d['files_loc'] = input_dict['files_loc']
+            if (cfg_d['files_loc'] not in valid_files_locs):
+                raise ValueError('The files location for ' + cfg_d['sensor'] + ' is not valid. Choose from: ' + valid_files_locs)
+            if (cfg_d['files_loc'] == 'local'):
+                if ('data_home' in input_dict):
+                    cfg_d['data_home'] = input_dict['data_home']
+                else:
+                    raise ValueError('Local files location is chosen, but data_home is not provided')
+        
+        else:
+            raise ValueError('Config file is missing required key: files_loc')
     try:
         cfg_d['lat_ul'] = float(input_dict['geo_upper_left'][0])
         cfg_d['lon_ul'] = float(input_dict['geo_upper_left'][1])
@@ -514,7 +527,6 @@ def process_config_dict(input_dict):
         print("Either there was no output data location specified or the one specified "+
               "does not exist. Data output will go in the code directory. \n")
 
-    cfg_d['data_home'] = input_dict.get('data_home', None)
     cfg_d['resample_method'] = input_dict.get(
         'resample_method', 'native_bilinear')
     if cfg_d['resample_method'] == "":
