@@ -319,14 +319,20 @@ def _process_overlay_dict(input_dict):
             sys.exit()
 
     if len(ovr_d['footprint_lims']) == 2:
-        ovr_d['fp_file_tag'] = ("_FP_" + str(ovr_d['footprint_lims'][0]) +
-                                "to" + str(ovr_d['footprint_lims'][1]))
+        if (ovr_d['footprint_lims'][0]==1) and (ovr_d['footprint_lims'][1]==8):
+            ovr_d['fp_file_tag'] = ""
+        else:
+            ovr_d['fp_file_tag'] = ("_FP_" + str(ovr_d['footprint_lims'][0]) +
+                                    "to" + str(ovr_d['footprint_lims'][1]))
     else:
         ovr_d['fp_file_tag'] = "_FP_"+str(ovr_d['footprint_lims'][0])
 
     if re.search("CO2", os.path.basename(ovr_d['var_file'])):
         ovr_d['sif_or_co2'] = "CO2"
-        ovr_d['qf_file_tag'] = "_"+ovr_d['lite_quality']+"_quality"
+        if ovr_d['lite_quality'] == 'all':
+            ovr_d['qf_file_tag'] = ""
+        else:
+            ovr_d['qf_file_tag'] = "_QF_"+ovr_d['lite_quality']
         if ovr_d['warn']:
             ovr_d['wl_file_tag'] = ("_WL_" + str(ovr_d['lite_warn_lims'][0]) +
                                     "to"+str(ovr_d['lite_warn_lims'][1]))
@@ -473,6 +479,7 @@ def process_config_dict(input_dict):
     cfg_d['out_plot_title'] = input_dict.get('plot_title', '')
     cfg_d['out_plot_dir'] = input_dict.get('out_plot_dir', '')
     cfg_d['out_plot_name'] = input_dict.get('out_plot_name', '')
+    cfg_d['out_background_name'] = input_dict.get('out_background_name', '')
     cfg_d['out_data_dir'] = input_dict.get('out_data_dir', '')
     cfg_d['out_data_name'] = input_dict.get('out_data_name', '')
 
@@ -1298,34 +1305,72 @@ if __name__ == "__main__":
             odat = load_OCO2_L1L2_overlay_data(ovr_d)
     
     # defining both name and XML url of the chosen layer (from the user's code)
-    layer_name = layers_encoding[layers_encoding['Code'] == cfg_d['layer']]['Name'].values[0]
-    layer_url = layers_url[layers_url['Name'] == layer_name]['Url'].values[0]
+    # this happens only for Worldview layers
+    if cfg_d['sensor'] == 'Worldview':
+        layer_name = layers_encoding[layers_encoding['Code'] == cfg_d['layer']]['Name'].values[0]
+        layer_url = layers_url[layers_url['Name'] == layer_name]['Url'].values[0]
     
     
-    # construct the auto-generated filename - it is easiest to do this
-    # once here (since it gets reused in multiple places)
-    if ovr_d:
-        output_file_root = ovr_d['var_name_only']
-        if cfg_d['region']:
-            output_file_root = output_file_root + "_" + cfg_d['region']
-        output_file_root = (output_file_root + "_" +
-                            cfg_d['straight_up_date'] + 
-                            ovr_d['version_file_tag']+
-                            ovr_d['qf_file_tag']+
-                            ovr_d['wl_file_tag']+
-                            ovr_d['fp_file_tag'])
+    # construct the auto-generated filenames. These are of the form:
+    # main overlay image:
+    # <background>_<oco variable>_<region>_<date>_<version>_<QF tag>_<WL tag>_<FP tag>.png
+    # overlay data:
+    # <oco variable>_<region>_<date>_<version>_<QF tag>_<WL tag>_<FP tag>.png
+    # The background only image will be:
+    # <background>_<region>_<date>.png
+    # 
+    # if the user specified the output names directly (in the out_plot_name,
+    # out_data_name, and out_background_name), these directly override the
+    # auto-generated names.
+
+    # first make the <region>_<date> part, that is common to all.
+    if cfg_d['region']:
+        auto_name = cfg_d['region']
     else:
-        output_file_root = cfg_d['straight_up_date']
+        auto_name = ""
+    auto_name += ("_" + cfg_d['straight_up_date'])
+
+    auto_data_name = ovr_d['var_name_only'] + "_" + auto_name
+    auto_data_name += (ovr_d['version_file_tag']+
+                       ovr_d['qf_file_tag']+
+                       ovr_d['wl_file_tag']+
+                       ovr_d['fp_file_tag']+
+                       '.h5')
+    auto_plot_name = ovr_d['var_name_only'] + "_" + auto_name
+    auto_plot_name += (ovr_d['version_file_tag']+
+                       ovr_d['qf_file_tag']+
+                       ovr_d['wl_file_tag']+
+                       ovr_d['fp_file_tag']+
+                       '.png')
+    auto_background_name = auto_name + '.png'
+
+    if cfg_d['sensor'] == 'Worldview':
+        auto_plot_name = layer_name + "_" + auto_plot_name
+        auto_background_name = layer_name + "_" + auto_background_name
+    else:
+        auto_plot_name = cfg_d['sensor']+"_imagery_" + auto_plot_name
+        auto_background_name = cfg_d['sensor']+"_imagery_" + auto_background_name
 
     if cfg_d['out_plot_name']:
         out_plot_name = cfg_d['out_plot_name']
     else:
-        out_plot_name = output_file_root + '.png'
+        out_plot_name = auto_plot_name
 
     if cfg_d['out_data_name']:
         out_data_name = cfg_d['out_data_name']
     else:
-        out_data_name = output_file_root + '.h5'
+        out_data_name = auto_data_name
+
+    if cfg_d['out_background_name']:
+        out_background_name = cfg_d['out_background_name']
+    else:
+        out_background_name = auto_background_name
+
+
+    # construct filenames for the plot and optional h5 output file.
+    out_plot_fullpath = os.path.join(cfg_d['out_plot_dir'], out_plot_name)
+    out_data_fullpath = os.path.join(cfg_d['out_data_dir'], out_data_name)
+    out_background_fullpath = os.path.join(cfg_d['out_plot_dir'], out_background_name)
 
     # if there is no overlay data present, or the 'background image'
     # flag is set, then generate the image without overlay data.
@@ -1337,22 +1382,19 @@ if __name__ == "__main__":
             cfg_d['datetime'] = dt
     else:
         make_background_image = True
+
     if make_background_image:
-        out_plot_fullpath = os.path.join(
-            cfg_d['out_plot_dir'], 
-            cfg_d['sensor']+"_imagery_" + out_plot_name)
-    
         if cfg_d['sensor'] == 'Worldview':
             do_overlay_plot(
                 cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
                 cfg_d['date'], layer_name, np.array([]), np.array([]),
                 np.array([]), np.array([]), layer_url,
                 interest_pt=cfg_d['ground_site'], cmap='black',
-                out_plot=out_plot_fullpath, cities=cfg_d['city_labels'])
+                out_plot=out_background_fullpath, cities=cfg_d['city_labels'])
         elif cfg_d['sensor'].startswith('GOES'):
             import satpy_overlay_plots
             satpy_overlay_plots.GOES_ABI_overlay_plot(
-                cfg_d, None, None, out_plot_name=out_plot_fullpath)
+                cfg_d, None, None, out_plot_name=out_background_fullpath)
         else:
             raise ValueError('Unknown sensor: '+cfg_d['sensor'])
 
@@ -1391,10 +1433,6 @@ if __name__ == "__main__":
         cbar_name = cbar_cap_strings+'\n('+odat['data_units']+')'
     else:
         cbar_name = ""
-
-    # construct filenames for the plot and optional h5 output file.
-    out_plot_fullpath = os.path.join(cfg_d['out_plot_dir'], out_plot_name)
-    out_data_fullpath = os.path.join(cfg_d['out_data_dir'], out_data_name)
     
     if cfg_d['sensor'] == 'Worldview':
         do_overlay_plot(

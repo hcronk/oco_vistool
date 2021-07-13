@@ -3,7 +3,7 @@ satpy_overlay_plots.py
 
 module implementing satpy based plots with OCO-2 data overlays.
 
-intended to integrate with oco2_modis_vistool.py
+intended to integrate with oco2_vistool.py
 """
 
 import os.path, glob, datetime, collections, itertools
@@ -26,7 +26,7 @@ import matplotlib.patches as mpatches
 import netCDF4
 import h5py
 
-from oco2_modis_vistool import read_shp
+from oco_vistool import read_shp
 
 # to get the location of the city data (a subdir from where the
 # code is located).

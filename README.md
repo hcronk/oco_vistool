@@ -1,4 +1,4 @@
-# oco2_modis_vistool.py
+# oco_vistool.py
 
 The purpose of this script is to pull different RGB images (depending on the user's choice from Encoding.csv) from Worldview using the NASA GIBS API and overlay various OCO-2 data fields for 
 case study analysis in support of OCO-2 cloud and aerosol screening validation.
@@ -37,7 +37,7 @@ It can also be called as a function from within another Python program for expan
     Dockerfiles and docker-compose files to set up an appropriate Python 2.7 or Python 3.6 container are included in the repo    
 
 3) Test run from the command line  
-   `python oco2_modis_vistool.py`
+   `python oco_vistool.py`
 
 
 4) Look for the output PNG and HDF5 in the code directory
@@ -77,7 +77,7 @@ It can also be called as a function from within another Python program for expan
        http://matplotlib.org/examples/color/named_colors.html
 
      **oco2_overlay_info** (dict, default: none):  
-         The information for the OCO-2 variable to overlay on the MODIS RGB.  
+         The information for the OCO-2 variable to overlay on the Background image.  
 		**{**  
 		**file** (string):  
         		This is *required* for a variable overlay.  
@@ -131,14 +131,17 @@ It can also be called as a function from within another Python program for expan
 	**out_plot_dir** (string, default: the directory that you are running the code in):  
     	The full output directory path for the output plot.
 
-	**out_plot_name** (string, default example: xco2_Amazon_20150701_all_quality_WL_0to20.png):  
+	**out_plot_name** (string, default example: MODIS_Aqua_CorrectedReflectance_TrueColor_xco2_Amazon_20150701_B7302b_QF_good_WL_0to20.png):  
     	The name of the output plot.
 
 	**out_data_dir** (string, default: the directory that you are running the code in):  
     	The full output directory path for the output data file.
 
-	**out_data_name** (string, default example: xco2_Amazon_20150701_all_quality_WL_0to20.h5):  
+	**out_data_name** (string, default example: xco2_Amazon_20150701_B7302b_QF_good_WL_0to20.h5):  
     	The name of the output data file.
+
+	**out_background_name** (string, default example: MODIS_Aqua_CorrectedReflectance_TrueColor_Amazon_20150701.png):  
+    	The name of the output background file, created if no overlay data is present or make_background_image is enabled.
 
 
 ## Other Information
@@ -152,16 +155,16 @@ layers (as of June 2021) into a separate CSV file. This relation CSV file is use
 The parser used a copy of the wmts capabilities file which was downloaded into the code directory from: https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi?SERVICE=WMTS&REQUEST=GetCapabilities
 
 Minimum command line call:  
-`python oco2_modis_vistool.py`
+`python oco_vistool.py`
 
 
 Minimum function call:  
 ```
-from oco2_modis_vistool import do_modis_overlay_plot
+from oco_vistool import do_overlay_plot
 
-do_modis_overlay_plot([lat_of_upper_lefthand_corner, lon_of_upper_lefthand_corner],
-                      [lat_of_lower_righthand_corner, lon_of_lower_righthand_corner], 
-		      date, lat_data, lon_data, variable_data)
+do_overlay_plot([lat_of_upper_lefthand_corner, lon_of_upper_lefthand_corner],
+                [lat_of_lower_righthand_corner, lon_of_lower_righthand_corner], 
+                date, lat_data, lon_data, variable_data)
 ```  
 
 ## A Note about Questions, Suggestions, and Issues
