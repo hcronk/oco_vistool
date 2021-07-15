@@ -3,7 +3,7 @@ satpy_overlay_plots.py
 
 module implementing satpy based plots with OCO-2 data overlays.
 
-intended to integrate with oco2_modis_vistool.py
+intended to integrate with oco_vistool.py
 """
 
 import os, glob, datetime, collections, itertools

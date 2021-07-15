@@ -49,7 +49,10 @@ out_data_name: set to a specific filename to control the output h5 data
     filename. Skipping this field is equivalent to setting it to an empty
     string, which means a default file name is constructed, matching the
     default plot name.
-
+out_background_name: set to a specific filename to control the output
+    background image filename, if make_background_image is enabled.
+    Skipping this field is equivalent to setting it to an empty string,
+    which means a default filename is constructed.
 Overlay specification:
 
 Required Fields
