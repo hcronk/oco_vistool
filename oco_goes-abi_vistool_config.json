@@ -1,12 +1,12 @@
 {
-	"date": "2021-02-20",
+	"date": "2019-10-08",
 	"sensor":"GOES16_ABI_C",
-    "data_home":"/arcdata/goes/grb/goes16",
-	"geo_upper_left": [47.2, -90.8],
-	"geo_lower_right": [45.8, -88.3],
+        "data_home":"goes16_data_dir",
+	"geo_upper_left": [47.0, -92.5],
+	"geo_lower_right": [45.0, -89.0],
 	"region": "",
 	"oco2_overlay_info": {
-		"file": "oco3_LtCO2_210220_B10205Xr_210322061333s.nc4",
+		"file": "oco_L1bScSC_191008_B99999_sampledata.h5",
 		"variable": "SoundingMeasurements/rad_continuum_o2",
 		"variable_plot_lims":[0.8e20, 1.2e20],
 		"lat_name": "/FootprintGeometry/footprint_vertex_latitude",
