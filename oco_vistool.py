@@ -1325,10 +1325,10 @@ if __name__ == "__main__":
 
     # first make the <region>_<date> part, that is common to all.
     if cfg_d['region']:
-        auto_name = cfg_d['region']
+        auto_name = cfg_d['region'] + "_"
     else:
         auto_name = ""
-    auto_name += ("_" + cfg_d['straight_up_date'])
+    auto_name += cfg_d['straight_up_date']
 
     auto_data_name = ovr_d['var_name_only'] + "_" + auto_name
     auto_data_name += (ovr_d['version_file_tag']+
