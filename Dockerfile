@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3:4.6.14
+FROM continuumio/miniconda3:4.9.2
 
-RUN conda install -y -c conda-forge h5py=2.9.0 \
-    pandas=0.25.0 cartopy=0.17.0 gdal=3.0.1
+RUN conda install -y -c conda-forge netcdf4=1.5.7 h5py=2.10.0 \
+    pandas=1.1.4 cartopy=0.18.0 owslib=0.24.1 pillow=7.2.0
