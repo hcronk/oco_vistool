@@ -990,12 +990,24 @@ def load_OCO2_Lite_overlay_data(ovr_d):
     return dd
 
 def get_layer_colorbar_params(layer_url):
+    """
+    Given the Worldview quantitative layer XML file url, creates its colorbar.
+
+    Returns a colormap object, normalized bounds object, ticks to show, bounds list, and units (if exist). 
+    
+    inputs:
+    layer_url: url of the XML file for the desired quantitative layer (with its specs)
+    """
+    
+    # get a response from the layer's XML file 
     response = urllib.request.urlopen(layer_url).read()
     root = ET.fromstring(response)
     bounds_list = list()
     df_list = list()
     ticks_list = list()
     units = None
+    
+    # iterate through the layer's fields
     for color_map in root.findall("ColorMap"):
         if ('units' in color_map.attrib):
             units = color_map.attrib.get('units')
@@ -1020,7 +1032,7 @@ def get_layer_colorbar_params(layer_url):
 
                         if ('showTick' in entry.attrib):
                             ticks_list.append(tmp_upper)
-                    
+                    # symmetrical with above
                     elif ('≤' in entry.attrib.get('tooltip')):
                         tmp_upper = float(entry.attrib.get('tooltip').split('≤')[1].strip())
                         # differently encoded dashes check (ranges case)
@@ -1054,7 +1066,7 @@ def get_layer_colorbar_params(layer_url):
 
                         if ('showTick' in entry.attrib):
                             ticks_list.append(tmp_lower)
-                    # symmetrical with above but when there is no upper bound specified
+                    # symmetrical with above
                     elif ('≥' in entry.attrib.get('tooltip')):
                         tmp_lower = float(entry.attrib.get('tooltip').split('≥')[1].strip())
                         if(' - ' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
@@ -1100,6 +1112,14 @@ def do_overlay_plot(
     cmap='jet', alpha=1, lat_name=None, lon_name=None, var_name=None,
     out_plot="vistool_output.png", var_label=None, cities=None,
     var_file=None):
+    """
+    Given the data from all dictionaries and layer info, overlays the OCO-2 data.
+
+    Plots the overlayed imagery.
+    
+    inputs:
+    all relevant fields from the dictionaries and some other parsed layer fields
+    """
     
     #Calculate lat/lon lims of RGB
     maxy = geo_upper_left[0]
@@ -1147,6 +1167,7 @@ def do_overlay_plot(
 
     gs =  gridspec.GridSpec(16, 16)
     
+    # request the needed layer and plot it
     url = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi'
     wmts = WebMapTileService(url)
     layer = layer_name
@@ -1203,13 +1224,15 @@ def do_overlay_plot(
     if var_lat.ndim == 2:
         zip_it = np.ma.dstack([var_lon, var_lat])
     
-    # if the XML file exists for the chosen layer
+    # if the XML file exists for the chosen layer (the layer is quantitative)
     if (layer_url != 'Null'):
+        # building the second colorbar
         cmap2, norm2, ticks_list, bounds_list, units = get_layer_colorbar_params(layer_url)
         ax2 = plt.subplot(gs[-1, 2:-2])
         cb2 = mpl.colorbar.ColorbarBase(ax2, cmap=cmap2, norm=norm2, orientation = 'horizontal',
                                         ticks = ticks_list + [bounds_list[0], bounds_list[-1]])
-
+        
+        
         for t in cb2.ax.xaxis.get_ticklabels():
             t.set_weight("bold")
             t.set_fontsize(8)
@@ -1220,7 +1243,6 @@ def do_overlay_plot(
             cb2.ax.set_xlabel('# in ' + units, fontdict=dict(weight='bold'))
 
     if color_or_cmap == "cmap" and var_vals.shape[0] > 0:
-    
         # vertex points for each footprint
         if var_lat.ndim == 2 and var_vals.ndim == 1:
             for row in range(zip_it.shape[0]):
@@ -1310,9 +1332,6 @@ def do_overlay_plot(
 
     fig.savefig(out_plot, dpi=150, bbox_inches='tight')
     print("\nFigure saved at "+out_plot)
-    
-    #print("code directory in subroutine:", code_dir)
-    #os.remove(code_dir+'/intermediate_RGB.tif')
 
 
 ### Static Definitions
@@ -1429,7 +1448,7 @@ if __name__ == "__main__":
     else:
         make_background_image = True
     
-    
+    # create the background image based on the sensor
     if make_background_image:
         if (cfg_d['sensor'] == 'Worldview'):
             do_overlay_plot(
@@ -1482,6 +1501,7 @@ if __name__ == "__main__":
     else:
         cbar_name = ""
     
+    # overlay the data based on the sensor
     if (cfg_d['sensor'] == 'Worldview'):
         do_overlay_plot(cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
                 cfg_d['datetime'], layer_name, odat['lat'], odat['lon'], odat['var_data'],
