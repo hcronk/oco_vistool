@@ -841,6 +841,7 @@ def nonworldview_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     if out_plot_name:
         fig = plt.figure(fignum)
         fig.savefig(out_plot_name, dpi=150)
+        print("\nFigure saved at "+ out_plot_name)
 
     ax_dict = dict(
         gridspec = gs, image_ax = ax, cb_ax = cb_ax,
