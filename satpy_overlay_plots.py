@@ -128,7 +128,7 @@ def get_loc_ABI_files(datetime_utc, data_home, domain, platform, hour_offsets, b
         flists[band] += located_files
     return flists
 
-def get_aws_ABI_files(datetime_utc, data_home, domain, platform, hour_offsets, band_list, glob_fstr, verbose):
+def get_aws_ABI_files(datetime_utc, domain, platform, hour_offsets, band_list, glob_fstr, verbose):
     """
     Helper function for getting the AWS S3 GOES ABI filenames.
     
@@ -136,7 +136,6 @@ def get_aws_ABI_files(datetime_utc, data_home, domain, platform, hour_offsets, b
     
     inputs:
     datetime_utc: datetime object for the needed point of time
-    data_home: origin background files directory
     domain: (C)ONUS or (F)ull disk
     platform: GOES-East (G16) or GOES-West (G17)
     hour_offsets: different offsets to iterate over
@@ -186,7 +185,7 @@ def get_aws_ABI_files(datetime_utc, data_home, domain, platform, hour_offsets, b
         flists[band] += located_files
     return flists, g_bucket
 
-def download_aws_ABI_files(flist, g_bucket, platform):
+def download_aws_ABI_files(flist, g_bucket, data_home):
     """
     Helper function for downloading the AWS GOES files given their names.
 
@@ -195,30 +194,28 @@ def download_aws_ABI_files(flist, g_bucket, platform):
     inputs:
     flist: list of needed files
     g_bucket: AWS S3 bucket to download the files from
-    platform: GOES-East (G16) or GOES-West (G17)
+    data_home: data origin for the background files (by format: data_home/YYYY/...)
     """
-    
     files = list()
-    
     # iterating to and downloading the needed files from the S3 bucket (by the known path)
     for needed_path in flist:
         g_files = g_bucket.objects.filter(Prefix=needed_path)
         for g_file in g_files:
-            if not (os.path.isfile(platform + '/' + g_file.key)):
-                if not os.path.isdir(os.path.dirname(platform + '/' + g_file.key)):
-                    os.makedirs(os.path.dirname(platform + '/' + g_file.key))
-                g_bucket.download_file(g_file.key, platform + '/' + g_file.key)
-                files.extend(glob.glob(platform + '/' + g_file.key))
+            if not (os.path.isfile(data_home + '/' + g_file.key)):
+                if not os.path.isdir(os.path.dirname(data_home + '/' + g_file.key)):
+                    os.makedirs(os.path.dirname(data_home + '/' + g_file.key))
+                g_bucket.download_file(g_file.key, data_home + '/' + g_file.key)
+                files.extend(glob.glob(data_home + '/' + g_file.key))
             else:
-                files.extend(glob.glob(platform + '/' + g_file.key))
+                files.extend(glob.glob(data_home + '/' + g_file.key))
 
     flist = list(set(files))
     return flist
 
 def get_ABI_files(datetime_utc, center_lat,
-                  sensor, files_loc, data_home = None, verbose=False):
+                  sensor, files_loc, data_home, verbose=False):
     """
-    Using the helpers above, accesses the needed GOES ABI files and downloads them (if needed)
+    Using the helpers above, accesses the needed GOES ABI files and downloads them (if needed).
     
     Returns a list with accessed GOES filenames and time offsets.
     
@@ -226,8 +223,8 @@ def get_ABI_files(datetime_utc, center_lat,
     datetime_utc: datetime object for the needed point of time
     center_lat: center latitude of the background image
     sensor: the geostation, device, and domain (GOES16_ABI_C, for example)
-    files_loc: if the background images are local or AWS
-    data_home: data origin for the background files if files are stored locally (by format: data_home/YYYY/...)
+    files_loc: if the background images are local or on AWS
+    data_home: data origin for the background files (by format: data_home/YYYY/...)
     verbose: if details are needed
     """
     
@@ -253,7 +250,7 @@ def get_ABI_files(datetime_utc, center_lat,
     
     # get the needed filenames (and the S3 bucket for AWS)
     if (files_loc == 'aws'):
-        flists, g_bucket = get_aws_ABI_files(datetime_utc, data_home, domain, platform, hour_offsets, band_list, glob_fstr, verbose)
+        flists, g_bucket = get_aws_ABI_files(datetime_utc, domain, platform, hour_offsets, band_list, glob_fstr, verbose)
     else:
         flists = get_loc_ABI_files(datetime_utc, data_home, domain, platform, hour_offsets, band_list, glob_fstr, verbose)
     
@@ -282,22 +279,91 @@ def get_ABI_files(datetime_utc, center_lat,
     
     # download the files if needed
     if (files_loc == 'aws'):
-        flist = download_aws_ABI_files(flist, g_bucket, platform)
-
+        flist = download_aws_ABI_files(flist, g_bucket, data_home)
     return flist, time_offset
 
-def get_AHI_files(datetime_utc, data_home = None):
+def get_loc_AHI_files(data_home, year, month, day_m, day_y, hour, minutes, bands_list):
     """
-    Access the needed Himawari files by date & time and downloads them (if needed).
+    Helper function for accessing the local Himawari background files.
+
+    Returns a list with local Himawari filenames.
     
-    Returns a list with needed glob-format AHI Himawari files.
+    inputs:
+    data_home: origin directory for the background files
+    year: year of the requested timeslot (format: YYYY - string)
+    month: month of the requested timeslot (format: MM - string, 01-12)
+    day_m: needed day relative to the month (format: DD - string, 01-31)
+    day_y: needed day relative to the year (format: DDD - string, 001-365)
+    hour: needed hour in the day (format: hh - string, 00-23)
+    minutes: needed minute in the hour (format: mm - string, 00-59)
+    bands_list: list of band numbers needed to construct the true color image
+    """    
+    files = list()
+    # access and record all the background files by the known path format
+    for band in bands_list:
+        files.extend(glob.glob(data_home + "/" + year + "/" + year + "_" + month + "_" + day_m + "_" + day_y + "/" + hour + 
+                               minutes + "/HS_H08_" + year + month + day_m + "_" + hour + minutes +"_B" + str(band).zfill(2) +
+                              "_FLDK_*.DAT")) 
+    return files
+
+def get_aws_AHI_files(data_home, year, month, day_m, hour, minutes, bands_list):
+    """
+    Helper function for accessing and downloading (if needed) the AWS Himawari background files.
+
+    Returns a list with AWS S3 Himawari local filenames.
+    
+    inputs:
+    data_home: origin directory for the background files
+    year: year of the requested timeslot (format: YYYY - string)
+    month: month of the requested timeslot (format: MM - string, 01-12)
+    day_m: needed day relative to the month (format: DD - string, 01-31)
+    hour: needed hour in the day (format: hh - string, 00-23)
+    minutes: needed minute in the hour (format: mm - string, 00-59)
+    bands_list: list of band numbers needed to construct the true color image
+    """
+    
+    # connecting to the S3 Himawari bucket
+    aws_keys = pd.read_csv('Keys.csv', header = 0)
+    s3 = boto3.resource('s3', aws_access_key_id = aws_keys['aws_access_key_id'].values[0], aws_secret_access_key = aws_keys['aws_secret_access_key'].values[0])
+    hima_bucket = s3.Bucket('noaa-himawari8')
+    hima_path = 'AHI-L1b-FLDK/' + year + '/' + month + '/' + day_m +'/' + hour + minutes + '/'
+    hima_files = hima_bucket.objects.filter(Prefix=hima_path)
+    
+    files = list()
+    # downloading and recording the needed Himawari files by known AWS paths
+    for hima_file in hima_files:
+        for band in bands_list:
+            if '_B0' + str(band) + '_' in hima_file.key:
+                if not (os.path.isfile(data_home + '/' + hima_file.key[:-4]) or os.path.isfile(data_home + '/' + hima_file.key)):
+                    if not os.path.isdir(os.path.dirname(data_home + '/' + hima_file.key)):
+                        os.makedirs(os.path.dirname(data_home + '/' + hima_file.key))
+                    hima_bucket.download_file(hima_file.key, data_home + '/' + hima_file.key)
+                else:
+                    files.extend(glob.glob(data_home + '/' + hima_file.key[:-4]))
+    # decompressing the downloaded files
+    for filename in glob.glob(data_home + '/' + hima_path + '*.bz2'):
+        zipfile = bz2.BZ2File(filename)
+        data = zipfile.read()
+        new_filename = filename[:-4] 
+        open(new_filename, 'wb').write(data)
+        os.remove(filename)
+        files.extend(glob.glob(new_filename))
+    files = list(set(files))
+    return files
+
+def get_AHI_files(datetime_utc, files_loc, data_home):
+    """
+    Using the helpers above, accesses the needed Himawari files by date & time and downloads them (if needed).
+    
+    Returns a list with needed Himawari background filenames and a time offset of the image relative to the request.
     
     inputs:
     datetime_utc: datetime object for the needed point of time
-    data_home: data origin for the background files if files are stored locally (by format: data_home/YYYY/...)
+    files_loc: if the background images are local or on AWS
+    data_home: origin directory for the background files 
     """
     
-    # Constructing the files path by the format
+    # Constructing the files path by the known format
     year = str(datetime_utc.year)
     month = str(datetime_utc.month).zfill(2)
     day_m = str(datetime_utc.day).zfill(2)
@@ -306,46 +372,21 @@ def get_AHI_files(datetime_utc, data_home = None):
     orig_minutes = datetime_utc.minute
     seconds = datetime_utc.second
     minutes = str(int(round(orig_minutes + seconds/60, -1))%60).zfill(2)
-    
+
+    time_offset = abs((datetime_utc - datetime.datetime(int(year), int(month), int(day_m), int(hour), int(minutes))).total_seconds())
+
     bands_list = [1, 2, 3, 4]
     files = list()
     
-    # accessing the files locally
-    if (data_home is not None):
-        for band in bands_list:
-            files.extend(glob.glob(data_home + "/" + year + "/" + year + "_" + month + "_" + day_m + "_" + day_y + "/" + hour + 
-                                   minutes + "/HS_H08_" + year + month + day_m + "_" + hour + minutes +"_B" + str(band).zfill(2) +
-                                  "_FLDK_*.DAT"))  
-    # accessing the files and downloading them from AWS 
+    # accessing the files and downloading them from AWS (if needed) 
+    if (files_loc == 'aws'):
+        files = get_aws_AHI_files(data_home, year, month, day_m, hour, minutes, bands_list)
+
+    # accessing the local files
     else:
-        # connecting to the S3 Himawari bucket
-        aws_keys = pd.read_csv('Keys.csv', header = 0)
-        s3 = boto3.resource('s3', aws_access_key_id = aws_keys['aws_access_key_id'].values[0], aws_secret_access_key = aws_keys['aws_secret_access_key'].values[0])
-        hima_bucket = s3.Bucket('noaa-himawari8')
-        hima_path = 'AHI-L1b-FLDK/' + year + '/' + month + '/' + day_m +'/' + hour + minutes + '/'
-        hima_files = hima_bucket.objects.filter(Prefix=hima_path)
-        
-        # downloading the needed Himawari files by known AWS paths
-        for hima_file in hima_files:
-            for band in bands_list:
-                if '_B0' + str(band) + '_' in hima_file.key:
-                    if not (os.path.isfile('Himawari-08/' + hima_file.key[:-4]) or os.path.isfile('Himawari-08/' + hima_file.key)):
-                        if not os.path.isdir(os.path.dirname('Himawari-08/' + hima_file.key)):
-                            os.makedirs(os.path.dirname('Himawari-08/' + hima_file.key))
-                        hima_bucket.download_file(hima_file.key, 'Himawari-08/' + hima_file.key)
-                    else:
-                        files.extend(glob.glob('Himawari-08/' + hima_file.key[:-4]))
-         
-        # decompressing the downloaded files
-        for filename in glob.glob('Himawari-08/' + hima_path + '*.bz2'):
-            zipfile = bz2.BZ2File(filename)
-            data = zipfile.read()
-            newfilename = filename[:-4] 
-            open(newfilename, 'wb').write(data)
-            os.remove(filename)
-            files.extend(glob.glob(newfilename))
-        files = list(set(files))
-    return files
+        files = get_loc_AHI_files(data_home, year, month, day_m, day_y, hour, minutes, bands_list)
+
+    return files, time_offset
 
 def get_scene_obj(file_list, latlon_extent, sensor, width=750, height=750,
                   tmp_cache=False, resample_method='native_bilinear'):
@@ -697,7 +738,7 @@ def overlay_data(ax, cb_ax, odata, var_label=None, **kw):
 def nonworldview_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
                           var_label=None, fignum=10):
     """
-    Make an overlay plot - GOES/Himawaei. 
+    Make an overlay plot - GOES/Himawari. 
     This is function to integrate with the vistool plot data flow.
 
     inputs (all 3 are defined by the corresponding vistool functions)
@@ -727,21 +768,16 @@ def nonworldview_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
 
     center_lat = (cfg_d['lat_lr'] + cfg_d['lat_ul']) / 2.0
     
-    # getting the needed files depending on the station and files location; downloading if needed
+    # accessing the needed files depending on the geostation and files location; downloading if needed
+    # also getting the time offset of the background image
     if (cfg_d['sensor'].startswith('GOES')):
-        if (cfg_d['files_loc'] == 'local'):
-            file_list, time_offsets = get_ABI_files(
-                dt, center_lat, cfg_d['sensor'], cfg_d['files_loc'], cfg_d['data_home'])
-        else:
-            file_list, time_offsets = get_ABI_files(
-                dt, center_lat, cfg_d['sensor'], cfg_d['files_loc'])
-        mean_time_offset = np.mean(time_offsets)/60.0
+        file_list, time_offsets = get_ABI_files(
+            dt, center_lat, cfg_d['sensor'], cfg_d['files_loc'], cfg_d['data_home'])
+        time_offset = np.mean(time_offsets)/60.0
     else:
-        if (cfg_d['files_loc'] == 'local'):
-            file_list = get_AHI_files(
-                dt, cfg_d['data_home'])
-        else:
-            file_list = get_AHI_files(dt)
+        file_list, time_offset = get_AHI_files(dt, cfg_d['files_loc'], cfg_d['data_home'])
+        time_offset /= 60.0
+        
     if len(file_list) == 0:
         raise ValueError('No files were found for requested date')
 
@@ -783,49 +819,28 @@ def nonworldview_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     
     # formatting the plot
     if cfg_d['out_plot_title'] == 'auto':
-        if cfg_d['sensor'].startswith('GOES'):
-            if ovr_d:
-                title_string = (
-                    'Overlay data from {0:s}' +
-                    '\nBackground from {1:s}, '+
-                    '\nOverlay time = {2:s},   '+
-                    'mean time offset = {3:4.1f} min.,  '+
-                    'plot created on {4:s}' )
-                title_string = title_string.format(
-                    os.path.split(ovr_d['var_file'])[1],
-                    os.path.split(file_list[1])[1], 
-                    dt.strftime('%Y-%m-%d %H:%M:%S'), mean_time_offset,
-                    todays_date)
-            else:
-                title_string = (
-                    'Background from  {0:s}' + 
-                    '\n Request time = {1:s},   '+
-                    'mean time offset = {2:4.1f} min.,  '+
-                    'plot created on {3:s}' )
-                title_string = title_string.format(
-                    os.path.split(file_list[1])[1],
-                    dt.strftime('%Y-%m-%d %H:%M:%S'),
-                    mean_time_offset, todays_date)
+        if ovr_d:
+            title_string = (
+                'Overlay data from {0:s}' +
+                '\nBackground from {1:s}, '+
+                '\nOverlay time = {2:s},   '+
+                'time offset = {3:4.1f} min.,  '+
+                'plot created on {4:s}' )
+            title_string = title_string.format(
+                os.path.split(ovr_d['var_file'])[1],
+                os.path.split(file_list[1])[1], 
+                dt.strftime('%Y-%m-%d %H:%M:%S'),
+                time_offset, todays_date)
         else:
-            if ovr_d:
-                title_string = (
-                    'Overlay data from {0:s}' +
-                    '\nBackground from {1:s}, '+
-                    '\nOverlay time = {2:s},   '+
-                    'plot created on {3:s}' )
-                title_string = title_string.format(
-                    os.path.split(ovr_d['var_file'])[1],
-                    os.path.split(file_list[1])[1], 
-                    dt.strftime('%Y-%m-%d %H:%M:%S'),
-                    todays_date)
-            else:
-                title_string = (
-                    'Background from  {0:s}' + 
-                    '\n Request time = {1:s},   '+
-                    'plot created on {2:s}' )
-                title_string = title_string.format(
-                    os.path.split(file_list[1])[1],
-                    dt.strftime('%Y-%m-%d %H:%M:%S'), todays_date)
+            title_string = (
+                'Background from  {0:s}' + 
+                '\n Request time = {1:s},   '+
+                'time offset = {2:4.1f} min.,  '+
+                'plot created on {3:s}' )
+            title_string = title_string.format(
+                os.path.split(file_list[1])[1],
+                dt.strftime('%Y-%m-%d %H:%M:%S'),
+                time_offset, todays_date)
             
     else:
         title_string = cfg_d['out_plot_title']
@@ -841,7 +856,7 @@ def nonworldview_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     if out_plot_name:
         fig = plt.figure(fignum)
         fig.savefig(out_plot_name, dpi=150)
-        print("\nFigure saved at "+ out_plot_name)
+        print("\nFigure saved at "+ out_plot_name + "\n")
 
     ax_dict = dict(
         gridspec = gs, image_ax = ax, cb_ax = cb_ax,

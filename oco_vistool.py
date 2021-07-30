@@ -130,7 +130,7 @@ def read_shp(filename):
 
 def _process_overlay_dict(input_dict):
     """
-    process OCO-2 overlay data input.
+    Process OCO-2 overlay data input.
     this is a helper normally called by process_config_dict(), see docstring there.
 
     In general, this is doing similar work as process_config_dict(), just this function
@@ -461,14 +461,13 @@ def process_config_dict(input_dict):
             cfg_d['files_loc'] = input_dict['files_loc']
             if (cfg_d['files_loc'] not in valid_files_locs):
                 raise ValueError('The files location for ' + cfg_d['sensor'] + ' is not valid. Choose from: ' + valid_files_locs)
-            if (cfg_d['files_loc'] == 'local'):
-                if ('data_home' in input_dict):
-                    cfg_d['data_home'] = input_dict['data_home']
-                else:
-                    raise ValueError('Local files location is chosen, but data_home is not provided')
+            if ('data_home' in input_dict):
+                cfg_d['data_home'] = input_dict['data_home']
+            else:
+                raise ValueError('Config file is missing a required key for non-Worldview sensors: data_home')
         
         else:
-            raise ValueError('Config file is missing required key: files_loc')
+            raise ValueError('Config file is missing a required key for non-Worldview sensors: files_loc')
     try:
         cfg_d['lat_ul'] = float(input_dict['geo_upper_left'][0])
         cfg_d['lon_ul'] = float(input_dict['geo_upper_left'][1])
