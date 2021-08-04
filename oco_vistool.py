@@ -1395,18 +1395,24 @@ if __name__ == "__main__":
         auto_name = ""
     auto_name += cfg_d['straight_up_date']
 
-    auto_data_name = ovr_d['var_name_only'] + "_" + auto_name
-    auto_data_name += (ovr_d['version_file_tag']+
-                       ovr_d['qf_file_tag']+
-                       ovr_d['wl_file_tag']+
-                       ovr_d['fp_file_tag']+
-                       '.h5')
-    auto_plot_name = ovr_d['var_name_only'] + "_" + auto_name
-    auto_plot_name += (ovr_d['version_file_tag']+
-                       ovr_d['qf_file_tag']+
-                       ovr_d['wl_file_tag']+
-                       ovr_d['fp_file_tag']+
-                       '.png')
+    # construct auto output name from overlay data information if present
+    if ovr_d:
+        auto_data_name = ovr_d['var_name_only'] + "_" + auto_name
+        auto_data_name += (ovr_d['version_file_tag']+
+                           ovr_d['qf_file_tag']+
+                           ovr_d['wl_file_tag']+
+                           ovr_d['fp_file_tag']+
+                           '.h5')
+        auto_plot_name = ovr_d['var_name_only'] + "_" + auto_name
+        auto_plot_name += (ovr_d['version_file_tag']+
+                           ovr_d['qf_file_tag']+
+                           ovr_d['wl_file_tag']+
+                           ovr_d['fp_file_tag']+
+                           '.png')
+    else:
+        auto_data_name = auto_name
+        auto_plot_name = auto_name
+
     auto_background_name = auto_name + '.png'
 
     if cfg_d['sensor'] == 'Worldview':
