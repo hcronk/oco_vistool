@@ -388,8 +388,9 @@ def process_config_dict(input_dict):
         related to the base image
 
     contents:
-    date: "YYYY-MM-DD"
-    straight_up_date: "YYYYMMDD"
+    date: "YYYY-MM-DD" or "YYYY-MM-DD HH:MM:SS" if specified
+    straight_up_date: "YYYYMMDD" or "YYYYMMDD_HHMMSS" if specified
+         this version of the date will be used in the auto output filenames
     lat_ul
     lon_ul
     lat_lr
@@ -434,7 +435,7 @@ def process_config_dict(input_dict):
     # note the use of dict.get(key, default) will effectively set default blank or None
     # values.
     cfg_d['date'] = input_dict['date']
-    cfg_d['straight_up_date'] = cfg_d['date'].replace("-", "")
+    cfg_d['straight_up_date'] = cfg_d['date'].replace("-", "").replace(":",'').replace(" ","_")
 
     cfg_d['geo_upper_left'] = input_dict['geo_upper_left']
     cfg_d['geo_lower_right'] = input_dict['geo_lower_right']
