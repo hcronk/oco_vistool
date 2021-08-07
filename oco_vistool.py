@@ -461,7 +461,7 @@ def process_config_dict(input_dict):
             valid_files_locs = ('local', 'aws',)
             cfg_d['files_loc'] = input_dict['files_loc']
             if (cfg_d['files_loc'] not in valid_files_locs):
-                raise ValueError('The files location for ' + cfg_d['sensor'] + ' is not valid. Choose from: ' + valid_files_locs)
+                raise ValueError('The files location for ' + cfg_d['sensor'] + ' is not valid. Choose from: ' + str(valid_files_locs))
             if ('data_home' in input_dict):
                 cfg_d['data_home'] = input_dict['data_home']
             else:
