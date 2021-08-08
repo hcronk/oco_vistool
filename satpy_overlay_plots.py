@@ -373,7 +373,10 @@ def get_loc_AHI_files(datetime_utc, data_home, offsets, bands_list):
                         '_B{0:02d}_FLDK_R??_S????.DAT'.format(band)))
         files_at_offset = glob.glob(glob_str)
         files_at_offset.sort()
-        files[band].append(files_at_offset)
+        # if data is missing at this time offset, the files_at_offset list
+        # will be empty. In that case, don't add to the list.
+        if len(files_at_offset) > 0:
+            files[band].append(files_at_offset)
 
     return files
 
