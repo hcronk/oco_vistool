@@ -39,6 +39,7 @@ import urllib.request
 
 from OCO2FileOps import *
 from default_cmaps import default_cmaps
+from geo_scan_time import compute_time_offset, approx_scanline_time
 
 import numpy as np
 import math
@@ -1171,11 +1172,35 @@ def do_overlay_plot(
     url = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi'
     wmts = WebMapTileService(url)
     layer = layer_name
-    date = date.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+    # For Himawari, we can adjust the request time to account for the
+    # time it takes to collect the Full-disk image. This is only because
+    # Himawari AHI takes the full disk image on a regular time window,
+    # from N*10 to (N+1)*10 minutes after the hour.
+    # Note that worldview appears to match time requests by retrieving
+    # the most recent image before the requested time (e.g. rounding down
+    # to nearest 10 minute time step)
+    if layer.startswith('Himawari_AHI'):
+        rounded_minutes = 10 * (date.minute//10)
+        rounded_date = datetime.datetime(
+            date.year, date.month, date.day, date.hour, rounded_minutes, 0)
+        stime = rounded_date
+        etime = rounded_date + datetime.timedelta(minutes=10)
+        center_lat = (miny + maxy) / 2
+        scan_time = approx_scanline_time(stime, etime, center_lat, 'F')
+        # the fixed 5 minutes shifts the matching from the most recent 
+        # geo image before the time request (e.g. rounding down) to the
+        # nearest before or after (e.g. rounding)
+        time_offset = datetime.timedelta(minutes = 5) - (scan_time-stime)
+        date = date + time_offset
+
+    date_string = date.strftime('%Y-%m-%dT%H:%M:%SZ')
+    print('Requested time from Worldview: ', date_string)
+
     ax = plt.subplot(gs[0:-1, 3:-2], projection=ccrs.PlateCarree())
     ax.set_xlim((minx, maxx))
     ax.set_ylim((miny, maxy))
-    im = ax.add_wmts(wmts, layer, wmts_kwargs={'time': date})
+    im = ax.add_wmts(wmts, layer, wmts_kwargs={'time': date_string})
     txt = ax.text(minx, miny, wmts[layer].title, fontsize=10, color='wheat',
                   transform=ccrs.Geodetic())
     txt.set_path_effects([patheffects.withStroke(linewidth=5,
