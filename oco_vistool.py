@@ -1177,14 +1177,19 @@ def do_overlay_plot(
     wmts = WebMapTileService(url)
     layer = layer_name
 
-    # For Himawari, we can adjust the request time to account for the
-    # time it takes to collect the Full-disk image. This is only because
-    # Himawari AHI takes the full disk image on a regular time window,
-    # from N*10 to (N+1)*10 minutes after the hour.
+    # For Geostationary imagery, we can adjust the request time to account
+    # for the time it takes to collect the Full-disk image.
+    # This method assumes the full disk image is collected in a regular
+    # time window, from N*10 to (N+1)*10 minutes after the hour.
+    # This appears to be generally true for GOES-ABI and Himawari-AHI;
+    # the full disk imagery generally starts about 20-40 seconds after
+    # N*10 minutes after the hour, and ends 20-40 seconds before the end
+    # of the 10 minute window.
+    #
     # Note that worldview appears to match time requests by retrieving
     # the most recent image before the requested time (e.g. rounding down
     # to nearest 10 minute time step)
-    if layer.startswith('Himawari_AHI'):
+    if layer.startswith('Himawari_AHI') or layer.startswith('GOES'):
         rounded_minutes = 10 * (date.minute//10)
         rounded_date = datetime.datetime(
             date.year, date.month, date.day, date.hour, rounded_minutes, 0)
