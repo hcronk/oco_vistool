@@ -784,14 +784,7 @@ def nonworldview_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     inset_ax: the MPL axis object with the inset image
     """
 
-    # if there is overlay data present, use the OCO2 obs time
-    # to get the data.
-    # otherwise, use the datetime object
-    if ovr_d:
-        dt = datetime.datetime.utcfromtimestamp(np.mean(odat['time']))
-    else:
-        dt = cfg_d['datetime']
-
+    dt = cfg_d['datetime']
     center_lat = (cfg_d['lat_lr'] + cfg_d['lat_ul']) / 2.0
     
     # accessing the needed files depending on the geostation and files location; downloading if needed

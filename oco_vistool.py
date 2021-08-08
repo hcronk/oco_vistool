@@ -307,6 +307,10 @@ def _process_overlay_dict(input_dict):
     ovr_d['lat_shift'] = input_dict.get('lat_shift', 0.0)
     ovr_d['lon_shift'] = input_dict.get('lon_shift', 0.0)
 
+    # similarly, allow for a time shift to allow for manual fixing
+    # of timing errors with respect to the background image.
+    ovr_d['time_shift'] = input_dict.get('time_shift', 0.0)
+
     # another optional setting to extract a frame range before subsetting
     # (this helps with TG mode, where the soundings overlap, esp. for OCO-3.)
     # use the dict.get() method.
@@ -1474,7 +1478,10 @@ if __name__ == "__main__":
         make_background_image = ovr_d['make_background_image']
         # there can be an overlay dict, but it might have no data.
         if len(odat['time']) > 0:
+            # here, replace the datetime in the config with the mean
+            # time from the overlay data, adding the optional time shift.
             dt = datetime.datetime.utcfromtimestamp(np.mean(odat['time']))
+            dt = dt + datetime.timedelta(minutes = ovr_d['time_shift'])
             cfg_d['datetime'] = dt
     else:
         make_background_image = True
