@@ -39,6 +39,7 @@ import urllib.request
 
 from OCO2FileOps import *
 from default_cmaps import default_cmaps
+from geo_scan_time import compute_time_offset, approx_scanline_time
 
 import numpy as np
 import math
@@ -306,6 +307,10 @@ def _process_overlay_dict(input_dict):
     ovr_d['lat_shift'] = input_dict.get('lat_shift', 0.0)
     ovr_d['lon_shift'] = input_dict.get('lon_shift', 0.0)
 
+    # similarly, allow for a time shift to allow for manual fixing
+    # of timing errors with respect to the background image.
+    ovr_d['time_shift'] = input_dict.get('time_shift', 0.0)
+
     # another optional setting to extract a frame range before subsetting
     # (this helps with TG mode, where the soundings overlap, esp. for OCO-3.)
     # use the dict.get() method.
@@ -388,8 +393,9 @@ def process_config_dict(input_dict):
         related to the base image
 
     contents:
-    date: "YYYY-MM-DD"
-    straight_up_date: "YYYYMMDD"
+    date: "YYYY-MM-DD" or "YYYY-MM-DD HH:MM:SS" if specified
+    straight_up_date: "YYYYMMDD" or "YYYYMMDD_HHMMSS" if specified
+         this version of the date will be used in the auto output filenames
     lat_ul
     lon_ul
     lat_lr
@@ -434,7 +440,7 @@ def process_config_dict(input_dict):
     # note the use of dict.get(key, default) will effectively set default blank or None
     # values.
     cfg_d['date'] = input_dict['date']
-    cfg_d['straight_up_date'] = cfg_d['date'].replace("-", "")
+    cfg_d['straight_up_date'] = cfg_d['date'].replace("-", "").replace(":",'').replace(" ","_")
 
     cfg_d['geo_upper_left'] = input_dict['geo_upper_left']
     cfg_d['geo_lower_right'] = input_dict['geo_lower_right']
@@ -460,7 +466,7 @@ def process_config_dict(input_dict):
             valid_files_locs = ('local', 'aws',)
             cfg_d['files_loc'] = input_dict['files_loc']
             if (cfg_d['files_loc'] not in valid_files_locs):
-                raise ValueError('The files location for ' + cfg_d['sensor'] + ' is not valid. Choose from: ' + valid_files_locs)
+                raise ValueError('The files location for ' + cfg_d['sensor'] + ' is not valid. Choose from: ' + str(valid_files_locs))
             if ('data_home' in input_dict):
                 cfg_d['data_home'] = input_dict['data_home']
             else:
@@ -1170,11 +1176,40 @@ def do_overlay_plot(
     url = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi'
     wmts = WebMapTileService(url)
     layer = layer_name
-    date = date.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+    # For Geostationary imagery, we can adjust the request time to account
+    # for the time it takes to collect the Full-disk image.
+    # This method assumes the full disk image is collected in a regular
+    # time window, from N*10 to (N+1)*10 minutes after the hour.
+    # This appears to be generally true for GOES-ABI and Himawari-AHI;
+    # the full disk imagery generally starts about 20-40 seconds after
+    # N*10 minutes after the hour, and ends 20-40 seconds before the end
+    # of the 10 minute window.
+    #
+    # Note that worldview appears to match time requests by retrieving
+    # the most recent image before the requested time (e.g. rounding down
+    # to nearest 10 minute time step)
+    if layer.startswith('Himawari_AHI') or layer.startswith('GOES'):
+        rounded_minutes = 10 * (date.minute//10)
+        rounded_date = datetime.datetime(
+            date.year, date.month, date.day, date.hour, rounded_minutes, 0)
+        stime = rounded_date
+        etime = rounded_date + datetime.timedelta(minutes=10)
+        center_lat = (miny + maxy) / 2
+        scan_time = approx_scanline_time(stime, etime, center_lat, 'F')
+        # the fixed 5 minutes shifts the matching from the most recent 
+        # geo image before the time request (e.g. rounding down) to the
+        # nearest before or after (e.g. rounding)
+        time_offset = datetime.timedelta(minutes = 5) - (scan_time-stime)
+        date = date + time_offset
+
+    date_string = date.strftime('%Y-%m-%dT%H:%M:%SZ')
+    print('Requested time from Worldview: ', date_string)
+
     ax = plt.subplot(gs[0:-1, 3:-2], projection=ccrs.PlateCarree())
     ax.set_xlim((minx, maxx))
     ax.set_ylim((miny, maxy))
-    im = ax.add_wmts(wmts, layer, wmts_kwargs={'time': date})
+    im = ax.add_wmts(wmts, layer, wmts_kwargs={'time': date_string})
     txt = ax.text(minx, miny, wmts[layer].title, fontsize=10, color='wheat',
                   transform=ccrs.Geodetic())
     txt.set_path_effects([patheffects.withStroke(linewidth=5,
@@ -1394,18 +1429,24 @@ if __name__ == "__main__":
         auto_name = ""
     auto_name += cfg_d['straight_up_date']
 
-    auto_data_name = ovr_d['var_name_only'] + "_" + auto_name
-    auto_data_name += (ovr_d['version_file_tag']+
-                       ovr_d['qf_file_tag']+
-                       ovr_d['wl_file_tag']+
-                       ovr_d['fp_file_tag']+
-                       '.h5')
-    auto_plot_name = ovr_d['var_name_only'] + "_" + auto_name
-    auto_plot_name += (ovr_d['version_file_tag']+
-                       ovr_d['qf_file_tag']+
-                       ovr_d['wl_file_tag']+
-                       ovr_d['fp_file_tag']+
-                       '.png')
+    # construct auto output name from overlay data information if present
+    if ovr_d:
+        auto_data_name = ovr_d['var_name_only'] + "_" + auto_name
+        auto_data_name += (ovr_d['version_file_tag']+
+                           ovr_d['qf_file_tag']+
+                           ovr_d['wl_file_tag']+
+                           ovr_d['fp_file_tag']+
+                           '.h5')
+        auto_plot_name = ovr_d['var_name_only'] + "_" + auto_name
+        auto_plot_name += (ovr_d['version_file_tag']+
+                           ovr_d['qf_file_tag']+
+                           ovr_d['wl_file_tag']+
+                           ovr_d['fp_file_tag']+
+                           '.png')
+    else:
+        auto_data_name = auto_name
+        auto_plot_name = auto_name
+
     auto_background_name = auto_name + '.png'
 
     if cfg_d['sensor'] == 'Worldview':
@@ -1442,7 +1483,10 @@ if __name__ == "__main__":
         make_background_image = ovr_d['make_background_image']
         # there can be an overlay dict, but it might have no data.
         if len(odat['time']) > 0:
+            # here, replace the datetime in the config with the mean
+            # time from the overlay data, adding the optional time shift.
             dt = datetime.datetime.utcfromtimestamp(np.mean(odat['time']))
+            dt = dt + datetime.timedelta(minutes = ovr_d['time_shift'])
             cfg_d['datetime'] = dt
     else:
         make_background_image = True
