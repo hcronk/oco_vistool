@@ -57,26 +57,26 @@ def _get_AHI_times(file_list):
     return time_range
 
 
-def get_loc_ABI_files(datetime_utc, data_home, domain, platform, hour_offsets, band_list, glob_fstr, verbose):
+def get_loc_ABI_files(datetime_utc, data_home, domain, platform, hour_offsets, bands_list, glob_fstr, verbose):
     """
     Helper function for getting the local filesystem GOES ABI files.
     
     Returns a list with relevant filenames.
     
     inputs:
-    datetime_utc: datetime object for the needed 
-    data_home: origin background files directory
+    datetime_utc: datetime object for the needed timeslot
+    data_home: origin for the background files (by format: data_home/YYYY/...)
     domain: (C)ONUS or (F)ull disk
     platform: GOES-East (G16) or GOES-West (G17)
     hour_offsets: different offsets to iterate
-    band_list: list of needed bands
+    bands_list: list of needed bands
     glob_fstr: glob file format
     verbose: T/F - if details are needed
     """
     
     flists = collections.defaultdict(list)
     # iterating over all time options and adding the located files to the list
-    for hour_offset, band in itertools.product(hour_offsets, band_list):
+    for hour_offset, band in itertools.product(hour_offsets, bands_list):
         dt = datetime_utc - datetime.timedelta(hours=hour_offset)
 
         if verbose:
@@ -107,7 +107,7 @@ def get_loc_ABI_files(datetime_utc, data_home, domain, platform, hour_offsets, b
         flists[band] += located_files
     return flists
 
-def get_aws_ABI_files(datetime_utc, domain, platform, hour_offsets, band_list, glob_fstr, verbose):
+def get_aws_ABI_files(datetime_utc, domain, platform, hour_offsets, bands_list, glob_fstr, verbose):
     """
     Helper function for getting the AWS S3 GOES ABI filenames.
     
@@ -118,7 +118,7 @@ def get_aws_ABI_files(datetime_utc, domain, platform, hour_offsets, band_list, g
     domain: (C)ONUS or (F)ull disk
     platform: GOES-East (G16) or GOES-West (G17)
     hour_offsets: different offsets to iterate over
-    band_list: list of needed bands
+    bands_list: list of needed bands
     glob_fstr: glob file format
     verbose: T/F - if details are needed
     """
@@ -135,7 +135,7 @@ def get_aws_ABI_files(datetime_utc, domain, platform, hour_offsets, band_list, g
     flists = collections.defaultdict(list)
     
     # iterating over the different hours to locate the needed files
-    for hour_offset, band in itertools.product(hour_offsets, band_list):
+    for hour_offset, band in itertools.product(hour_offsets, bands_list):
         dt = datetime_utc - datetime.timedelta(hours=hour_offset)
         if verbose:
             print('Searching for data at hour: '+str(dt))
@@ -171,9 +171,9 @@ def download_aws_ABI_files(flist, g_bucket, data_home):
     Returns a list with downloaded local GOES ABI filenames.
     
     inputs:
-    flist: list of needed files
+    flist: list of needed files paths
     g_bucket: AWS S3 bucket to download the files from
-    data_home: data origin for the background files (by format: data_home/YYYY/...)
+    data_home: data destination for the background files (by format: data_home/ABI-Rad<domain>/...)
     """
     files = list()
     # iterating to and downloading the needed files from the S3 bucket (by the known path)
@@ -260,21 +260,16 @@ def get_ABI_files(datetime_utc, center_lat,
 
 def get_loc_AHI_files(datetime_utc, data_home, offsets, bands_list):
     """
-    Helper function for accessing the local Himawari background files.
-
-    Returns a list with local Himawari filenames.
+    Helper function for getting the local filesystem Himawari AHI files.
+    
+    Returns a list with relevant filenames.
     
     inputs:
-    data_home: origin directory for the background files
-    year: year of the requested timeslot (format: YYYY - string)
-    month: month of the requested timeslot (format: MM - string, 01-12)
-    day_m: needed day relative to the month (format: DD - string, 01-31)
-    day_y: needed day relative to the year (format: DDD - string, 001-365)
-    hour: needed hour in the day (format: hh - string, 00-23)
-    minutes: needed minute in the hour (format: mm - string, 00-59)
-    bands_list: list of band numbers needed to construct the true color image
-    """    
-
+    datetime_utc: datetime object for the needed timeslot
+    data_home: origin for the background files (by format: data_home/YYYY/...)
+    offsets: different time offsets to iterate
+    bands_list: list of needed bands
+    """   
     files = collections.defaultdict(list)
 
     # round down to nearest 10 minutes.
@@ -294,6 +289,7 @@ def get_loc_AHI_files(datetime_utc, data_home, offsets, bands_list):
                         '_B{0:02d}_FLDK_R??_S????.DAT'.format(band)))
         files_at_offset = glob.glob(glob_str)
         files_at_offset.sort()
+
         # if data is missing at this time offset, the files_at_offset list
         # will be empty. In that case, don't add to the list.
         if len(files_at_offset) > 0:
@@ -301,23 +297,17 @@ def get_loc_AHI_files(datetime_utc, data_home, offsets, bands_list):
 
     return files
 
-def get_aws_AHI_files(datetime_utc, data_home, offsets, bands_list):
+def get_aws_AHI_files(datetime_utc, offsets, bands_list):
     """
-    Helper function for accessing and downloading (if needed) the AWS Himawari background files.
+    Helper function for accessing the paths of relevant AWS Himawari background files.
 
-    Returns a list with AWS S3 Himawari local filenames.
+    Returns a dicttionary with AWS S3 Himawari file paths (key: band number, value: list of lists of filepaths by time offset).
     
     inputs:
-    data_home: origin directory for the background files
-    year: year of the requested timeslot (format: YYYY - string)
-    month: month of the requested timeslot (format: MM - string, 01-12)
-    day_m: needed day relative to the month (format: DD - string, 01-31)
-    hour: needed hour in the day (format: hh - string, 00-23)
-    minutes: needed minute in the hour (format: mm - string, 00-59)
-    bands_list: list of band numbers needed to construct the true color image
+    datetime_utc: datetime object for the needed timeslot
+    offsets: different time offsets to iterate
+    bands_list: list of needed bands
     """
-    
-    # connecting to the S3 Himawari bucket
     files = collections.defaultdict(list)
 
     # round down to nearest 10 minutes.
@@ -325,50 +315,75 @@ def get_aws_AHI_files(datetime_utc, data_home, offsets, bands_list):
     rounded_datetime_utc = datetime.datetime(
         datetime_utc.year, datetime_utc.month, datetime_utc.day,
         datetime_utc.hour, rounded_minutes, 0)
-    
+
+    # connecting to the S3 Himawari bucket
     aws_keys = pd.read_csv('Keys.csv', header = 0)
     s3 = boto3.resource('s3', aws_access_key_id = aws_keys['aws_access_key_id'].values[0], aws_secret_access_key = aws_keys['aws_secret_access_key'].values[0])
     hima_bucket = s3.Bucket('noaa-himawari8')
-    # access and record all the background files by the known path format
-    strftime_template = 'AHI-L1b-FLDK/%Y/%Y_%m_%d_%j/%H%M/HS_H08_%Y%m%d_%H%M'
+    
+    # known AWS Hima filepath format
+    strftime_template = 'AHI-L1b-FLDK/%Y/%m/%d/%H%M/'
+
     for offset, band in itertools.product(offsets, bands_list):
         offset_dt = rounded_datetime_utc + datetime.timedelta(minutes=offset)
+
+        # access the background files by the known path format
+        hima_files = hima_bucket.objects.filter(Prefix=offset_dt.strftime(strftime_template))
+
         # searches for files with the selected band, at any resolution (R??)
         # and for all segments (S????)
-        glob_str = os.path.join(
-            data_home, (offset_dt.strftime(strftime_template) +
-                        '_B{0:02d}_FLDK_R??_S????.DAT'.format(band)))
-        files_at_offset = glob.glob(glob_str)
+        glob_str = offset_dt.strftime(strftime_template + 'HS_H08_%Y%m%d_%H%M') + '_B{0:02d}_FLDK_R??_S????.DAT.bz2'.format(band)
+
+        # record the AWS files by the needed format
+        keys = list()
+        for hima_file in hima_files:
+            keys.append(hima_file.key)
+            
+        files_at_offset = fnmatch.filter(keys, glob_str)
         files_at_offset.sort()
+           
         # if data is missing at this time offset, the files_at_offset list
         # will be empty. In that case, don't add to the list.
         if len(files_at_offset) > 0:
             files[band].append(files_at_offset)
 
-    return files        
-    hima_path = 'AHI-L1b-FLDK/' + year + '/' + month + '/' + day_m +'/' + hour + minutes + '/'
-    hima_files = hima_bucket.objects.filter(Prefix=hima_path)
+    return files, hima_bucket    
+
+def download_aws_AHI_files(flist, hima_bucket, data_home):
+    """
+    Helper function for downloading and decompressing the AWS Himawari files given their AWS S3 paths.
+
+    Returns a list with downloaded local Himawari AHI filenames.
     
-    # downloading and recording the needed Himawari files by known AWS paths
-    for hima_file in hima_files:
-        for band in bands_list:
-            if '_B0' + str(band) + '_' in hima_file.key:
-                if not (os.path.isfile(data_home + '/' + hima_file.key[:-4]) or os.path.isfile(data_home + '/' + hima_file.key)):
-                    if not os.path.isdir(os.path.dirname(data_home + '/' + hima_file.key)):
-                        os.makedirs(os.path.dirname(data_home + '/' + hima_file.key))
-                    hima_bucket.download_file(hima_file.key, data_home + '/' + hima_file.key)
-                else:
-                    files.extend(glob.glob(data_home + '/' + hima_file.key[:-4]))
-    # decompressing the downloaded files
-    for filename in glob.glob(data_home + '/' + hima_path + '*.bz2'):
-        zipfile = bz2.BZ2File(filename)
-        data = zipfile.read()
-        new_filename = filename[:-4] 
-        open(new_filename, 'wb').write(data)
-        os.remove(filename)
-        files.extend(glob.glob(new_filename))
-    files = list(set(files))
-    return files
+    inputs:
+    flist: list of needed AWS file paths
+    hima_bucket: AWS S3 bucket to download the files from
+    data_home: data destination for the background files (by format: data_home/AHI-FLDK/...)
+    """
+    files = list()
+
+    # iterating to and downloading the needed files from the S3 bucket (by the known path)
+    for needed_path in flist:
+        hima_files = hima_bucket.objects.filter(Prefix=needed_path)
+        # downloading and recording the needed Himawari files by known AWS paths
+        for hima_file in hima_files:
+            if not (os.path.isfile(data_home + '/' + hima_file.key[:-4]) or os.path.isfile(data_home + '/' + hima_file.key)):
+                if not os.path.isdir(os.path.dirname(data_home + '/' + hima_file.key)):
+                    os.makedirs(os.path.dirname(data_home + '/' + hima_file.key))
+                hima_bucket.download_file(hima_file.key, data_home + '/' + hima_file.key)
+            else:
+                files.extend(glob.glob(data_home + '/' + hima_file.key[:-4]))
+                
+        # decompressing the downloaded files
+        for filename in glob.glob(data_home + '/' + needed_path):
+            zipfile = bz2.BZ2File(filename)
+            data = zipfile.read()
+            new_filename = filename[:-4] 
+            open(new_filename, 'wb').write(data)
+            os.remove(filename)
+            files.extend(glob.glob(new_filename))
+    flist = list(set(files))
+    return flist
 
 def get_AHI_files(datetime_utc, center_lat, files_loc, data_home):
     """
@@ -382,28 +397,13 @@ def get_AHI_files(datetime_utc, center_lat, files_loc, data_home):
     files_loc: if the background images are local or on AWS
     data_home: origin directory for the background files 
     """
-    
-#     # Constructing the files path by the known format
-#     year = str(datetime_utc.year)
-#     month = str(datetime_utc.month).zfill(2)
-#     day_m = str(datetime_utc.day).zfill(2)
-#     day_y = str(datetime_utc.timetuple().tm_yday).zfill(3)
-#     hour = str(datetime_utc.hour).zfill(2)
-#     orig_minutes = datetime_utc.minute
-#     seconds = datetime_utc.second
-#     minutes = str(int(round(orig_minutes + seconds/60, -1))%60).zfill(2)
 
     bands_list = [1, 2, 3, 4]
     offsets = (-10, 0, 10)
     
-    # accessing the files from AWS
+    # accessing the Himawari files paths and bucket from AWS
     if (files_loc == 'aws'):
-        # TODO: this function call should be modified to get only the
-        # file lists, but not do the downloading.
-        # files should be a dictionary, with keys equal to the bands_list.
-        # each value should be a list (one per offset) of lists (the segment
-        # files for that time offset). The
-        files = get_aws_AHI_files(datetime_utc, data_home, offsets, bands_list)
+        files, hima_bucket = get_aws_AHI_files(datetime_utc, offsets, bands_list)
 
     # accessing the local files
     else:
@@ -430,9 +430,11 @@ def get_AHI_files(datetime_utc, center_lat, files_loc, data_home):
         k = np.argmin(np.abs(time_offsets_all))
         flist.extend(files[band][k])
         time_offset.append(time_offsets_all[k])
+    
 
+    # downloading the recorded/accessed files from AWS
     if (files_loc == 'aws'):
-        download_aws_AHI_files(flist, g_bucket, data_home)
+        flist = download_aws_AHI_files(flist, hima_bucket, data_home)
 
     return flist, time_offset
 
