@@ -1,9 +1,9 @@
 # oco_vistool.py
 
-The purpose of this script is to pull different RGB images (depending on the user's choice from Encoding.csv) from Worldview using the NASA GIBS API and overlay various OCO-2 data fields for 
-case study analysis in support of OCO-2 cloud and aerosol screening validation.
+The purpose of this script is to pull different RGB images (depending on the user's choice from Encoding.csv) from Worldview using the NASA GIBS API and overlay various OCO-2/3 data fields for 
+case study analysis in support of OCO-2/3 cloud and aerosol screening validation.
 
-It can be used as a command line tool to plot any data in the OCO-2 CO2 or SIF Lite file, filtered by warn level, quality flag, and/or footprint number where applicable.  
+It can be used as a command line tool to plot any data in the OCO-2/3 CO2 or SIF Lite file, filtered by warn level, quality flag, and/or footprint number where applicable.  
 It can also be called as a function from within another Python program for expanded use with other datasets.
 
 ## GETTING STARTED
@@ -17,24 +17,49 @@ It can also be called as a function from within another Python program for expan
    and comparing files.  
 
 2) Make sure you have the necessary system and Python requirements.
-    #### Option 1: DIY   
+    #### Option 1: Conda Environment 
 
-    ##### Python requirements:
-    Python 2.7 or higher
-      
-    For those new to Python, it is easiest to get the Anaconda distribution: 
-    https://www.continuum.io/download and then use the Anaconda utility conda 
-    to fetch and install packages.
-
-
-    The conda installs required on top of what comes with Anaconda 5.2 for both Python 2.7 and Python 3.6 are as follows:
-    + conda install -c conda-forge cartopy
-    + conda install -c conda-forge ncurses
-    + conda install -c conda-forge hdf5
-    + conda install -c conda-forge future
+    ##### Miniconda Installation Instructions:
+    Linux: https://www.cira.colostate.edu/wiki/miniconda-python-distribution-on-linux/
+    Mac: https://www.cira.colostate.edu/wiki/miniconda-python-distribution-on-mac/
+    Windows: https://www.cira.colostate.edu/wiki/miniconda-python-distribution-on-windows/
+    
+    From the cloned directory, run `conda env create -f environment.yml` to create the conda environment. To activate the environment, use `conda activate oco_vistool` and to deactivate, use `conda deactivate`. More information about working with conda environments can be found at https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
 
     #### Option 2: Docker Container
-    Dockerfiles and docker-compose files to set up an appropriate Python 2.7 or Python 3.6 container are included in the repo    
+    The Dockerfile included in the repository can be used to create an appropriate Docker image and container environment.
+    
+    ##### Building the image
+    Build the image using the command `docker build -t oco_vistool:1.0 .`
+    Although the tag (`-t`) is optional, it will assign a name and version to
+    the resulting image which will make it easily locatable and also provide
+    a mechanism to have multiple versions available for testing and using
+    upgrades. Note the `.` assumes you are working in the directory that
+    contains the Dockerfile. To provide an alternate path, trade the period
+    out for `-f /path/to/the/Dockerfile`
+
+    ##### Creating a container from the image
+    Although the default Docker behavior will create a container that runs
+    as root, it is best practice to declare your own user when you create
+    the container to avoid messy security issues. For compatability with
+    the host machine, you can use your user and preferred group ids in the
+    container, or if compatability is not an issue, you may simply create a new user:group identification for the container. To get your user and group id
+    on the host (provided that you are working in a linux-like environment), use
+    `id -u [user name]` and `id -g [group name]`.
+
+    To create and run a container from the image, use
+    `docker run -it --name oco_vistool -u uid:gid -v /path/to/data/on/host:/path/to/data/in/the/container oco_vistool:1.0`,
+    adding -v flags before the image name as necessary to provide any data mounts
+    needed for the code to be able to access the necessary input data.
+    Again, the `--name` is optional but makes the container easily locatable.
+
+    ### Entering the container
+    The `-it` flag in the `docker build` command will start an interactive
+    session within the container, where you will be dropped in the
+    `/ECO1280_int_scripts` directory where the conversion scripts are located.
+    If the container is stopped (you can check by running `docker ps`),
+    start it by running `docker start oco_vistool` and then enter it
+    using `docker exec -it oco_vistool /bin/bash`.    
 
 3) Test run from the command line  
    `python oco_vistool.py`
