@@ -20,9 +20,9 @@ It can also be called as a function from within another Python program for expan
     #### Option 1: Conda Environment 
 
     ##### Miniconda Installation Instructions:
-    Linux: https://www.cira.colostate.edu/wiki/miniconda-python-distribution-on-linux/
-    Mac: https://www.cira.colostate.edu/wiki/miniconda-python-distribution-on-mac/
-    Windows: https://www.cira.colostate.edu/wiki/miniconda-python-distribution-on-windows/
+    - Linux: https://www.cira.colostate.edu/wiki/miniconda-python-distribution-on-linux/
+    - Mac: https://www.cira.colostate.edu/wiki/miniconda-python-distribution-on-mac/
+    - Windows: https://www.cira.colostate.edu/wiki/miniconda-python-distribution-on-windows/
     
     From the cloned directory, run `conda env create -f environment.yml` to create the conda environment. To activate the environment, use `conda activate oco_vistool` and to deactivate, use `conda deactivate`. More information about working with conda environments can be found at https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
 
@@ -53,7 +53,7 @@ It can also be called as a function from within another Python program for expan
     needed for the code to be able to access the necessary input data.
     Again, the `--name` is optional but makes the container easily locatable.
 
-    ### Entering the container
+    ##### Entering the container
     The `-it` flag in the `docker build` command will start an interactive
     session within the container, where you will be dropped in the
     `/ECO1280_int_scripts` directory where the conversion scripts are located.
