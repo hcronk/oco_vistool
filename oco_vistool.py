@@ -46,6 +46,9 @@ import pandas as pd
 
 from matplotlib import patheffects
 from owslib.wmts import WebMapTileService
+import cartopy
+cartopy.config["downloaders"][("shapefiles", "natural_earth")].url_template = (
+      "https://naturalearth.s3.amazonaws.com/{resolution}_{category}/ne_{resolution}_{name}.zip")
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import shapefile
@@ -1061,11 +1064,13 @@ def do_overlay_plot(
     miny = geo_lower_right[0]
     maxx = geo_lower_right[1]
 
-    deltax = maxx - minx
-    deltay = maxy - miny
+    #deltax = maxx - minx
+    #deltay = maxy - miny
+    
+    #aspect_ratio = deltax/deltay
 
-    fig_y = 7.1
-    fig_x = fig_y * deltax / deltay
+    #fig_y = 7.1
+    #fig_x = fig_y * aspect_ratio
     
     #Check if color is single or map
     if cmap in plt.colormaps():
@@ -1077,8 +1082,8 @@ def do_overlay_plot(
         cmap = 'red'
         color_or_cmap = "color"
 
-    if color_or_cmap == "cmap":
-        fig_x += 2
+    #if color_or_cmap == "cmap":
+    #    fig_x += 2
 
     # note - if var_vals.shape is zero, the var_lims are not needed, since
     # the colorbar and scatter or polygon collection will not be plotted.
@@ -1095,24 +1100,39 @@ def do_overlay_plot(
 
     ### Plot the image ###
     if var_vals.shape:
-        fig = plt.figure(figsize = (fig_x + 1, fig_y), dpi = 150)
+        #fig = plt.figure(figsize = (fig_x + 1, fig_y), dpi = 150)
+        fig = plt.figure(figsize = (7, 8), dpi = 150)
     else:
-        fig = plt.figure(figsize = (fig_x, fig_y), dpi = 150)
+        fig = plt.figure(figsize = (6, 8), dpi = 150)
 
-    gs =  gridspec.GridSpec(16, 16)
+    #gs =  gridspec.GridSpec(16, 16)
+    #Use 3 rows by 1 column and set ratio width here, rather than handling the ratio in 16x16 space
+    #Add an if to handle non-overlay
+    #Ratios will change as figsize changes? Don't let figsize be dynamic?
+
+    gs = fig.add_gridspec(1, 3, width_ratios=[1,5,0.4])
     
     url = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi'
     wmts = WebMapTileService(url)
     layer = layer_name
 
-    ax = plt.subplot(gs[0:-1, 3:-2], projection=ccrs.PlateCarree())
+    #ax = plt.subplot(gs[0:-1, 3:-2], projection=ccrs.PlateCarree())
+    ax = fig.add_subplot(gs[0,1], projection=ccrs.PlateCarree())
     ax.set_xlim((minx, maxx))
     ax.set_ylim((miny, maxy))
+
     im = ax.add_wmts(wmts, layer, wmts_kwargs={'time': date})
-    txt = ax.text(minx, miny, wmts[layer].title, fontsize=10, color='wheat',
-                  transform=ccrs.Geodetic())
+    transform = ccrs.PlateCarree()._as_mpl_transform(ax)
+    txt = ax.annotate(wmts[layer].title, (minx, miny), xycoords=transform, fontsize=10, color='wheat',
+                      xytext=(20,-50), textcoords="offset pixels")
     txt.set_path_effects([patheffects.withStroke(linewidth=5,
                                                  foreground='black')])
+
+    ax.annotate(str(minx), (minx, miny), xycoords=transform, fontsize=9, fontweight="bold", xytext=(-30,-25), textcoords="offset pixels")
+    ax.annotate(str(maxx), (maxx, miny), xycoords=transform, fontsize=9, fontweight="bold", xytext=(-25,-25), textcoords="offset pixels")
+    ax.annotate(str(miny), (minx, miny), xycoords=transform, fontsize=9, fontweight="bold", xytext=(-50,0), textcoords="offset pixels")
+    ax.annotate(str(maxy), (minx, maxy), xycoords=transform, fontsize=9, fontweight="bold", xytext=(-50,-12), textcoords="offset pixels")
+
 
     ax.coastlines(resolution = '10m', color = 'white', linewidth = 1)
     ax.add_feature(states_provinces, edgecolor='black', linewidth=1)
@@ -1133,24 +1153,6 @@ def do_overlay_plot(
 
     if interest_pt is not None:
         ax.plot(interest_pt[1], interest_pt[0], 'w*', markersize=10, transform=ccrs.Geodetic())
-
-    ylocs, ylabels = plt.yticks()
-    xlocs, xlabels = plt.xticks()
-
-    ax_minlat = plt.subplot(gs[-1, 1])
-    ax_maxlat = plt.subplot(gs[0, 1])
-    ax_minlon = plt.subplot(gs[-1, 3])
-    ax_maxlon = plt.subplot(gs[-1, -2])
-
-    ax_minlat.axis('off')
-    ax_maxlat.axis('off')
-    ax_maxlon.axis('off')
-    ax_minlon.axis('off')
-
-    ax_minlat.set_title(str("%.1f" % ylocs[0]), horizontalalignment='left', verticalalignment='bottom', fontsize=10, fontweight='bold')
-    ax_maxlat.set_title(str("%.1f" % ylocs[-1]), horizontalalignment='left', verticalalignment='top', fontsize=10, fontweight='bold')
-    ax_minlon.set_title(str("%.1f" % xlocs[0]), horizontalalignment='center', verticalalignment='top', fontsize=10, fontweight='bold')
-    ax_maxlon.set_title(str("%.1f" % xlocs[-1]), horizontalalignment='right', verticalalignment='top', fontsize=10, fontweight='bold')
     
     patches = []
 
@@ -1190,7 +1192,8 @@ def do_overlay_plot(
         else:
             ax.scatter(var_lon, var_lat, c=var_vals,
                        cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
-        cb_ax1 = plt.subplot(gs[0:-1, -1])
+        #cb_ax1 = plt.subplot(gs[0:-1, -1])
+        cb_ax1 = plt.subplot(gs[0, 2]) 
         norm1 = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
         cmap_obj1 = mpl.cm.get_cmap(cmap)
         cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap_obj1, orientation = 'vertical', norm = norm1)
@@ -1232,35 +1235,39 @@ def do_overlay_plot(
                          size='x-small')
 
 
-    # during testing, it appears that sometimes the scatter
-    # could cause MPL to shift the axis range - I think because one
-    # scatter point goes slightly out of the display range.
-    # so, here force it back to the original domain.
-    img_extent = (minx, maxx, miny, maxy)
-    ax.axis(img_extent)
+#    # during testing, it appears that sometimes the scatter
+    ## could cause MPL to shift the axis range - I think because one
+    ## scatter point goes slightly out of the display range.
+    ## so, here force it back to the original domain.
+    ##img_extent = (minx, maxx, miny, maxy)
+    ##ax.axis(img_extent)
 
-    inset_extent_x = [minx, maxx]
-    inset_extent_y = [miny, maxy]
+    #inset_extent_x = [minx, maxx]
+    #inset_extent_y = [miny, maxy]
+    
+    ##This may be messing things up and putting the box on the other side of the world
+    ##Try not setting the extent and test out
+    #inset_extent_x = [x + 360 if x < 0 else x for x in inset_extent_x]
+    #inset_extent_y = [y + 180 if y < 0 else y for y in inset_extent_y]
 
-    inset_extent_x = [x + 360 if x < 0 else x for x in inset_extent_x]
-    inset_extent_y = [y + 180 if y < 0 else y for y in inset_extent_y]
+    #inset_extent_x[0] -= 20
+    #inset_extent_y[0] -= 20
+    #inset_extent_x[1] += 20
+    #inset_extent_y[1] += 20
 
-    inset_extent_x[0] -= 20
-    inset_extent_y[0] -= 20
-    inset_extent_x[1] += 20
-    inset_extent_y[1] += 20
+    #inset_extent_x = [x - 360 if x > 180 else x for x in inset_extent_x]
+    #inset_extent_y = [y - 180 if y > 90 else y for y in inset_extent_y]
 
-    inset_extent_x = [x - 360 if x > 180 else x for x in inset_extent_x]
-    inset_extent_y = [y - 180 if y > 90 else y for y in inset_extent_y]
+    ##inset_ax = plt.subplot(gs[7:9, 0:3], projection=ccrs.PlateCarree())
+    #inset_ax = plt.subplot(gs[0,0], projection=ccrs.PlateCarree())
+    #inset_ax.set_extent([inset_extent_x[0], inset_extent_x[1], inset_extent_y[0], inset_extent_y[1]])
 
-    inset_ax = plt.subplot(gs[7:9, 0:3], projection=ccrs.PlateCarree())
-    inset_ax.set_extent([inset_extent_x[0], inset_extent_x[1], inset_extent_y[0], inset_extent_y[1]])
-
-    inset_ax.coastlines()
-    inset_ax.add_feature(cfeature.LAKES, edgecolor='black', facecolor='none')
-    extent_box = sgeom.box(minx, miny, maxx, maxy)
-    inset_ax.add_geometries([extent_box], ccrs.PlateCarree(), color='none', edgecolor='red')
-    inset_ax.set_aspect('auto')
+    #inset_ax.coastlines()
+    #inset_ax.add_feature(cfeature.LAKES, edgecolor='black', facecolor='none')
+    ##Use plot and just put a box? Matplotlib patches with the transform
+    #extent_box = sgeom.box(minx, miny, maxx, maxy)
+    #inset_ax.add_geometries([extent_box], ccrs.PlateCarree(), color='none', edgecolor='red')
+    #inset_ax.set_aspect("auto")
 
     fig.savefig(out_plot, dpi=150, bbox_inches='tight')
     print("\nFigure saved at "+out_plot)
