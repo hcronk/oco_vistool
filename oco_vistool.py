@@ -1110,7 +1110,7 @@ def do_overlay_plot(
     #Add an if to handle non-overlay
     #Ratios will change as figsize changes? Don't let figsize be dynamic?
 
-    gs = fig.add_gridspec(1, 3, width_ratios=[1,5,0.4])
+    gs = fig.add_gridspec(1, 3, width_ratios=[1.5,6,0.4])
     
     url = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi'
     wmts = WebMapTileService(url)
@@ -1124,7 +1124,7 @@ def do_overlay_plot(
     im = ax.add_wmts(wmts, layer, wmts_kwargs={'time': date})
     transform = ccrs.PlateCarree()._as_mpl_transform(ax)
     txt = ax.annotate(wmts[layer].title, (minx, miny), xycoords=transform, fontsize=10, color='wheat',
-                      xytext=(20,-50), textcoords="offset pixels")
+                      xytext=(0,-50), textcoords="offset pixels")
     txt.set_path_effects([patheffects.withStroke(linewidth=5,
                                                  foreground='black')])
 
@@ -1235,39 +1235,18 @@ def do_overlay_plot(
                          size='x-small')
 
 
-#    # during testing, it appears that sometimes the scatter
-    ## could cause MPL to shift the axis range - I think because one
-    ## scatter point goes slightly out of the display range.
-    ## so, here force it back to the original domain.
-    ##img_extent = (minx, maxx, miny, maxy)
-    ##ax.axis(img_extent)
 
-    #inset_extent_x = [minx, maxx]
-    #inset_extent_y = [miny, maxy]
+    inset_ax = plt.subplot(gs[0,0], projection=ccrs.PlateCarree())
+    inset_ax.set_extent([minx - 10, maxx + 10, miny - 10, maxy + 10])
+
+    inset_ax.coastlines()
+    inset_ax.add_feature(cfeature.LAKES, edgecolor='black', facecolor='none')
     
-    ##This may be messing things up and putting the box on the other side of the world
-    ##Try not setting the extent and test out
-    #inset_extent_x = [x + 360 if x < 0 else x for x in inset_extent_x]
-    #inset_extent_y = [y + 180 if y < 0 else y for y in inset_extent_y]
-
-    #inset_extent_x[0] -= 20
-    #inset_extent_y[0] -= 20
-    #inset_extent_x[1] += 20
-    #inset_extent_y[1] += 20
-
-    #inset_extent_x = [x - 360 if x > 180 else x for x in inset_extent_x]
-    #inset_extent_y = [y - 180 if y > 90 else y for y in inset_extent_y]
-
-    ##inset_ax = plt.subplot(gs[7:9, 0:3], projection=ccrs.PlateCarree())
-    #inset_ax = plt.subplot(gs[0,0], projection=ccrs.PlateCarree())
-    #inset_ax.set_extent([inset_extent_x[0], inset_extent_x[1], inset_extent_y[0], inset_extent_y[1]])
-
-    #inset_ax.coastlines()
-    #inset_ax.add_feature(cfeature.LAKES, edgecolor='black', facecolor='none')
-    ##Use plot and just put a box? Matplotlib patches with the transform
-    #extent_box = sgeom.box(minx, miny, maxx, maxy)
-    #inset_ax.add_geometries([extent_box], ccrs.PlateCarree(), color='none', edgecolor='red')
-    #inset_ax.set_aspect("auto")
+    patches=[]
+    rect = mpatches.Rectangle((minx, miny), width=(abs(maxx-minx)), height=(abs(maxy-miny)))
+    patches.append(rect)
+    p = mpl.collections.PatchCollection(patches, edgecolor='red', facecolor="None")
+    inset_ax.add_collection(p)
 
     fig.savefig(out_plot, dpi=150, bbox_inches='tight')
     print("\nFigure saved at "+out_plot)
