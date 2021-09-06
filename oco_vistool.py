@@ -1096,28 +1096,30 @@ def do_overlay_plot(
         name='admin_1_states_provinces_lines',
         scale='50m',
         facecolor='none')
+    
+    deltax = maxx - minx
+    deltay = maxy - miny
 
+    fig_y = 5 * deltay / deltax
+    fig_x = 5 * deltax / deltay
+
+    print(fig_x, fig_y)
 
     ### Plot the image ###
     if var_vals.shape:
-        #fig = plt.figure(figsize = (fig_x + 1, fig_y), dpi = 150)
-        fig = plt.figure(figsize = (7, 8), dpi = 150)
+        fig = plt.figure(figsize = (fig_x + 1, fig_y), dpi = 150)
+        #fig = plt.figure(figsize = (7, 8), dpi = 150)
+        gs = fig.add_gridspec(3, 3, width_ratios=[2,6,1], height_ratios=[0.75,7.5,0.75])
     else:
-        fig = plt.figure(figsize = (6, 8), dpi = 150)
-
-    #gs =  gridspec.GridSpec(16, 16)
-    #Use 3 rows by 1 column and set ratio width here, rather than handling the ratio in 16x16 space
-    #Add an if to handle non-overlay
-    #Ratios will change as figsize changes? Don't let figsize be dynamic?
-
-    gs = fig.add_gridspec(1, 3, width_ratios=[1.5,6,0.4])
+        #fig = plt.figure(figsize = (6, 8), dpi = 150)
+        fig = plt.figure(figsize = (fig_x, fig_y), dpi = 150)
+        gs = fig.add_gridspec(3, 2, width_ratios=[2,6], height_ratios=[0.75,7.5])
     
     url = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi'
     wmts = WebMapTileService(url)
     layer = layer_name
 
-    #ax = plt.subplot(gs[0:-1, 3:-2], projection=ccrs.PlateCarree())
-    ax = fig.add_subplot(gs[0,1], projection=ccrs.PlateCarree())
+    ax = fig.add_subplot(gs[1,1], projection=ccrs.PlateCarree())
     ax.set_xlim((minx, maxx))
     ax.set_ylim((miny, maxy))
 
@@ -1192,8 +1194,8 @@ def do_overlay_plot(
         else:
             ax.scatter(var_lon, var_lat, c=var_vals,
                        cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
-        #cb_ax1 = plt.subplot(gs[0:-1, -1])
-        cb_ax1 = plt.subplot(gs[0, 2]) 
+        inner_cb_grid = gs[1, 2].subgridspec(3, 3, width_ratios=[0.5,1,0.5], height_ratios=[0.25,1,0.25])
+        cb_ax1 = plt.subplot(inner_cb_grid[1, 1]) 
         norm1 = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
         cmap_obj1 = mpl.cm.get_cmap(cmap)
         cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap_obj1, orientation = 'vertical', norm = norm1)
@@ -1236,7 +1238,7 @@ def do_overlay_plot(
 
 
 
-    inset_ax = plt.subplot(gs[0,0], projection=ccrs.PlateCarree())
+    inset_ax = plt.subplot(gs[1,0], projection=ccrs.PlateCarree())
     inset_ax.set_extent([minx - 10, maxx + 10, miny - 10, maxy + 10])
 
     inset_ax.coastlines()
@@ -1250,9 +1252,6 @@ def do_overlay_plot(
 
     fig.savefig(out_plot, dpi=150, bbox_inches='tight')
     print("\nFigure saved at "+out_plot)
-    
-    #print("code directory in subroutine:", code_dir)
-    #os.remove(code_dir+'/intermediate_RGB.tif')
 
 
 ### Static Definitions
