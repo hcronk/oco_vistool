@@ -89,6 +89,7 @@ def get_loc_ABI_files(datetime_utc, data_home, domain, platform, hour_offsets, b
         # four "?" for the MMSS, and then one more for a character at
         # the end, I am not sure about (frac second?)
         stimestamp = dt.strftime('%Y%j%H') + '????' + '?'
+        #print(data_home)
         ddir = os.path.join(data_home, y_dir, ymdd_dir,
                             'abi', 'L1b', 'Rad'+domain)
         if verbose:
