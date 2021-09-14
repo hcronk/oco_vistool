@@ -756,6 +756,8 @@ def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
 
     try:
         #print(h5[ovr_d['var_name']].attrs['Units'][0])
+        #AJM: we probably need a better solution here. What would work for
+        # any version of python and h5py?
         dd['data_units'] = h5[ovr_d['var_name']].attrs['Units'][0]#.decode()
     except KeyError:
         # probably need a better solution here?
@@ -1265,8 +1267,7 @@ def do_overlay_plot(
         ax2 = plt.subplot(gs[-1, 2:-2])
         cb2 = mpl.colorbar.ColorbarBase(ax2, cmap=cmap2, norm=norm2, orientation = 'horizontal',
                                         ticks = ticks_list + [bounds_list[0], bounds_list[-1]])
-        
-        
+                
         for t in cb2.ax.xaxis.get_ticklabels():
             t.set_weight("bold")
             t.set_fontsize(8)
@@ -1367,9 +1368,7 @@ def do_overlay_plot(
     fig.savefig(out_plot, dpi=150, bbox_inches='tight')
     print("\nFigure saved at "+out_plot)
 
-
 ### Static Definitions
-
 code_dir = os.path.dirname(os.path.realpath(__file__))
 # dataframe with layers' names and their codes (generated for easier use by us)
 layers_encoding = pd.read_csv(code_dir + '/Encoding.csv', header = 0)
