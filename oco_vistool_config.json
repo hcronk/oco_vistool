@@ -1,4 +1,3 @@
-
 {
 	"date": "2016-07-27",
 	"geo_upper_left": [41.5, -78.5],
@@ -20,8 +19,8 @@
 	},
 	"ground_site": [40.7934, -77.86],
 	"city_labels": "", 
-	"out_plot_dir": "",
+	"out_plot_dir": "./out",
 	"out_plot_name": "",
-	"out_data_dir": "",
+	"out_data_dir": "./out",
 	"out_data_name": ""
 }

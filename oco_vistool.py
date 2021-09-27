@@ -47,6 +47,9 @@ import pandas as pd
 
 from matplotlib import patheffects
 from owslib.wmts import WebMapTileService
+import cartopy
+cartopy.config["downloaders"][("shapefiles", "natural_earth")].url_template = (
+      "https://naturalearth.s3.amazonaws.com/{resolution}_{category}/ne_{resolution}_{name}.zip")
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import shapefile
@@ -1473,6 +1476,8 @@ if __name__ == "__main__":
 
     # construct filenames for the plot and optional h5 output file.
     out_plot_fullpath = os.path.join(cfg_d['out_plot_dir'], out_plot_name)
+    if not os.path.isdir(os.path.dirname(out_plot_fullpath)):
+        os.makedirs(os.path.dirname(out_plot_fullpath))
     out_data_fullpath = os.path.join(cfg_d['out_data_dir'], out_data_name)
     out_background_fullpath = os.path.join(cfg_d['out_plot_dir'], out_background_name)
 
