@@ -1479,7 +1479,12 @@ if __name__ == "__main__":
     if (out_plot_fullpath != out_plot_name):
         if not os.path.isdir(os.path.dirname(out_plot_fullpath)):
             os.makedirs(os.path.dirname(out_plot_fullpath))
+            
     out_data_fullpath = os.path.join(cfg_d['out_data_dir'], out_data_name)
+    if (out_data_fullpath != out_data_name):
+        if not os.path.isdir(os.path.dirname(out_data_fullpath)):
+            os.makedirs(os.path.dirname(out_data_fullpath))
+            
     out_background_fullpath = os.path.join(cfg_d['out_plot_dir'], out_background_name)
 
     # if there is no overlay data present, or the 'background image'
