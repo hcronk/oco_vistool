@@ -15,3 +15,8 @@ VIIRS_SNPP_Cloud_Top_Height_Day,12
 GOES-East_ABI_Band2_Red_Visible_1km,13
 GOES-West_ABI_Band2_Red_Visible_1km,14
 Himawari_AHI_Band3_Red_Visible_1km,15
+GOES-East_ABI_Band13_Clean_Infrared,16
+GOES-West_ABI_Band13_Clean_Infrared,17
+Himawari_AHI_Band13_Clean_Infrared,18
+GOES-East_ABI_GeoColor,19
+GOES-West_ABI_GeoColor,20
