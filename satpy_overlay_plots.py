@@ -3,13 +3,15 @@ satpy_overlay_plots.py
 
 module implementing satpy based plots with OCO-2 data overlays.
 
-intended to integrate with oco2_vistool.py
+intended to integrate with oco_vistool.py
 """
 
-import os.path, glob, datetime, collections, itertools
+import os, glob, datetime, collections, itertools
 import tempfile, shutil
+import bz2
 
 import numpy as np
+import pandas as pd
 
 from satpy import Scene 
 from satpy.writers import get_enhanced_image
@@ -26,154 +28,64 @@ import matplotlib.patches as mpatches
 import netCDF4
 import h5py
 
+import boto3
+import botocore
+
+import fnmatch
+
 from oco_vistool import read_shp
+from geo_scan_time import compute_time_offset, approx_scanline_time
+from geo_scan_time import get_ABI_timerange_from_filename, get_AHI_timerange_from_filename
 
 # to get the location of the city data (a subdir from where the
 # code is located).
 _code_dir = os.path.dirname(os.path.realpath(__file__))
 
-def _approx_scanline_time(stime, etime, lat, domain):
+def _get_AHI_times(file_list):
     """
-    returns the scanline time, for a particular lat, and domain (C or F).
-    see docstring in get_ABI_files for implementation notes.
-
-    returns a single datetime object with the approx scanline time.
-
-    if the lat is out of range, it returns the closest time; in other
-    words, out of range will be limited to pick the stime or etime.
-
-    inputs:
-    stime: datetime object with start time
-    etime: datetime object with end time
-    lat: latitude (scalar)
-    domain: (C)ONUS or (F)ull disk
+    helper function to get the start and end time from a set of
+    Himawari HSD segment files.
+    Currently, the only straightforward way to do this appears to be
+    a satpy Scene object. I think, without calling the load() function,
+    this should not be an expensive operation. However, this does require
+    the full datafiles are downloaded.
     """
-
-    if domain == 'C':
-        slat = 50.0
-        elat = 15.0
-    elif domain == 'F':
-        slat = 81.0
-        elat = -81.0
-    else:
-        raise ValueError('invalid domain: '+domain)
-
-    tfrac = (slat - lat) / (slat - elat)
-
-    if tfrac < 0:
-        scan_time = stime
-    elif tfrac > 1:
-        scan_time = etime
-    else:
-        total_time = (etime-stime).total_seconds()
-        scan_time = stime + datetime.timedelta(seconds=total_time*tfrac)
-
-    return scan_time
-
-
-def get_ABI_files(datetime_utc, center_lat, data_home,
-                  sensor, verbose=False):
-    """
-    find the file list for an ABI domain, given an input date.
-    this will find the images (for bands 1,2,3) closest to the UTC
-    date time. If there are no files within 1 hour, throws exception.
-
-    inputs:
-    datetime_utc: a python datetime object (in UTC) with the requested time.
-    data_home: string containing path to local ABI file archive
-    sensor: string containing GOES sensor and mode, (C)ONUS or (F)ull disk.
-        examples: GOES16_ABI_C or GOES17_ABI_F
-    verbose: set to True to print more information to console
     
-    returns:
-    file_list: list of strings containing full paths to the located files.
-        should contain 3 (for each of bands 1,2,3)
-    time_offsets: the time offsets (in seconds) between the input 
-        datetime_utc and the start times of the ABI images.
+    scn = Scene(reader = 'ahi_hsd', filenames = file_list)
+    time_range = scn.start_time, scn.end_time
 
-    Implementation notes:
-    the data_home is assumed to contain a directory tree with the following
-    layout, containing the ABI netCDF4 files:
-    data_home
-      |--YYYY
-           |--YYYY_MM_DD_DOY
-              |--abi
-                 |--L1b
-                    |--RadC
-                       |--OR_ABI-L1b-RadC-M3C01_G16_sYYYYDOY*.nc
-                       |-- ....
-                       |--OR_ABI-L1b-RadC-M3C01_G16_sYYYYDOY*.nc
-                          <etc for other bands>
-                    |--RadF
-                       |--OR_ABI-L1b-RadF-M3C01_G16_sYYYYDOY*.nc
-                       |-- ....
-                       |--OR_ABI-L1b-RadF-M3C01_G16_sYYYYDOY*.nc
-                          <etc for other bands>
-                    |--RadM1
-                    |--RadM2
-           |-- ....
-           |--YYYY_MM_DD_DOY
+    return time_range
 
-    for example, the first CONUS Band 1 file for 2018:
 
-    data_home/2018/2018_01_01_001/abi/L1b/RadC/
-        OR_ABI-L1b-RadC-M3C01_G16_s20180010002196_e20180010004569_c20180010005015.nc
-
-    For the time offset calculation; there is not a straightforward
-    time for each series of scan lines in the L1b image. As a simple
-    approximation, we assume the data collection time is a linear ramp
-    between the start and end times (as encoded in the filename), and
-    that this ramp can be mapped in terms of latitude only. For a CONUS
-    image, we assume the ramp runs between latitude: 15 - 50 (approx.
-    CONUS coverage), and for Full Disk, between -81 and 81 (which is
-    roughly the full disk coverage from the Geo position.)
-
-    This approximation ignores any misalignment of the scans with respect
-    to parallels (lines of constant latitude) on the Earth surface; and
-    the curvature of the scan lines as the scans move away from the equator;
-    and ignores details of the true scan pattern. The true scan pattern 
-    would necessarily include time gaps between scans, and each scan itself
-    has a finite time for collection; The simple approximation here, treats
-    each East-West scan as an instantenous collection, and the scans are 
-    continuously and smoothly collected from the start to end time.
-
-    Put together, I think the different approximations here should incur
-    errors smaller than +/- 0.5 minutes, so it should be better than just
-    assuming the whole image was collected simultaneous at the mid time
-    (in which case the error could be up to the image revisit time, e.g.
-    5 minutes for CONUS or 10 minutes for Full disk)
-
+def get_loc_ABI_files(datetime_utc, data_home, domain, platform, hour_offsets, bands_list, glob_fstr, verbose):
     """
-
-    domain = sensor[-1]
-    platform = sensor.split('_')[0]
-
-    valid_domains = 'C', 'F'
-    if domain not in valid_domains:
-        raise ValueError('domain must be in '+str(valid_domains))
-    valid_platforms = 'GOES16', 'GOES17'
-    if platform not in valid_platforms:
-        raise ValueError('platform must be in '+str(valid_platforms))
-    # code used in filename is G16 or G17 for GOES16, GOES17.
-    platform = platform.replace('GOES','G')
-
-    # search within hour of input datetime, and +/-1 hour
+    Helper function for getting the local filesystem GOES ABI files.
+    
+    Returns a list with relevant filenames.
+    
+    inputs:
+    datetime_utc: datetime object for the needed timeslot
+    data_home: origin for the background files (by format: data_home/YYYY/...)
+    domain: (C)ONUS or (F)ull disk
+    platform: GOES-East (G16) or GOES-West (G17)
+    hour_offsets: different offsets to iterate
+    bands_list: list of needed bands
+    glob_fstr: glob file format
+    verbose: T/F - if details are needed
+    """
+    
     flists = collections.defaultdict(list)
-    band_list = (1,2,3)
-    hour_offsets = (-1,0,1)
-
-    # makes a glob string to match by s-time (I think, start time.)
-    glob_fstr = ('OR_ABI-L1b-Rad{0:1s}'+
-                 '-M?C{1:02d}_{2:s}_s{3:s}_e*_c*.nc')
-
-    for hour_offset, band in itertools.product(hour_offsets, band_list):
-
+    # iterating over all time options and adding the located files to the list
+    for hour_offset, band in itertools.product(hour_offsets, bands_list):
         dt = datetime_utc - datetime.timedelta(hours=hour_offset)
 
         if verbose:
             print('Searching for data at hour: '+str(dt))
+        
+        # constructing path to the needed files
         y_dir = dt.strftime('%Y')
         ymdd_dir = dt.strftime('%Y_%m_%d_%j')
+        
         # four "?" for the MMSS, and then one more for a character at
         # the end, I am not sure about (frac second?)
         stimestamp = dt.strftime('%Y%j%H') + '????' + '?'
@@ -193,9 +105,135 @@ def get_ABI_files(datetime_utc, center_lat, data_home,
             print('glob: '+glob_str)
 
         located_files = glob.glob(glob_str)
-
         flists[band] += located_files
+    return flists
 
+def get_aws_ABI_files(datetime_utc, domain, platform, hour_offsets, bands_list, glob_fstr, verbose):
+    """
+    Helper function for getting the AWS S3 GOES ABI filenames.
+    
+    Returns a list with needed filenames and the AWS S3 bucket object (where the files will be downloaded).
+    
+    inputs:
+    datetime_utc: datetime object for the needed point of time
+    domain: (C)ONUS or (F)ull disk
+    platform: GOES-East (G16) or GOES-West (G17)
+    hour_offsets: different offsets to iterate over
+    bands_list: list of needed bands
+    glob_fstr: glob file format
+    verbose: T/F - if details are needed
+    """
+    
+    # accessing the relevant S3 bucket
+    aws_keys = pd.read_csv('Keys.csv', header = 0)
+    s3 = boto3.resource('s3', aws_access_key_id = aws_keys['aws_access_key_id'].values[0], aws_secret_access_key = aws_keys['aws_secret_access_key'].values[0])
+    
+    if (platform[-2:] == '16'):
+        g_bucket = s3.Bucket('noaa-goes16')
+    else:
+        g_bucket = s3.Bucket('noaa-goes17')
+        
+    flists = collections.defaultdict(list)
+    
+    # iterating over the different hours to locate the needed files
+    for hour_offset, band in itertools.product(hour_offsets, bands_list):
+        dt = datetime_utc - datetime.timedelta(hours=hour_offset)
+        if verbose:
+            print('Searching for data at hour: '+str(dt))
+        
+        # constructing the file path
+        y_dir = dt.strftime('%Y')
+        dayY_dir = dt.strftime('%j')
+        h_dir = dt.strftime('%H')
+        
+        # four "?" for the MMSS, and then one more for a character at
+        # the end, I am not sure about (frac second?)
+        stimestamp = dt.strftime('%Y%j%H') + '????' + '?'
+        ddir = os.path.join('ABI-L1b-Rad' + domain, y_dir, dayY_dir, h_dir)
+        g_path = ddir + '/'
+        g_files = g_bucket.objects.filter(Prefix=g_path)
+
+        glob_str = os.path.join(ddir,glob_fstr.format(domain, band, platform, stimestamp))
+        if verbose:
+            print('glob: '+glob_str)
+        
+        # access the AWS files by the constructed format
+        keys = list()
+        for g_file in g_files:
+            keys.append(g_file.key)
+        located_files = fnmatch.filter(keys, glob_str)
+        flists[band] += located_files
+    return flists, g_bucket
+
+def download_aws_ABI_files(flist, g_bucket, data_home):
+    """
+    Helper function for downloading the AWS GOES files given their names.
+
+    Returns a list with downloaded local GOES ABI filenames.
+    
+    inputs:
+    flist: list of needed files paths
+    g_bucket: AWS S3 bucket to download the files from
+    data_home: data destination for the background files (by format: data_home/ABI-Rad<domain>/...)
+    """
+    files = list()
+    # iterating to and downloading the needed files from the S3 bucket (by the known path)
+    for needed_path in flist:
+        g_files = g_bucket.objects.filter(Prefix=needed_path)
+        for g_file in g_files:
+            if not (os.path.isfile(data_home + '/' + g_file.key)):
+                if not os.path.isdir(os.path.dirname(data_home + '/' + g_file.key)):
+                    os.makedirs(os.path.dirname(data_home + '/' + g_file.key))
+                g_bucket.download_file(g_file.key, data_home + '/' + g_file.key)
+                files.extend(glob.glob(data_home + '/' + g_file.key))
+            else:
+                files.extend(glob.glob(data_home + '/' + g_file.key))
+
+    flist = list(set(files))
+    return flist
+
+def get_ABI_files(datetime_utc, center_lat,
+                  sensor, files_loc, data_home, verbose=False):
+    """
+    Using the helpers above, accesses the needed GOES ABI files and downloads them (if needed).
+    
+    Returns a list with accessed GOES filenames and time offsets.
+    
+    inputs:
+    datetime_utc: datetime object for the needed point of time
+    center_lat: center latitude of the background image
+    sensor: the geostation, device, and domain (GOES16_ABI_C, for example)
+    files_loc: if the background images are local or on AWS
+    data_home: data origin for the background files (by format: data_home/YYYY/...)
+    verbose: if details are needed
+    """
+    
+    # checking the input validity
+    domain = sensor[-1]
+    platform = sensor.split('_')[0]
+
+    valid_domains = 'C', 'F'
+    if domain not in valid_domains:
+        raise ValueError('domain must be in '+str(valid_domains))
+    valid_platforms = 'GOES16', 'GOES17'
+    if platform not in valid_platforms:
+        raise ValueError('platform must be in '+str(valid_platforms))
+    # code used in filename is G16 or G17 for GOES16, GOES17.
+    platform = platform.replace('GOES','G')
+
+    # search within hour of input datetime, and +/-1 hour
+    band_list = (1,2,3)
+    hour_offsets = (-1,0,1)
+    # makes a glob string to match by s-time (I think, start time.)
+    glob_fstr = ('OR_ABI-L1b-Rad{0:1s}'+
+                 '-M?C{1:02d}_{2:s}_s{3:s}_e*_c*.nc')
+    
+    # get the needed filenames (and the S3 bucket for AWS)
+    if (files_loc == 'aws'):
+        flists, g_bucket = get_aws_ABI_files(datetime_utc, domain, platform, hour_offsets, band_list, glob_fstr, verbose)
+    else:
+        flists = get_loc_ABI_files(datetime_utc, data_home, domain, platform, hour_offsets, band_list, glob_fstr, verbose)
+    
     # have a set of 3-hour long lists of files, now just find the one with the
     # smallest time offset to the input datetime_utc.
     flist = []
@@ -208,21 +246,200 @@ def get_ABI_files(datetime_utc, center_lat, data_home,
         time_offsets_all = []
         for n in range(nfiles):
             # find the approx scan line time for the requested latitude.
-            stimestamp, etimestamp = flists[band][n].split('_')[-3:-1]
-            # [1:-1] slice removes 's' or 'e' and the extra number (frac seconds?)
-            stime = datetime.datetime.strptime(stimestamp[1:-1], '%Y%j%H%M%S')
-            etime = datetime.datetime.strptime(etimestamp[1:-1], '%Y%j%H%M%S')
-            scan_time = _approx_scanline_time(stime, etime, center_lat, domain)
+            etime, stime = get_ABI_timerange_from_filename(flists[band][n])
+            scan_time = approx_scanline_time(stime, etime, center_lat, domain)
             time_offsets_all.append((datetime_utc-scan_time).total_seconds())
-        # find minimum
+        # find minimum time difference
         k = np.argmin(np.abs(time_offsets_all))
         flist.append(flists[band][k])
         time_offset.append(time_offsets_all[k])
-        
+    
+    # download the files if needed
+    if (files_loc == 'aws'):
+        flist = download_aws_ABI_files(flist, g_bucket, data_home)
     return flist, time_offset
 
+def get_loc_AHI_files(datetime_utc, data_home, offsets, bands_list):
+    """
+    Helper function for getting the local filesystem Himawari AHI files.
+    
+    Returns a list with relevant filenames.
+    
+    inputs:
+    datetime_utc: datetime object for the needed timeslot
+    data_home: origin for the background files (by format: data_home/YYYY/...)
+    offsets: different time offsets to iterate
+    bands_list: list of needed bands
+    """   
+    files = collections.defaultdict(list)
 
-def get_scene_obj(file_list, latlon_extent, width=750, height=750,
+    # round down to nearest 10 minutes.
+    rounded_minutes = 10 * (datetime_utc.minute//10)
+    rounded_datetime_utc = datetime.datetime(
+        datetime_utc.year, datetime_utc.month, datetime_utc.day,
+        datetime_utc.hour, rounded_minutes, 0)
+
+    # access and record all the background files by the known path format
+    strftime_template = '%Y/%Y_%m_%d_%j/%H%M/HS_H08_%Y%m%d_%H%M'
+    for offset, band in itertools.product(offsets, bands_list):
+        offset_dt = rounded_datetime_utc + datetime.timedelta(minutes=offset)
+        # searches for files with the selected band, at any resolution (R??)
+        # and for all segments (S????)
+        glob_str = os.path.join(
+            data_home, (offset_dt.strftime(strftime_template) +
+                        '_B{0:02d}_FLDK_R??_S????.DAT'.format(band)))
+        files_at_offset = glob.glob(glob_str)
+        files_at_offset.sort()
+
+        # if data is missing at this time offset, the files_at_offset list
+        # will be empty. In that case, don't add to the list.
+        if len(files_at_offset) > 0:
+            files[band].append(files_at_offset)
+
+    return files
+
+def get_aws_AHI_files(datetime_utc, offsets, bands_list):
+    """
+    Helper function for accessing the paths of relevant AWS Himawari background files.
+
+    Returns a dicttionary with AWS S3 Himawari file paths (key: band number, value: list of lists of filepaths by time offset).
+    
+    inputs:
+    datetime_utc: datetime object for the needed timeslot
+    offsets: different time offsets to iterate
+    bands_list: list of needed bands
+    """
+    files = collections.defaultdict(list)
+
+    # round down to nearest 10 minutes.
+    rounded_minutes = 10 * (datetime_utc.minute//10)
+    rounded_datetime_utc = datetime.datetime(
+        datetime_utc.year, datetime_utc.month, datetime_utc.day,
+        datetime_utc.hour, rounded_minutes, 0)
+
+    # connecting to the S3 Himawari bucket
+    aws_keys = pd.read_csv('Keys.csv', header = 0)
+    s3 = boto3.resource('s3', aws_access_key_id = aws_keys['aws_access_key_id'].values[0], aws_secret_access_key = aws_keys['aws_secret_access_key'].values[0])
+    hima_bucket = s3.Bucket('noaa-himawari8')
+    
+    # known AWS Hima filepath format
+    strftime_template = 'AHI-L1b-FLDK/%Y/%m/%d/%H%M/'
+
+    for offset, band in itertools.product(offsets, bands_list):
+        offset_dt = rounded_datetime_utc + datetime.timedelta(minutes=offset)
+
+        # access the background files by the known path format
+        hima_files = hima_bucket.objects.filter(Prefix=offset_dt.strftime(strftime_template))
+
+        # searches for files with the selected band, at any resolution (R??)
+        # and for all segments (S????)
+        glob_str = offset_dt.strftime(strftime_template + 'HS_H08_%Y%m%d_%H%M') + '_B{0:02d}_FLDK_R??_S????.DAT.bz2'.format(band)
+
+        # record the AWS files by the needed format
+        keys = list()
+        for hima_file in hima_files:
+            keys.append(hima_file.key)
+            
+        files_at_offset = fnmatch.filter(keys, glob_str)
+        files_at_offset.sort()
+           
+        # if data is missing at this time offset, the files_at_offset list
+        # will be empty. In that case, don't add to the list.
+        if len(files_at_offset) > 0:
+            files[band].append(files_at_offset)
+
+    return files, hima_bucket    
+
+def download_aws_AHI_files(flist, hima_bucket, data_home):
+    """
+    Helper function for downloading and decompressing the AWS Himawari files given their AWS S3 paths.
+
+    Returns a list with downloaded local Himawari AHI filenames.
+    
+    inputs:
+    flist: list of needed AWS file paths
+    hima_bucket: AWS S3 bucket to download the files from
+    data_home: data destination for the background files (by format: data_home/AHI-FLDK/...)
+    """
+    files = list()
+
+    # iterating to and downloading the needed files from the S3 bucket (by the known path)
+    for needed_path in flist:
+        hima_files = hima_bucket.objects.filter(Prefix=needed_path)
+        # downloading and recording the needed Himawari files by known AWS paths
+        for hima_file in hima_files:
+            if not (os.path.isfile(data_home + '/' + hima_file.key[:-4]) or os.path.isfile(data_home + '/' + hima_file.key)):
+                if not os.path.isdir(os.path.dirname(data_home + '/' + hima_file.key)):
+                    os.makedirs(os.path.dirname(data_home + '/' + hima_file.key))
+                hima_bucket.download_file(hima_file.key, data_home + '/' + hima_file.key)
+            else:
+                files.extend(glob.glob(data_home + '/' + hima_file.key[:-4]))
+                
+        # decompressing the downloaded files
+        for filename in glob.glob(data_home + '/' + needed_path):
+            zipfile = bz2.BZ2File(filename)
+            data = zipfile.read()
+            new_filename = filename[:-4] 
+            open(new_filename, 'wb').write(data)
+            os.remove(filename)
+            files.extend(glob.glob(new_filename))
+    flist = list(set(files))
+    return flist
+
+def get_AHI_files(datetime_utc, center_lat, files_loc, data_home):
+    """
+    Using the helpers above, accesses the needed Himawari files by date & time and downloads them (if needed).
+    
+    Returns a list with needed Himawari background filenames and a time offset of the image relative to the request.
+    
+    inputs:
+    datetime_utc: datetime object for the needed point of time
+    center_lat: center latitude of the background image
+    files_loc: if the background images are local or on AWS
+    data_home: origin directory for the background files 
+    """
+
+    bands_list = [1, 2, 3, 4]
+    offsets = (-10, 0, 10)
+    
+    # accessing the Himawari files paths and bucket from AWS
+    if (files_loc == 'aws'):
+        files, hima_bucket = get_aws_AHI_files(datetime_utc, offsets, bands_list)
+
+    # accessing the local files
+    else:
+        files = get_loc_AHI_files(datetime_utc, data_home, offsets, bands_list)
+
+    flist = []
+    time_offset = []
+    for band in bands_list:
+        nfiles = len(files[band])
+        if nfiles == 0:
+            print('no files found for AHI band '+str(band))
+            continue
+        time_offsets_all = []
+        for n in range(nfiles):
+            # use rough approximation: assume the himawari start/end times are exactly
+            # the time from the file path, and +10 later.
+            # this means we don't have to download the file data.
+            # the more accurate variation would use the _get_AHI_times() helper
+            # function to get the actual start and end time.
+            stime, etime = get_AHI_timerange_from_filename(files[band][n][0])
+            scan_time = approx_scanline_time(stime, etime, center_lat, 'F')
+            time_offsets_all.append((datetime_utc-scan_time).total_seconds())
+        # find minimum time difference
+        k = np.argmin(np.abs(time_offsets_all))
+        flist.extend(files[band][k])
+        time_offset.append(time_offsets_all[k])
+    
+
+    # downloading the recorded/accessed files from AWS
+    if (files_loc == 'aws'):
+        flist = download_aws_AHI_files(flist, hima_bucket, data_home)
+
+    return flist, time_offset
+
+def get_scene_obj(file_list, latlon_extent, sensor, width=750, height=750,
                   tmp_cache=False, resample_method='native_bilinear'):
     """Get Scene object, apply the resample area, to a small box 
     centered on the lat lon point.
@@ -271,9 +488,9 @@ def get_scene_obj(file_list, latlon_extent, width=750, height=750,
             dst_f = os.path.join(tdir, os.path.split(f)[-1])
             shutil.copyfile(src_f, dst_f)
             cached_file_list.append(dst_f)
-        scn = Scene(reader='abi_l1b', filenames=cached_file_list)
+        scn = Scene(reader=sensor, filenames=cached_file_list)
     else:
-        scn = Scene(reader='abi_l1b', filenames=file_list)
+        scn = Scene(reader=sensor, filenames=file_list)
     
     scn.load(['true_color'])
 
@@ -395,20 +612,7 @@ def annotate_ll_axes(gs, img_ul, img_lr):
     ax_maxlat.text(0.5, 1.0, str("%.1f" % img_ul[0]), **fontkw)
     ax_minlon.text(0.5, 0.0, str("%.1f" % img_ul[1]), **fontkw)
     ax_maxlon.text(0.5, 0.0, str("%.1f" % img_lr[1]), **fontkw)
-
-    #ax_minlat.set_title(str("%.1f" % img_lr[0]),
-    #                    horizontalalignment='left',
-    #                    verticalalignment='bottom', **fontkw)
-    #ax_maxlat.set_title(str("%.1f" % img_ul[0]),
-    #                    horizontalalignment='left',
-    #                    verticalalignment='top', **fontkw)
-    #ax_minlon.set_title(str("%.1f" % img_ul[1]),
-    #                    horizontalalignment='center',
-    #                    verticalalignment='top', **fontkw)
-    #ax_maxlon.set_title(str("%.1f" % img_lr[1]),
-    #                    horizontalalignment='right',
-    #                    verticalalignment='top', **fontkw)
-                    
+            
     return (ax_minlat, ax_maxlat, ax_minlon, ax_maxlon)
 
 
@@ -582,11 +786,11 @@ def overlay_data(ax, cb_ax, odata, var_label=None, **kw):
             t.set_fontsize(12)
 
 
-def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
+def nonworldview_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
                           var_label=None, fignum=10):
     """
-    make a GOES ABI overlay plot. This is function to integrate with the
-    vistool plot data flow.
+    Make an overlay plot - GOES/Himawari. 
+    This is function to integrate with the vistool plot data flow.
 
     inputs (all 3 are defined by the corresponding vistool functions)
     cfg_d: configuration dictionary
@@ -605,39 +809,56 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     inset_ax: the MPL axis object with the inset image
     """
 
-    # if there is overlay data present, use the OCO2 obs time
-    # to get the data.
-    # otherwise, use the datetime object
-    if ovr_d:
-        dt = datetime.datetime.utcfromtimestamp(np.mean(odat['time']))
-    else:
-        dt = cfg_d['datetime']
-
+    dt = cfg_d['datetime']
     center_lat = (cfg_d['lat_lr'] + cfg_d['lat_ul']) / 2.0
-    file_list, time_offsets = get_ABI_files(
-        dt, center_lat, cfg_d['data_home'], cfg_d['sensor'])
+    
+    # accessing the needed files depending on the geostation and files location; downloading if needed
+    # also getting the time offset of the background image
+    if (cfg_d['sensor'].startswith('GOES')):
+        file_list, time_offsets = get_ABI_files(
+            dt, center_lat, cfg_d['sensor'], cfg_d['files_loc'], cfg_d['data_home'])
+        time_offset = np.mean(time_offsets)/60.0
+    else:
+        file_list, time_offsets = get_AHI_files(
+            dt, center_lat, cfg_d['files_loc'], cfg_d['data_home'])
+        time_offset = np.mean(time_offsets)/60.0
+        
     if len(file_list) == 0:
-        raise ValueError('No ABI files were found for requested date in '+
-                         cfg_d['data_home'])
+        raise ValueError('No files were found for requested date')
 
     # convert the LL box corners (in degrees LL) to an extent box
     # [min_lon, min_lat, max_lon, max_lat]
     latlon_extent = [cfg_d['lon_ul'], cfg_d['lat_lr'], 
                      cfg_d['lon_lr'], cfg_d['lat_ul']]
-
-    scn = get_scene_obj(file_list, latlon_extent,
-                        resample_method=cfg_d['resample_method'])
+    
+    # getting the scene by the background files
+    if (cfg_d['sensor'].startswith('GOES')):
+        scn = get_scene_obj(file_list, latlon_extent, 'abi_l1b',
+                            resample_method=cfg_d['resample_method'])
+    else:
+        scn = get_scene_obj(file_list, latlon_extent, 'ahi_hsd',
+                            resample_method=cfg_d['resample_method'])
     crs = scn['true_color'].attrs['area'].to_cartopy_crs()
+
+    # recompute the time offset, now that the files are loaded.
+    # This probably will not change the number for ABI obs, since a
+    # precise start/end time is in the filename, but will change
+    # things slightly for AHI.
+    if (cfg_d['sensor'].startswith('GOES')):
+        domain = cfg_d['sensor'][-1]
+    else:
+        domain = 'F'
+    time_offset = compute_time_offset(scn, center_lat, domain, dt)/60.0
 
     overlay_present = ovr_d is not None
     cbar_needed = overlay_present and ovr_d['cmap'] in plt.colormaps()
 
     gs, ax, cb_ax, inset_ax = setup_axes(
         fignum, crs, create_colorbar_axis=cbar_needed)
-
+    
+    # plotting the retrieved scene
     im = plot_scene_obj(ax, scn)
     
-    #print(overlay_present)
     if overlay_present:
         if ovr_d['var_lims']:
             vmin, vmax = ovr_d['var_lims']
@@ -649,32 +870,33 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
                          var_label=var_label, alpha=ovr_d['alpha'])
 
     make_inset_map(inset_ax, cfg_d['geo_upper_left'], cfg_d['geo_lower_right'])
-    mean_time_offset = np.mean(time_offsets)/60.0
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
-
+    
+    # formatting the plot
     if cfg_d['out_plot_title'] == 'auto':
         if ovr_d:
             title_string = (
                 'Overlay data from {0:s}' +
                 '\nBackground from {1:s}, '+
                 '\nOverlay time = {2:s},   '+
-                'mean time offset = {3:4.1f} min.,  '+
+                'time offset = {3:4.1f} min.,  '+
                 'plot created on {4:s}' )
             title_string = title_string.format(
                 os.path.split(ovr_d['var_file'])[1],
                 os.path.split(file_list[1])[1], 
-                dt.strftime('%Y-%m-%d %H:%M:%S'), mean_time_offset,
-                todays_date)
+                dt.strftime('%Y-%m-%d %H:%M:%S'),
+                time_offset, todays_date)
         else:
             title_string = (
                 'Background from  {0:s}' + 
                 '\n Request time = {1:s},   '+
-                'mean time offset = {2:4.1f} min.,  '+
+                'time offset = {2:4.1f} min.,  '+
                 'plot created on {3:s}' )
             title_string = title_string.format(
                 os.path.split(file_list[1])[1],
                 dt.strftime('%Y-%m-%d %H:%M:%S'),
-                mean_time_offset, todays_date)
+                time_offset, todays_date)
+            
     else:
         title_string = cfg_d['out_plot_title']
 
@@ -689,6 +911,7 @@ def GOES_ABI_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     if out_plot_name:
         fig = plt.figure(fignum)
         fig.savefig(out_plot_name, dpi=150)
+        print("\nFigure saved at "+ out_plot_name + "\n")
 
     ax_dict = dict(
         gridspec = gs, image_ax = ax, cb_ax = cb_ax,

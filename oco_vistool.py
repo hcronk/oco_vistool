@@ -39,6 +39,7 @@ import urllib.request
 
 from OCO2FileOps import *
 from default_cmaps import default_cmaps
+from geo_scan_time import compute_time_offset, approx_scanline_time
 
 import numpy as np
 import math
@@ -46,6 +47,9 @@ import pandas as pd
 
 from matplotlib import patheffects
 from owslib.wmts import WebMapTileService
+import cartopy
+cartopy.config["downloaders"][("shapefiles", "natural_earth")].url_template = (
+      "https://naturalearth.s3.amazonaws.com/{resolution}_{category}/ne_{resolution}_{name}.zip")
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import shapefile
@@ -130,7 +134,7 @@ def read_shp(filename):
 
 def _process_overlay_dict(input_dict):
     """
-    process OCO-2 overlay data input.
+    Process OCO-2 overlay data input.
     this is a helper normally called by process_config_dict(), see docstring there.
 
     In general, this is doing similar work as process_config_dict(), just this function
@@ -306,6 +310,10 @@ def _process_overlay_dict(input_dict):
     ovr_d['lat_shift'] = input_dict.get('lat_shift', 0.0)
     ovr_d['lon_shift'] = input_dict.get('lon_shift', 0.0)
 
+    # similarly, allow for a time shift to allow for manual fixing
+    # of timing errors with respect to the background image.
+    ovr_d['time_shift'] = input_dict.get('time_shift', 0.0)
+
     # another optional setting to extract a frame range before subsetting
     # (this helps with TG mode, where the soundings overlap, esp. for OCO-3.)
     # use the dict.get() method.
@@ -388,8 +396,9 @@ def process_config_dict(input_dict):
         related to the base image
 
     contents:
-    date: "YYYY-MM-DD"
-    straight_up_date: "YYYYMMDD"
+    date: "YYYY-MM-DD" or "YYYY-MM-DD HH:MM:SS" if specified
+    straight_up_date: "YYYYMMDD" or "YYYYMMDD_HHMMSS" if specified
+         this version of the date will be used in the auto output filenames
     lat_ul
     lon_ul
     lat_lr
@@ -434,14 +443,14 @@ def process_config_dict(input_dict):
     # note the use of dict.get(key, default) will effectively set default blank or None
     # values.
     cfg_d['date'] = input_dict['date']
-    cfg_d['straight_up_date'] = cfg_d['date'].replace("-", "")
+    cfg_d['straight_up_date'] = cfg_d['date'].replace("-", "").replace(":",'').replace(" ","_")
 
     cfg_d['geo_upper_left'] = input_dict['geo_upper_left']
     cfg_d['geo_lower_right'] = input_dict['geo_lower_right']
     
     cfg_d['sensor'] = input_dict.get('sensor')
     valid_sensor_names = ('Worldview', 'GOES16_ABI_C', 'GOES16_ABI_F',
-                          'GOES17_ABI_C', 'GOES17_ABI_F',)
+                          'GOES17_ABI_C', 'GOES17_ABI_F', 'Himawari-08',)
 
     if cfg_d['sensor'] not in valid_sensor_names:
         raise ValueError('sensor name: ' + cfg_d['sensor'] + ' is not valid')
@@ -454,8 +463,20 @@ def process_config_dict(input_dict):
             if (cfg_d['layer'] < 0 or cfg_d['layer'] >= layers_num):
                     raise ValueError('layer code value out of bounds')
         else:
-            raise ValueError("Worldview sensor is chosen, but the layer code isn't provided in the config file")
-            
+            raise ValueError("Worldview sensor is chosen, but the layer code from the config file isn't provided")
+    else:
+        if ('files_loc' in input_dict):
+            valid_files_locs = ('local', 'aws',)
+            cfg_d['files_loc'] = input_dict['files_loc']
+            if (cfg_d['files_loc'] not in valid_files_locs):
+                raise ValueError('The files location for ' + cfg_d['sensor'] + ' is not valid. Choose from: ' + str(valid_files_locs))
+            if ('data_home' in input_dict):
+                cfg_d['data_home'] = input_dict['data_home']
+            else:
+                raise ValueError('Config file is missing a required key for non-Worldview sensors: data_home')
+        
+        else:
+            raise ValueError('Config file is missing a required key for non-Worldview sensors: files_loc')
     try:
         cfg_d['lat_ul'] = float(input_dict['geo_upper_left'][0])
         cfg_d['lon_ul'] = float(input_dict['geo_upper_left'][1])
@@ -521,7 +542,6 @@ def process_config_dict(input_dict):
         print("Either there was no output data location specified or the one specified "+
               "does not exist. Data output will go in the code directory. \n")
 
-    cfg_d['data_home'] = input_dict.get('data_home', None)
     cfg_d['resample_method'] = input_dict.get(
         'resample_method', 'native_bilinear')
     if cfg_d['resample_method'] == "":
@@ -739,7 +759,9 @@ def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
 
     try:
         #print(h5[ovr_d['var_name']].attrs['Units'][0])
-        dd['data_units'] = h5[ovr_d['var_name']].attrs['Units'][0].decode()
+        #AJM: we probably need a better solution here. What would work for
+        # any version of python and h5py?
+        dd['data_units'] = h5[ovr_d['var_name']].attrs['Units'][0]#.decode()
     except KeyError:
         # probably need a better solution here?
         dd['data_units'] = ''
@@ -978,12 +1000,24 @@ def load_OCO2_Lite_overlay_data(ovr_d):
     return dd
 
 def get_layer_colorbar_params(layer_url):
+    """
+    Given the Worldview quantitative layer XML file url, creates its colorbar.
+
+    Returns a colormap object, normalized bounds object, ticks to show, bounds list, and units (if exist). 
+    
+    inputs:
+    layer_url: url of the XML file for the desired quantitative layer (with its specs)
+    """
+    
+    # get a response from the layer's XML file 
     response = urllib.request.urlopen(layer_url).read()
     root = ET.fromstring(response)
     bounds_list = list()
     df_list = list()
     ticks_list = list()
     units = None
+    
+    # iterate through the layer's fields
     for color_map in root.findall("ColorMap"):
         if ('units' in color_map.attrib):
             units = color_map.attrib.get('units')
@@ -995,10 +1029,10 @@ def get_layer_colorbar_params(layer_url):
                     if ('<' in entry.attrib.get('tooltip')):
                         tmp_upper = float(entry.attrib.get('tooltip').split('<')[1].strip())
                         # differently encoded dashes check (ranges case)
-                        if ('-' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
-                            next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split('-')
-                        elif ('–' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
-                            next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split('–')
+                        if (' - ' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
+                            next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split(' - ')
+                        elif (' – ' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
+                            next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split(' – ')
                         tmp_diff = float(next_range[1].strip()) - float(next_range[0].strip())
                         tmp_lower = tmp_upper - tmp_diff
                         bounds_list.append(tmp_lower)
@@ -1008,13 +1042,47 @@ def get_layer_colorbar_params(layer_url):
 
                         if ('showTick' in entry.attrib):
                             ticks_list.append(tmp_upper)
+                    # symmetrical with above
+                    elif ('≤' in entry.attrib.get('tooltip')):
+                        tmp_upper = float(entry.attrib.get('tooltip').split('≤')[1].strip())
+                        # differently encoded dashes check (ranges case)
+                        if (' - ' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
+                            next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split(' - ')
+                        elif (' – ' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
+                            next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split(' – ')
+                        tmp_diff = float(next_range[1].strip()) - float(next_range[0].strip())
+                        tmp_lower = tmp_upper - tmp_diff
+                        bounds_list.append(tmp_lower)
+
+                        # convert and get each rgb code to the needed integer form
+                        df_list.append(list(map(lambda i: int(i)/255, entry.attrib.get('rgb').split(','))))
+
+                        if ('showTick' in entry.attrib):
+                            ticks_list.append(tmp_upper)
+                            
                     # symmetrical with above but when there is no upper bound specified
+                    elif ('>' in entry.attrib.get('tooltip')):
+                        tmp_lower = float(entry.attrib.get('tooltip').split('>')[1].strip())
+                        if(' - ' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
+                            prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split(' - ')
+                        elif (' – ' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
+                            prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split(' – ')
+                        tmp_diff = float(prev_range[1].strip()) - float(prev_range[0].strip())
+                        tmp_upper = tmp_lower + tmp_diff
+                        bounds_list.append(tmp_lower)
+                        bounds_list.append(tmp_upper)
+
+                        df_list.append(list(map(lambda i: int(i)/255, entry.attrib.get('rgb').split(','))))
+
+                        if ('showTick' in entry.attrib):
+                            ticks_list.append(tmp_lower)
+                    # symmetrical with above
                     elif ('≥' in entry.attrib.get('tooltip')):
                         tmp_lower = float(entry.attrib.get('tooltip').split('≥')[1].strip())
-                        if('-' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
-                            prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split('-')
-                        elif ('–' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
-                            prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split('–')
+                        if(' - ' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
+                            prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split(' - ')
+                        elif (' – ' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
+                            prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split(' – ')
                         tmp_diff = float(prev_range[1].strip()) - float(prev_range[0].strip())
                         tmp_upper = tmp_lower + tmp_diff
                         bounds_list.append(tmp_lower)
@@ -1026,10 +1094,10 @@ def get_layer_colorbar_params(layer_url):
                             ticks_list.append(tmp_lower)
                     # range with defined bounds or a single value/bound
                     else:
-                        if ('-' in entry.attrib.get('tooltip')):
-                            tmp_lower = (float(entry.attrib.get('tooltip').split('-')[0].strip()))
-                        elif ('–' in entry.attrib.get('tooltip')):
-                            tmp_lower = (float(entry.attrib.get('tooltip').split('–')[0].strip()))
+                        if (' - ' in entry.attrib.get('tooltip')):
+                            tmp_lower = (float(entry.attrib.get('tooltip').split(' - ')[0].strip()))
+                        elif (' – ' in entry.attrib.get('tooltip')):
+                            tmp_lower = (float(entry.attrib.get('tooltip').split(' – ')[0].strip()))
                         else:
                             tmp_lower = (float(entry.attrib.get('tooltip').strip()))
 
@@ -1054,6 +1122,14 @@ def do_overlay_plot(
     cmap='jet', alpha=1, lat_name=None, lon_name=None, var_name=None,
     out_plot="vistool_output.png", var_label=None, cities=None,
     var_file=None):
+    """
+    Given the data from all dictionaries and layer info, overlays the OCO-2 data.
+
+    Plots the overlayed imagery.
+    
+    inputs:
+    all relevant fields from the dictionaries and some other parsed layer fields
+    """
     
     #Calculate lat/lon lims of RGB
     maxy = geo_upper_left[0]
@@ -1101,14 +1177,44 @@ def do_overlay_plot(
 
     gs =  gridspec.GridSpec(16, 16)
     
+    # request the needed layer and plot it
     url = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi'
     wmts = WebMapTileService(url)
     layer = layer_name
 
+    # For Geostationary imagery, we can adjust the request time to account
+    # for the time it takes to collect the Full-disk image.
+    # This method assumes the full disk image is collected in a regular
+    # time window, from N*10 to (N+1)*10 minutes after the hour.
+    # This appears to be generally true for GOES-ABI and Himawari-AHI;
+    # the full disk imagery generally starts about 20-40 seconds after
+    # N*10 minutes after the hour, and ends 20-40 seconds before the end
+    # of the 10 minute window.
+    #
+    # Note that worldview appears to match time requests by retrieving
+    # the most recent image before the requested time (e.g. rounding down
+    # to nearest 10 minute time step)
+    if layer.startswith('Himawari_AHI') or layer.startswith('GOES'):
+        rounded_minutes = 10 * (date.minute//10)
+        rounded_date = datetime.datetime(
+            date.year, date.month, date.day, date.hour, rounded_minutes, 0)
+        stime = rounded_date
+        etime = rounded_date + datetime.timedelta(minutes=10)
+        center_lat = (miny + maxy) / 2
+        scan_time = approx_scanline_time(stime, etime, center_lat, 'F')
+        # the fixed 5 minutes shifts the matching from the most recent 
+        # geo image before the time request (e.g. rounding down) to the
+        # nearest before or after (e.g. rounding)
+        time_offset = datetime.timedelta(minutes = 5) - (scan_time-stime)
+        date = date + time_offset
+
+    date_string = date.strftime('%Y-%m-%dT%H:%M:%SZ')
+    print('Requested time from Worldview: ', date_string)
+
     ax = plt.subplot(gs[0:-1, 3:-2], projection=ccrs.PlateCarree())
     ax.set_xlim((minx, maxx))
     ax.set_ylim((miny, maxy))
-    im = ax.add_wmts(wmts, layer, wmts_kwargs={'time': date})
+    im = ax.add_wmts(wmts, layer, wmts_kwargs={'time': date_string})
     txt = ax.text(minx, miny, wmts[layer].title, fontsize=10, color='wheat',
                   transform=ccrs.Geodetic())
     txt.set_path_effects([patheffects.withStroke(linewidth=5,
@@ -1157,13 +1263,14 @@ def do_overlay_plot(
     if var_lat.ndim == 2:
         zip_it = np.ma.dstack([var_lon, var_lat])
     
-    # if the XML file exists for the chosen layer
+    # if the XML file exists for the chosen layer (the layer is quantitative)
     if (layer_url != 'Null'):
+        # building the second colorbar
         cmap2, norm2, ticks_list, bounds_list, units = get_layer_colorbar_params(layer_url)
         ax2 = plt.subplot(gs[-1, 2:-2])
         cb2 = mpl.colorbar.ColorbarBase(ax2, cmap=cmap2, norm=norm2, orientation = 'horizontal',
                                         ticks = ticks_list + [bounds_list[0], bounds_list[-1]])
-
+                
         for t in cb2.ax.xaxis.get_ticklabels():
             t.set_weight("bold")
             t.set_fontsize(8)
@@ -1174,7 +1281,6 @@ def do_overlay_plot(
             cb2.ax.set_xlabel('# in ' + units, fontdict=dict(weight='bold'))
 
     if color_or_cmap == "cmap" and var_vals.shape[0] > 0:
-    
         # vertex points for each footprint
         if var_lat.ndim == 2 and var_vals.ndim == 1:
             for row in range(zip_it.shape[0]):
@@ -1264,10 +1370,6 @@ def do_overlay_plot(
 
     fig.savefig(out_plot, dpi=150, bbox_inches='tight')
     print("\nFigure saved at "+out_plot)
-    
-    #print("code directory in subroutine:", code_dir)
-    #os.remove(code_dir+'/intermediate_RGB.tif')
-
 
 ### Static Definitions
 code_dir = os.path.dirname(os.path.realpath(__file__))
@@ -1305,8 +1407,7 @@ if __name__ == "__main__":
             odat = load_OCO2_L1L2_overlay_data(ovr_d)
     
     # defining both name and XML url of the chosen layer (from the user's code)
-    # this happens only for Worldview layers
-    if cfg_d['sensor'] == 'Worldview':
+    if (cfg_d['sensor'] == 'Worldview'): 
         layer_name = layers_encoding[layers_encoding['Code'] == cfg_d['layer']]['Name'].values[0]
         layer_url = layers_url[layers_url['Name'] == layer_name]['Url'].values[0]
     
@@ -1330,18 +1431,24 @@ if __name__ == "__main__":
         auto_name = ""
     auto_name += cfg_d['straight_up_date']
 
-    auto_data_name = ovr_d['var_name_only'] + "_" + auto_name
-    auto_data_name += (ovr_d['version_file_tag']+
-                       ovr_d['qf_file_tag']+
-                       ovr_d['wl_file_tag']+
-                       ovr_d['fp_file_tag']+
-                       '.h5')
-    auto_plot_name = ovr_d['var_name_only'] + "_" + auto_name
-    auto_plot_name += (ovr_d['version_file_tag']+
-                       ovr_d['qf_file_tag']+
-                       ovr_d['wl_file_tag']+
-                       ovr_d['fp_file_tag']+
-                       '.png')
+    # construct auto output name from overlay data information if present
+    if ovr_d:
+        auto_data_name = ovr_d['var_name_only'] + "_" + auto_name
+        auto_data_name += (ovr_d['version_file_tag']+
+                           ovr_d['qf_file_tag']+
+                           ovr_d['wl_file_tag']+
+                           ovr_d['fp_file_tag']+
+                           '.h5')
+        auto_plot_name = ovr_d['var_name_only'] + "_" + auto_name
+        auto_plot_name += (ovr_d['version_file_tag']+
+                           ovr_d['qf_file_tag']+
+                           ovr_d['wl_file_tag']+
+                           ovr_d['fp_file_tag']+
+                           '.png')
+    else:
+        auto_data_name = auto_name
+        auto_plot_name = auto_name
+
     auto_background_name = auto_name + '.png'
 
     if cfg_d['sensor'] == 'Worldview':
@@ -1369,7 +1476,15 @@ if __name__ == "__main__":
 
     # construct filenames for the plot and optional h5 output file.
     out_plot_fullpath = os.path.join(cfg_d['out_plot_dir'], out_plot_name)
+    if (out_plot_fullpath != out_plot_name):
+        if not os.path.isdir(os.path.dirname(out_plot_fullpath)):
+            os.makedirs(os.path.dirname(out_plot_fullpath))
+            
     out_data_fullpath = os.path.join(cfg_d['out_data_dir'], out_data_name)
+    if (out_data_fullpath != out_data_name):
+        if not os.path.isdir(os.path.dirname(out_data_fullpath)):
+            os.makedirs(os.path.dirname(out_data_fullpath))
+            
     out_background_fullpath = os.path.join(cfg_d['out_plot_dir'], out_background_name)
 
     # if there is no overlay data present, or the 'background image'
@@ -1378,25 +1493,30 @@ if __name__ == "__main__":
         make_background_image = ovr_d['make_background_image']
         # there can be an overlay dict, but it might have no data.
         if len(odat['time']) > 0:
+            # here, replace the datetime in the config with the mean
+            # time from the overlay data, adding the optional time shift.
             dt = datetime.datetime.utcfromtimestamp(np.mean(odat['time']))
+            dt = dt + datetime.timedelta(minutes = ovr_d['time_shift'])
             cfg_d['datetime'] = dt
     else:
         make_background_image = True
-
+    
+    # create the background image based on the sensor
     if make_background_image:
-        if cfg_d['sensor'] == 'Worldview':
+        if (cfg_d['sensor'] == 'Worldview'):
             do_overlay_plot(
                 cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
-                cfg_d['date'], layer_name, np.array([]), np.array([]),
+                cfg_d['datetime'], layer_name, np.array([]), np.array([]),
                 np.array([]), np.array([]), layer_url,
                 interest_pt=cfg_d['ground_site'], cmap='black',
                 out_plot=out_background_fullpath, cities=cfg_d['city_labels'])
-        elif cfg_d['sensor'].startswith('GOES'):
+        elif (cfg_d['sensor'].startswith('GOES') or cfg_d['sensor'].startswith('Himawari')):
             import satpy_overlay_plots
-            satpy_overlay_plots.GOES_ABI_overlay_plot(
+            satpy_overlay_plots.nonworldview_overlay_plot(
                 cfg_d, None, None, out_plot_name=out_background_fullpath)
         else:
             raise ValueError('Unknown sensor: '+cfg_d['sensor'])
+
 
 
     # at this point, if there is no overlay to process, can exit here.
@@ -1434,23 +1554,23 @@ if __name__ == "__main__":
     else:
         cbar_name = ""
     
-    if cfg_d['sensor'] == 'Worldview':
-        do_overlay_plot(
-            cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
-            cfg_d['date'], layer_name, odat['lat'], odat['lon'], odat['var_data'],
-            cfg_d['out_plot_title'], layer_url,
-            var_vals_missing=odat['data_fill'],
-            lite_sid=odat['sounding_id'],
-            var_lims=ovr_d['var_lims'], interest_pt=cfg_d['ground_site'],
-            cmap=ovr_d['cmap'], alpha=ovr_d['alpha'],
-            lat_name=ovr_d['lat_name'], lon_name=ovr_d['lon_name'],
-            var_name=ovr_d['var_name'],
-            out_plot=out_plot_fullpath,
-            var_label=cbar_name, cities=cfg_d['city_labels'],
-            var_file=os.path.split(ovr_d['var_file'])[1])
-    elif cfg_d['sensor'].startswith('GOES'):
+    # overlay the data based on the sensor
+    if (cfg_d['sensor'] == 'Worldview'):
+        do_overlay_plot(cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
+                cfg_d['datetime'], layer_name, odat['lat'], odat['lon'], odat['var_data'],
+                cfg_d['out_plot_title'], layer_url,
+                var_vals_missing=odat['data_fill'],
+                lite_sid=odat['sounding_id'],
+                var_lims=ovr_d['var_lims'], interest_pt=cfg_d['ground_site'],
+                cmap=ovr_d['cmap'], alpha=ovr_d['alpha'],
+                lat_name=ovr_d['lat_name'], lon_name=ovr_d['lon_name'],
+                var_name=ovr_d['var_name'],
+                out_plot=out_plot_fullpath,
+                var_label=cbar_name, cities=cfg_d['city_labels'],
+                var_file=os.path.split(ovr_d['var_file'])[1])
+    elif (cfg_d['sensor'].startswith('GOES') or cfg_d['sensor'].startswith('Himawari')):
         import satpy_overlay_plots
-        satpy_overlay_plots.GOES_ABI_overlay_plot(
+        satpy_overlay_plots.nonworldview_overlay_plot(
             cfg_d, ovr_d, odat, var_label=cbar_name,
             out_plot_name=out_plot_fullpath)
     else:
