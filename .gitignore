@@ -2,4 +2,6 @@
 Keys.csv
 *.h5
 *~
-__pycache__
+__pycache
+*.nc
+*.nc4__
