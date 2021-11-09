@@ -30,6 +30,7 @@ import h5py
 
 import boto3
 import botocore
+from botocore.handlers import disable_signing
 
 import fnmatch
 
@@ -125,8 +126,10 @@ def get_aws_ABI_files(datetime_utc, domain, platform, hour_offsets, bands_list, 
     """
     
     # accessing the relevant S3 bucket
-    aws_keys = pd.read_csv('Keys.csv', header = 0)
-    s3 = boto3.resource('s3', aws_access_key_id = aws_keys['aws_access_key_id'].values[0], aws_secret_access_key = aws_keys['aws_secret_access_key'].values[0])
+    s3 = boto3.resource('s3')
+    
+    # See https://stackoverflow.com/questions/34865927/can-i-use-boto3-anonymously for reference
+    s3.meta.client.meta.events.register('choose-signer.s3.*', disable_signing)
     
     if (platform[-2:] == '16'):
         g_bucket = s3.Bucket('noaa-goes16')
@@ -318,8 +321,10 @@ def get_aws_AHI_files(datetime_utc, offsets, bands_list):
         datetime_utc.hour, rounded_minutes, 0)
 
     # connecting to the S3 Himawari bucket
-    aws_keys = pd.read_csv('Keys.csv', header = 0)
-    s3 = boto3.resource('s3', aws_access_key_id = aws_keys['aws_access_key_id'].values[0], aws_secret_access_key = aws_keys['aws_secret_access_key'].values[0])
+    s3 = boto3.resource('s3')
+    
+    # See https://stackoverflow.com/questions/34865927/can-i-use-boto3-anonymously for reference
+    s3.meta.client.meta.events.register('choose-signer.s3.*', disable_signing)
     hima_bucket = s3.Bucket('noaa-himawari8')
     
     # known AWS Hima filepath format

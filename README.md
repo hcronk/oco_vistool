@@ -179,9 +179,8 @@ reason of this Python parser is to get the relation, layer name - layer specific
 layers (as of June 2021) into a separate CSV file. This relation CSV file is used for plotting and styling the output image.
 The parser used a copy of the wmts capabilities file which was downloaded into the code directory from: https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi?SERVICE=WMTS&REQUEST=GetCapabilities
 
-#### AWS functionality (Keys.csv file)
-When either GOES or Himawari is chosen as the desired sensor in the config JSON file, there will appear a required key, such as the "files_loc". Two options (as of July 2021) for this key are: "aws" and "local". If the user wants to use the AWS S3 NOAA bucket as the source of background imagery, one would need to provide a Keys.csv file in the code directory. The file must have 2 columns with names: aws_access_key_id,aws_secret_access_key. Then, the user should provide each of the keys under the corresponding columns. To have these keys, one would need to create an AWS account and then generate both keys (or have an account with these keys being active).
-Full instruction on this process can be found in the "Programmatic access" part of the AWS documentation: https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html
+#### AWS functionality
+When either GOES or Himawari is chosen as a desired sensor in config.json, there will appear a required "files_loc" key. Two options for this key are: "aws" and "local". Starting with November 2021, if a user wants to use NOAA AWS S3 buckets as a source of background imagery ("files_loc": "aws"), one doesn't need to provide any personal AWS keys to the program. Downloading data from NOAA S3 buckets is handled automatically and anonymously by the vistool.
 
 Minimum command line call:  
 `python oco_vistool.py`
