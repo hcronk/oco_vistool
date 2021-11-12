@@ -42,7 +42,6 @@ from default_cmaps import default_cmaps
 from geo_scan_time import compute_time_offset, approx_scanline_time
 
 import numpy as np
-import math
 import pandas as pd
 
 from matplotlib import patheffects
@@ -380,8 +379,6 @@ def _process_overlay_dict(input_dict):
     return ovr_d
 
 def construct_target_box(target_id, delta_degree = 1.5):
-    km_per_lat_degree = 111
-    r_earth = 6378
     targets = pd.read_csv('targets.csv', index_col = 0)
     if (target_id not in targets['target_name'].values):
         raise ValueError('Provide a valid target ID')
@@ -389,9 +386,9 @@ def construct_target_box(target_id, delta_degree = 1.5):
     center_lon = targets[targets['target_name'] == target_id]['target_lon'].values[0]
     center_lat = targets[targets['target_name'] == target_id]['target_lat'].values[0]
     
-    # See https://stackoverflow.com/questions/7477003/calculating-new-longitude-latitude-from-old-n-meters
-    geo_upper_left = [center_lat + (km_per_lat_degree * delta_degree / r_earth) * (180 / math.pi), center_lon - ((km_per_lat_degree * delta_degree / r_earth) * (180 / math.pi))/(math.cos(math.radians(center_lat)))]
-    geo_lower_right = [center_lat - (km_per_lat_degree * delta_degree / r_earth) * (180 / math.pi), center_lon + ((km_per_lat_degree * delta_degree / r_earth) * (180 / math.pi))/(math.cos(math.radians(center_lat)))]
+    geo_upper_left = [center_lat + delta_degree, center_lon - delta_degree/(np.cos(np.deg2rad(center_lat)))]
+    geo_lower_right = [center_lat - delta_degree, center_lon + delta_degree/(np.cos(np.deg2rad(center_lat)))]
+    
     return geo_upper_left, geo_lower_right
 
 
