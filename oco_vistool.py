@@ -1033,6 +1033,8 @@ def get_layer_colorbar_params(layer_url):
                             next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split(' - ')
                         elif (' – ' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
                             next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split(' – ')
+                        else:
+                            next_range = [legend.findall("LegendEntry")[1].attrib.get('tooltip'), legend.findall("LegendEntry")[2].attrib.get('tooltip')]
                         tmp_diff = float(next_range[1].strip()) - float(next_range[0].strip())
                         tmp_lower = tmp_upper - tmp_diff
                         bounds_list.append(tmp_lower)
@@ -1050,6 +1052,8 @@ def get_layer_colorbar_params(layer_url):
                             next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split(' - ')
                         elif (' – ' in legend.findall("LegendEntry")[1].attrib.get('tooltip')):
                             next_range = legend.findall("LegendEntry")[1].attrib.get('tooltip').split(' – ')
+                        else:
+                            next_range = [legend.findall("LegendEntry")[1].attrib.get('tooltip'), legend.findall("LegendEntry")[2].attrib.get('tooltip')]
                         tmp_diff = float(next_range[1].strip()) - float(next_range[0].strip())
                         tmp_lower = tmp_upper - tmp_diff
                         bounds_list.append(tmp_lower)
@@ -1067,6 +1071,8 @@ def get_layer_colorbar_params(layer_url):
                             prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split(' - ')
                         elif (' – ' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
                             prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split(' – ')
+                        else:
+                            prev_range = [legend.findall("LegendEntry")[num_entries - 3].attrib.get('tooltip'), legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')]
                         tmp_diff = float(prev_range[1].strip()) - float(prev_range[0].strip())
                         tmp_upper = tmp_lower + tmp_diff
                         bounds_list.append(tmp_lower)
@@ -1083,6 +1089,8 @@ def get_layer_colorbar_params(layer_url):
                             prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split(' - ')
                         elif (' – ' in legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')):
                             prev_range = legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip').split(' – ')
+                        else:
+                            prev_range = [legend.findall("LegendEntry")[num_entries - 3].attrib.get('tooltip'), legend.findall("LegendEntry")[num_entries - 2].attrib.get('tooltip')]                        
                         tmp_diff = float(prev_range[1].strip()) - float(prev_range[0].strip())
                         tmp_upper = tmp_lower + tmp_diff
                         bounds_list.append(tmp_lower)
@@ -1100,7 +1108,7 @@ def get_layer_colorbar_params(layer_url):
                             tmp_lower = (float(entry.attrib.get('tooltip').split(' – ')[0].strip()))
                         else:
                             tmp_lower = (float(entry.attrib.get('tooltip').strip()))
-
+   
                         bounds_list.append(tmp_lower)
                         df_list.append(list(map(lambda i: int(i)/255, entry.attrib.get('rgb').split(','))))
 
