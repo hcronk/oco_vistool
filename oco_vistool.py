@@ -42,6 +42,7 @@ from default_cmaps import default_cmaps
 from geo_scan_time import compute_time_offset, approx_scanline_time
 
 import numpy as np
+import math
 import pandas as pd
 
 from matplotlib import patheffects
