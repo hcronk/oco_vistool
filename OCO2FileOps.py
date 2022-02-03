@@ -1,4 +1,5 @@
 import h5py
+import netCDF4
 import sys
 import numpy as np
 import datetime
@@ -9,48 +10,91 @@ class LiteSIFFile:
         self.lite_file = lite_file
 
     def open_file(self):
-        self.lf = h5py.File(self.lite_file, 'r')
-    
-    def get_lat(self):
-        return self.lf['latitude'][:]
-        
-    def get_lon(self):
-        return self.lf['longitude'][:]
+        # many things were renamed in OCO3 B10... as an attempt to
+        # simplify reading, determine if this is a B10 format file,
+        # and set variable names accordingly.
+        self.lf = netCDF4.Dataset(self.lite_file, 'r')
+        if 'Metadata' in self.lf.groups:
+            self._time_name = 'Delta_Time'
+            self._mode_name = 'Metadata/MeasurementMode',
+            self._orbit_name = 'Metadata/OrbitId'
+            self._footprint_name = 'Metadata/FootprintId'
+            self._sid_name = 'Metadata/SoundingId'
+        else:
+            self._time_name = 'time'
+            self._mode_name = 'measurement_mode'
+            self._orbit_name = 'orbit_number'
+            self._footprint_name = 'footprint'
+            self._sid_name = 'sounding_id'
 
-    def get_vertex_lat(self):
-        return self.lf['footprint_vertex_latitude'][:]
-        
-    def get_vertex_lon(self):
-        return self.lf['footprint_vertex_longitude'][:]
-        
+    def get_product_version(self):
+        # this does not work with the method setup in the open_file,
+        # because the old way used an attribute.
+        if 'Metadata' in self.lf.groups:
+            return self.lf['Metadata/CollectionLabel'].getValue()
+        return self.product_version
+
+    # LtSIF stores the target name/ID very differently than
+    # the LtCO2 - in each case, derive an array that matches
+    # how it is done in LtCO2.
+    def get_target_id(self):
+        num_sounding = self.lf.dimensions['sounding_dim'].size
+        target_id = np.zeros(num_sounding, dtype=object)
+        target_id[:] = 'none'
+        if 'Sequences' in self.lf.groups:
+            for s in range(self.lf.dimensions['sequences_dim'].size):
+                msk = self.lf['Sequences/SequencesIndex'][:] == s
+                target_id[msk] = self.lf['Sequences/SequencesId'][s]
+        return target_id
+
+    def get_target_name(self):
+        num_sounding = self.lf.dimensions['sounding_dim'].size
+        target_name = np.zeros(num_sounding, dtype=object)
+        target_name[:] = 'none'
+        if 'Sequences' in self.lf.groups:
+            for s in range(self.lf.dimensions['sequences_dim'].size):
+                msk = self.lf['Sequences/SequencesIndex'][:] == s
+                target_name[msk] = self.lf['Sequences/SequencesName'][s]
+        return target_name
+
+    # note the Lite SIF has a different code -> string mapping for
+    # the operation mode.
+    def get_operation_mode(self):
+        opmode_code = self.lf[self._mode_name][:]
+        opmode = np.zeros(opmode_code.shape[0], dtype='S3')
+        opmode_map = ['ND', 'GL', 'TG', 'SAM', 'XS']
+        for code, opmode_str in enumerate(opmode_map):
+            msk = opmode_code == code
+            opmode[msk] = opmode_str
+        return opmode
+
     def get_sid(self):
-        return self.lf['sounding_id'][:]
+        return self.lf[self._sid_name][:]
         
     def get_orbit(self):
-        return self.lf['orbit_number'][:]
+        return self.lf[self._orbit_name][:]
         
     def get_footprint(self):
-        return self.lf['footprint'][:]
-        
-    def get_SIF757(self):
-        return self.lf['SIF_757nm'][:]
-    
-    def get_SIF771(self):
-        return self.lf['SIF_771nm'][:]
-    
-    def get_SIF_units(self):
-        SIF_obj = self.lf['SIF_757nm']
-        return SIF_obj.attrs.get('unit').decode('utf-8') 
+        return self.lf[self._footprint_name][:]
 
     def get_time(self):
+
         # gets time and shifts it to match the 1970 reference time
         # (standard unix time stamp)
         # this matches LtCO2 except that there is a leap second
         # mismatch (the same sounding ID in LtCO2 will be off by 
         # the leap second change.)
-        t = self.lf['time'][:]
-        dt = datetime.datetime(1993,1,1) - datetime.datetime(1970,1,1)
+
+        t = self.lf[self._time_name][:]
+
+        # B10 SIF has a different time reference
+        if 'Delta_Time' in nc.lf.variables:
+            dt = datetime.datetime(1990,1,1) - datetime.datetime(1970,1,1)
+        else:
+            dt = datetime.datetime(1993,1,1) - datetime.datetime(1970,1,1)
+
         t = t + dt.total_seconds()
+
         return t
 
     def close_file(self):
@@ -61,25 +105,47 @@ class LiteCO2File:
 
     def __init__(self, lite_file):
         self.lite_file = lite_file
-
+        
     def open_file(self):
-        self.lf = h5py.File(self.lite_file, 'r')
-    
-    def get_lat(self):
-        return self.lf['latitude'][:]
-        
-    def get_lon(self):
-        return self.lf['longitude'][:]
+        self.lf = netCDF4.Dataset(self.lite_file, 'r')
 
-    def get_vertex_lat(self):
-        return self.lf['vertex_latitude'][:]
-        
-    def get_vertex_lon(self):
-        return self.lf['vertex_longitude'][:]
+    def get_product_version(self):
+        # try several different variables... there is not consistency
+        # among versions here.
+        try:
+            product_version = self.lf.getncattr('CollectionLabel')
+        except AttributeError:
+            try:
+                product_version = self.lf.getncattr('BuildId')
+            except:
+                product_version = 'unknown'
+        return product_version
 
-    def get_xco2(self):
-        return self.lf['xco2'][:]
-        
+    def get_target_id(self):
+        if 'target_id' in self.lf['Sounding'].variables:
+            target_id = self.lf['Sounding/target_id'][:]
+        else:
+            target_id = np.zeros(self.lf.dimensions['sounding_id'].size, object)
+            target_id[:] = 'none'
+        return target_id
+
+    def get_target_name(self):
+        if 'target_name' in self.lf['Sounding'].variables:
+            target_name = self.lf['Sounding/target_name'][:]
+        else:
+            target_name = np.zeros(self.lf.dimensions['sounding_id'].size, object)
+            target_name[:] = 'none'
+        return target_name
+
+    def get_operation_mode(self):
+        opmode_code = self.lf['/Sounding/operation_mode'][:]
+        opmode = np.zeros(opmode_code.shape[0], dtype=object)
+        opmode_map = ['ND', 'GL', 'TG', 'XS', 'SAM']
+        for code, opmode_str in enumerate(opmode_map):
+            msk = opmode_code == code
+            opmode[msk] = opmode_str
+        return opmode
+
     def get_warn(self):
         return self.lf['warn_level'][:]
 
@@ -94,24 +160,6 @@ class LiteCO2File:
         
     def get_footprint(self):
         return self.lf['/Sounding/footprint'][:]
-
-    def get_sfcP(self):
-        return self.lf['/Retrieval/psurf'][:]
-        
-    def get_sfcP_apriori(self):
-        return self.lf['/Retrieval/psurf_apriori'][:]
-    
-    def get_delta_sfcP(self):
-        return self.lf['/Preprocessors/dp_abp'][:]
-
-    def get_co2_ratio(self):
-        return self.lf['/Preprocessors/co2_ratio'][:]
-        
-    def get_co2_ratio(self):
-        return self.lf['/Preprocessors/co2_ratio'][:]
-
-    def get_sfc_type(self):
-        return self.lf['/Retrieval/surface_type'][:]
 
     def get_time(self):
         return self.lf['time'][:]
