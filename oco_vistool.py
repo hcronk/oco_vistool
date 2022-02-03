@@ -134,7 +134,7 @@ def read_shp(filename):
 
 def _process_overlay_dict(input_dict):
     """
-    Process OCO-2 overlay data input.
+    Process OCO overlay data input.
     this is a helper normally called by process_config_dict(), see docstring there.
 
     In general, this is doing similar work as process_config_dict(), just this function
@@ -149,6 +149,20 @@ def _process_overlay_dict(input_dict):
             raise ValueError('Config file, overlay info is missing required key: '+k)
 
     ovr_d['var_file'] = input_dict['file']
+    if input_dict['file'].startswith('oco2'):
+        ovr_d['sensor'] = 'OCO-2'
+    elif input_dict['file'].startswith('oco3'):
+        ovr_d['sensor'] = 'OCO-3'
+    else:
+        ovr_d['sensor'] = ''
+
+    # TBD - might need other ways to make "nicer" title strings...
+    # for now, just making a proper "XCO2" with subscripting
+    if input_dict['variable'] == 'xco2':
+        ovr_d['var_title_string'] = '$X_{CO_2}$'
+    else:
+        ovr_d['var_title_string'] = ovr_d['var_name']
+
     ovr_d['var_name'] = input_dict['variable']
     # trims off group names (for certain vars) - this is needed at the end
     # for the auto generated filename
@@ -931,6 +945,13 @@ def load_OCO2_Lite_overlay_data(ovr_d):
     else:
         lite_file = LiteSIFFile(ovr_d['var_file'])
         lite_file.open_file()
+
+    dd['data_version'] = lite_file.get_product_version()
+
+    lite_target_id = lite_file.get_target_id()
+    lite_target_name = lite_file.get_target_name()
+    lite_operation_mode = lite_file.get_operation_mode()
+
     lite_time = lite_file.get_time()
     lite_sid = lite_file.get_sid()
     lite_orbit = lite_file.get_orbit()
@@ -996,6 +1017,12 @@ def load_OCO2_Lite_overlay_data(ovr_d):
     dd['lon'] = lon_data[combined_msk, ...]
     dd['sounding_id'] = lite_sid[combined_msk]
     dd['time'] = lite_time[combined_msk]
+
+    # for the remaining metadata-like values, take just the first value.
+    # there isn't an obvious way to deal with data that changes modes
+    dd['target_id'] = lite_target_id[combined_msk][0]
+    dd['target_name'] = lite_target_name[combined_msk][0]
+    dd['operation_mode'] = lite_operation_mode[combined_msk][0]
 
     return dd
 
