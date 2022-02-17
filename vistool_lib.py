@@ -5,6 +5,7 @@ import numpy as np
 
 import cartopy.crs as ccrs
 from cartopy.io import shapereader
+from shapefile import ShapefileException
 from cartopy.mpl.geoaxes import GeoAxes
 
 from pyproj import Proj
@@ -12,6 +13,7 @@ from pyproj import Proj
 import shapely.geometry as sgeom
 from shapely.strtree import STRtree
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -90,11 +92,12 @@ def get_overlay_boundingbox(odat, target_latlon, edge_width=0.25):
 
     return box
 
-def add_coastlines(latlon_extent, ax1, coastline_dir):
+def add_coastlines(latlon_extent, ax):
     """
     new method for adding coastlines, to replace the cartopy builtin
-    method. This is dependent on the GSHHG data, "h"igh resolution
-    shapefiles.
+    method. This is dependent on the GSHHS data, "h"igh resolution
+    shapefiles. We rely on the cartopy shapereader to manage the
+    GSHHS datafiles.
 
     Copies the method created by Rob Nelson for the OCO3 quicklook
     imagery.
@@ -103,12 +106,12 @@ def add_coastlines(latlon_extent, ax1, coastline_dir):
     latlon_extent: W,S,E,N of the bounding box in a 4-element arraylike.
     ax: the axis to use for drawing coastlines.
     """
-    W, S, E, N = latlon_extent
 
-    shp = shapereader.Reader(coastline_dir+'GSHHS_h_L1.shp')
-    shp2 = shapereader.Reader(coastline_dir+'GSHHS_h_L2.shp')
-    shp3 = shapereader.Reader(coastline_dir+'GSHHS_h_L3.shp')
-    coastlines_all = [[geoms for geoms in shp.geometries()],
+    shp1 = shapereader.Reader(shapereader.gshhs('h', 1))
+    shp2 = shapereader.Reader(shapereader.gshhs('h', 2))
+    shp3 = shapereader.Reader(shapereader.gshhs('h', 3))
+
+    coastlines_all = [[geoms1 for geoms1 in shp1.geometries()],
                       [geoms2 for geoms2 in shp2.geometries()],
                       [geoms3 for geoms3 in shp3.geometries()]]
     coastlines = [item for sublist in coastlines_all for item in sublist]
@@ -116,6 +119,7 @@ def add_coastlines(latlon_extent, ax1, coastline_dir):
     # STRtree is used to efficiently discard most of the coastline data,
     # which is a global dataset. In effect, this loop identifies the
     # small subset of coastline data that resides in the latlon box.
+    W, S, E, N = latlon_extent
     plotting_box = sgeom.Polygon([[W,S],[E,S],[E,N],[W,N],[W,S]])
     tree = STRtree([plotting_box])
     coasts_in_box = []
@@ -156,8 +160,7 @@ def _add_background_map(latlon_extent, ax1):
 
 
 def setup_axes(latlon_extent, crs, fignum=1,
-               figsize=(20,20), background_map=False,
-               coastline_dir = './gshhg-shp-2.3.7/GSHHS_shp/h/'):
+               figsize=(20,20), background_map=False):
     """
     setup axes to match the Quicklook imagery.
     copying code from R. Nelson
@@ -171,11 +174,20 @@ def setup_axes(latlon_extent, crs, fignum=1,
     background_map: set to True to use the ESRI supplied background map.
         generally this should be false, since this is designed to use
         Geo imager data. For tests only.
+
+    returns:
+    fig : the created matplotlib figure object
+    ax1 : the axis for the display imagery and overlay
+    ax2 : the inset axis
+    cax : colorbar axis
+    fig_scalefactor : a float scalefactor to control size of certain
+        annotations, relative to the (20,20) "standard" fig size.
     """
 
     W, S, E, N = latlon_extent
 
     fig = plt.figure(fignum, figsize=figsize)
+    fig.clf()
     ax1 = plt.axes(projection=crs)
     ax1.set_extent([W,E,S,N], ccrs.PlateCarree())
 
@@ -189,7 +201,7 @@ def setup_axes(latlon_extent, crs, fignum=1,
     cax_width = 0.4 * fig_scalefactor
 
     #Load the coastlines
-    add_coastlines(latlon_extent, ax1, coastline_dir)
+    add_coastlines(latlon_extent, ax1)
 
     #Grid
     gl = ax1.gridlines(draw_labels=True, color="0.75")
@@ -216,7 +228,7 @@ def setup_axes(latlon_extent, crs, fignum=1,
                 marker='*',transform=ccrs.PlateCarree())
     ax2.background_img(name='ne_shaded', resolution='low')
 
-    return ax1, ax2, cax, fig_scalefactor
+    return fig, ax1, ax2, cax, fig_scalefactor
 
 
 def create_plot_title_string(cfg_d, ovr_d, odat):
@@ -255,3 +267,107 @@ def create_plot_title_string(cfg_d, ovr_d, odat):
         title += ', Orbit ' + str(ovr_d['orbit'])
 
     return title
+
+
+def overlay_data(ax, cb_ax, odata, var_label=None,
+                 fig_scalefactor=1.0, **kw):
+    """
+    overlay data onto background image.
+    if vertices are available, shapely polygon obects are used;
+    otherwise mpl.scatter is used.
+    This function also takes care of the colorbar associated to
+    the overlaid data.
+
+    inputs:
+    ax: axis object where polygons will be drawn
+    cb_ax: the colorbar axis object. Note this is only used if
+       the cmap is a colormap.
+    odata: oco2 overlay data dictionary
+
+    var_label: string containing a label to add to the colorbar,
+         typically the name and units of the variable being overlaid.
+    fig_scalefactor: floating point number to scale the annotation
+         text sizes in the colorbar.
+
+    extra kw: cmap (string colormap or color name), vmin, vmax, alpha
+
+    returns:
+    None
+
+    method based on
+    https://scitools.org.uk/cartopy/docs/latest/gallery/hurricane_katrina.html
+    #sphx-glr-gallery-hurricane-katrina-py
+
+    the add_geometries() method would accept a list of polygons, but then
+    there is no obvious way to color them according to the colorbar -
+    so, instead do them one at a time.
+    """
+
+    n_vals = odata['lat'].shape[0]
+
+    if 'cmap' in kw:
+        if kw['cmap'] in plt.colormaps():
+            cmap_name = kw['cmap']
+            use_cmap = True
+        elif kw['cmap'] in mpl.colors.cnames.keys():
+            color_name = kw['cmap']
+            use_cmap = False
+        else:
+            print(kw['cmap'] + " is not a recognized color or colormap. "+
+                  "Data will be displayed in red")
+            color_name = 'red'
+            use_cmap = False
+    else:
+        cmap_name = 'jet'
+        use_cmap = True
+
+    if 'alpha' in kw:
+        alpha = kw['alpha']
+    else:
+        alpha = 1.0
+
+    if use_cmap:
+        if 'vmin' in kw:
+            vmin = kw['vmin']
+        else:
+            vmin = odata['var_data'].min()
+        if 'vmax' in kw:
+            vmax = kw['vmax']
+        else:
+            vmax = odata['var_data'].max()
+
+        C_func = mpl.cm.get_cmap(cmap_name)
+        N_func = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+
+    # vertices: loop over footprints and use add_geometries()
+    if odata['lat'].ndim == 2:
+
+        for n in range(n_vals):
+            poly_pts = np.ma.stack([odata['lon'][n,:], odata['lat'][n,:]]).T
+            polygon = sgeom.Polygon(poly_pts)
+
+            if use_cmap:
+                facecolor = C_func(N_func(odata['var_data'][n]))
+            else:
+                facecolor = color_name
+            ax.add_geometries([polygon], ccrs.PlateCarree(),
+                              facecolor=facecolor, alpha=alpha,
+                              edgecolor='none')
+
+    # footprint centers, use scatter()
+    else:
+        if use_cmap:
+            ax.scatter(odata['lon'], odata['lat'], c=odata['var_data'],
+                       cmap=cmap_name, vmin=vmin, vmax=vmax,
+                       s=9, edgecolor='none', transform=ccrs.PlateCarree())
+        else:
+            ax.scatter(odata['lon'], odata['lat'], c=color_name,
+                       s=9, edgecolor='none', transform=ccrs.PlateCarree())
+
+    if use_cmap:
+        cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=N_func, cmap=C_func),
+                            extend='both',cax=cb_ax)
+        cbar.set_label(var_label, size=28*fig_scalefactor,
+                       rotation=270, labelpad=35*fig_scalefactor)
+        cbar.ax.tick_params(labelsize=22*fig_scalefactor)
+        cbar.ax.yaxis.get_offset_text().set_fontsize(22*fig_scalefactor)
