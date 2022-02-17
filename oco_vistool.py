@@ -40,6 +40,7 @@ import urllib.request
 from OCO2FileOps import *
 from default_cmaps import default_cmaps
 from geo_scan_time import compute_time_offset, approx_scanline_time
+import vistool_lib as vl
 
 import numpy as np
 import math
@@ -1151,12 +1152,9 @@ def get_layer_colorbar_params(layer_url):
     return cmap, norm, ticks_list, bounds_list, units
 
 def do_overlay_plot(
-    geo_upper_left, geo_lower_right, date, layer_name, 
-    var_lat, var_lon, var_vals, plot_title, layer_url, var_vals_missing=None, lite_sid=np.empty([]),
-    var_lims=None, interest_pt=None,
-    cmap='jet', alpha=1, lat_name=None, lon_name=None, var_name=None,
-    out_plot="vistool_output.png", var_label=None, cities=None,
-    var_file=None):
+        cfg_d, ovr_d, odat, layer_name, layer_url,
+        out_plot="vistool_output.png", var_label=None,
+        var_file=None, figsize=(20,20)):
     """
     Given the data from all dictionaries and layer info, overlays the OCO-2 data.
 
@@ -1165,52 +1163,62 @@ def do_overlay_plot(
     inputs:
     all relevant fields from the dictionaries and some other parsed layer fields
     """
-    
+
+    # Historical note: the original code used a long argument list with
+    # many keywords for different inputs. The newer method (implemented
+    # first with the satpy plotting functionality) uses three python
+    # dictionaries to pass around the data.
+    # I've updated this function to use those dictionaries so the function
+    # inputs between the two paths are now the same, and then simply
+    # remapped the variables to the original names here.
+
+    geo_upper_left = cfg_d['geo_upper_left']
+    geo_lower_right = cfg_d['geo_lower_right']
+    date = cfg_d['datetime']
+
+    # these might be able to be just passed around as odat now?
+    plot_title = cfg_d['out_plot_title']
+    interest_pt = cfg_d['ground_site']
+    cities = cfg_d['city_labels']
+
+    if ovr_d:
+        var_lims = ovr_d['var_lims']
+        cmap = ovr_d['cmap']
+        alpha = ovr_d['alpha']
+        lat_name = ovr_d['lat_name']
+        lon_name = ovr_d['lon_name']
+        var_name = ovr_d['var_name']
+        #Check if color is single or map
+        if cmap in plt.colormaps():
+            color_or_cmap = "cmap"
+        elif cmap in mpl.colors.cnames.keys():
+            color_or_cmap = "color"
+        else:
+            print(cmap + " is not a recognized color or colormap. Data will be displayed in red")
+            cmap = 'red'
+            color_or_cmap = "color"
+        # note - if var_vals.shape is zero, the var_lims are not needed, since
+        # the colorbar and scatter or polygon collection will not be plotted.
+        if var_lims is None and var_vals.shape[0] > 0:
+            var_lims = [var_vals.min(), var_vals.max()]
+
+    if odat:
+        var_lat = odat['lat']
+        var_lon = odat['lon']
+        var_vals = odat['var_data']
+        var_vals_missing = odat['data_fill']
+        lite_sid = odat['sounding_id']
+
     #Calculate lat/lon lims of RGB
     maxy = geo_upper_left[0]
     minx = geo_upper_left[1]
     miny = geo_lower_right[0]
     maxx = geo_lower_right[1]
-
-    deltax = maxx - minx
-    deltay = maxy - miny
-
-    fig_y = 7.1
-    fig_x = fig_y * deltax / deltay
-    
-    #Check if color is single or map
-    if cmap in plt.colormaps():
-        color_or_cmap = "cmap"
-    elif cmap in mpl.colors.cnames.keys():
-        color_or_cmap = "color"
-    else:
-        print(cmap + " is not a recognized color or colormap. Data will be displayed in red")
-        cmap = 'red'
-        color_or_cmap = "color"
-
-    if color_or_cmap == "cmap":
-        fig_x += 2
-
-    # note - if var_vals.shape is zero, the var_lims are not needed, since
-    # the colorbar and scatter or polygon collection will not be plotted.
-    if var_lims is None and var_vals.shape[0] > 0:
-            var_lims = [var_vals.min(), var_vals.max()]
+    latlon_extent = (minx, miny, maxx, maxy)
 
     ### Plot prep ###
-    states_provinces = cfeature.NaturalEarthFeature(
-        category='cultural',
-        name='admin_1_states_provinces_lines',
-        scale='50m',
-        facecolor='none')
-
-
-    ### Plot the image ###
-    if var_vals.shape:
-        fig = plt.figure(figsize = (fig_x + 1, fig_y), dpi = 150)
-    else:
-        fig = plt.figure(figsize = (fig_x, fig_y), dpi = 150)
-
-    gs =  gridspec.GridSpec(16, 16)
+    fig, ax, inset_ax, cb_ax, fig_scalefactor = vl.setup_axes(
+        latlon_extent, ccrs.PlateCarree())
     
     # request the needed layer and plot it
     url = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi'
@@ -1246,21 +1254,28 @@ def do_overlay_plot(
     date_string = date.strftime('%Y-%m-%dT%H:%M:%SZ')
     print('Requested time from Worldview: ', date_string)
 
-    ax = plt.subplot(gs[0:-1, 3:-2], projection=ccrs.PlateCarree())
     ax.set_xlim((minx, maxx))
     ax.set_ylim((miny, maxy))
     im = ax.add_wmts(wmts, layer, wmts_kwargs={'time': date_string})
-    txt = ax.text(minx, miny, wmts[layer].title, fontsize=10, color='wheat',
+    txt = ax.text(minx, miny, wmts[layer].title,
+                  fontsize=24*fig_scalefactor, color='wheat',
                   transform=ccrs.Geodetic())
     txt.set_path_effects([patheffects.withStroke(linewidth=5,
                                                  foreground='black')])
 
-    ax.coastlines(resolution = '10m', color = 'white', linewidth = 1)
+    # ToDo: what parts are redundant to GSHHG?
+    states_provinces = cfeature.NaturalEarthFeature(
+        category='cultural',
+        name='admin_1_states_provinces_lines',
+        scale='50m',
+        facecolor='none')
     ax.add_feature(states_provinces, edgecolor='black', linewidth=1)
     ax.add_feature(cfeature.LAND, edgecolor='black', linewidth=1)
     ax.add_feature(cfeature.OCEAN, edgecolor='black', linewidth=1)
     ax.add_feature(cfeature.BORDERS, edgecolor='black', linewidth=1)
 
+    # ToDo: this needs to get included in satpy plots.
+    # move to vl?
     if cities is not None:
         populated_places_filename = code_dir+'/natural_earth/ne_10m_populated_places'
         df = read_shp(populated_places_filename)
@@ -1274,104 +1289,39 @@ def do_overlay_plot(
 
     if interest_pt is not None:
         ax.plot(interest_pt[1], interest_pt[0], 'w*', markersize=10, transform=ccrs.Geodetic())
-
-    ylocs, ylabels = plt.yticks()
-    xlocs, xlabels = plt.xticks()
-
-    ax_minlat = plt.subplot(gs[-1, 1])
-    ax_maxlat = plt.subplot(gs[0, 1])
-    ax_minlon = plt.subplot(gs[-1, 3])
-    ax_maxlon = plt.subplot(gs[-1, -2])
-
-    ax_minlat.axis('off')
-    ax_maxlat.axis('off')
-    ax_maxlon.axis('off')
-    ax_minlon.axis('off')
-
-    ax_minlat.set_title(str("%.1f" % ylocs[0]), horizontalalignment='left', verticalalignment='bottom', fontsize=10, fontweight='bold')
-    ax_maxlat.set_title(str("%.1f" % ylocs[-1]), horizontalalignment='left', verticalalignment='top', fontsize=10, fontweight='bold')
-    ax_minlon.set_title(str("%.1f" % xlocs[0]), horizontalalignment='center', verticalalignment='top', fontsize=10, fontweight='bold')
-    ax_maxlon.set_title(str("%.1f" % xlocs[-1]), horizontalalignment='right', verticalalignment='top', fontsize=10, fontweight='bold')
-    
-    patches = []
-
-    if var_lat.ndim == 2:
-        zip_it = np.ma.dstack([var_lon, var_lat])
     
     # if the XML file exists for the chosen layer (the layer is quantitative)
     if (layer_url != 'Null'):
         # building the second colorbar
         cmap2, norm2, ticks_list, bounds_list, units = get_layer_colorbar_params(layer_url)
-        ax2 = plt.subplot(gs[-1, 2:-2])
-        cb2 = mpl.colorbar.ColorbarBase(ax2, cmap=cmap2, norm=norm2, orientation = 'horizontal',
-                                        ticks = ticks_list + [bounds_list[0], bounds_list[-1]])
+        # this needs to be replaced with a new axis.
+        # leaving this commented out until I can fix up the code.
+        #ax2 = plt.subplot(gs[-1, 2:-2])
+        #cb2 = mpl.colorbar.ColorbarBase(ax2, cmap=cmap2, norm=norm2, orientation = 'horizontal',
+        #                                ticks = ticks_list + [bounds_list[0], bounds_list[-1]])
                 
-        for t in cb2.ax.xaxis.get_ticklabels():
-            t.set_weight("bold")
-            t.set_fontsize(8)
-            t.set_rotation(45)
+        #for t in cb2.ax.xaxis.get_ticklabels():
+        #    t.set_weight("bold")
+        #    t.set_fontsize(8)
+        #    t.set_rotation(45)
 
         # if units were stated in the XML
-        if (units != None):
-            cb2.ax.set_xlabel('# in ' + units, fontdict=dict(weight='bold'))
+        #if (units != None):
+        #    cb2.ax.set_xlabel('# in ' + units, fontdict=dict(weight='bold'))
 
-    if color_or_cmap == "cmap" and var_vals.shape[0] > 0:
-        # vertex points for each footprint
-        if var_lat.ndim == 2 and var_vals.ndim == 1:
-            for row in range(zip_it.shape[0]):
-                polygon = mpatches.Polygon(zip_it[row,:,:])
-                patches.append(polygon)
-
-            p = mpl.collections.PatchCollection(patches, cmap=cmap, alpha=alpha, edgecolor='none')
-            p.set_array(var_vals)
-            p.set_clim(var_lims[0], var_lims[1])
-            ax.add_collection(p)
-
-        # or just plot the central (sounding) lat lon.
+    if ovr_d is not None:
+        if ovr_d['var_lims']:
+            vmin, vmax = ovr_d['var_lims']
+            vl.overlay_data(ax, cb_ax, odat, cmap=ovr_d['cmap'],
+                            vmin=vmin, vmax=vmax,
+                            var_label=var_label, alpha=ovr_d['alpha'],
+                            fig_scalefactor=fig_scalefactor)
         else:
-            ax.scatter(var_lon, var_lat, c=var_vals,
-                       cmap=cmap, edgecolor='none', s=2, vmax=var_lims[1], vmin=var_lims[0])
-        cb_ax1 = plt.subplot(gs[0:-1, -1])
-        norm1 = mpl.colors.Normalize(vmin = var_lims[0], vmax = var_lims[1])
-        cmap_obj1 = mpl.cm.get_cmap(cmap)
-        cb1 = mpl.colorbar.ColorbarBase(cb_ax1, cmap=cmap_obj1, orientation = 'vertical', norm = norm1)
-        if var_label:
-            cb1_lab = cb1.ax.set_xlabel(var_label, labelpad=8, fontweight='bold')
-            cb1_lab.set_fontsize(12)
-            cb1.ax.xaxis.set_label_position("top")
-        for t in cb1.ax.yaxis.get_ticklabels():
-            t.set_weight("bold")
-            t.set_fontsize(12)
-
-    if color_or_cmap == "color" and var_vals.shape[0] > 0:
-
-        # vertex points for each footprint
-        if var_lat.ndim == 2 and var_vals.ndim == 1:
-            for row in range(zip_it.shape[0]):
-                polygon = mpatches.Polygon(zip_it[row,:,:], color=cmap)
-                patches.append(polygon)
-            p = mpl.collections.PatchCollection(patches, alpha=alpha, edgecolor='none',
-                                                match_original=True)
-            ax.add_collection(p)
-
-        # or just plot the central (sounding) lat lon.
-        else:
-            ax.scatter(var_lon, var_lat, c=cmap, edgecolor='none', s=2)
-
-    todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
-    
-    if plot_title == 'auto':
-        if var_file:
-            ax.set_title('Overlay data from '+
-                         os.path.split(ovr_d['var_file'])[1] +
-                         '\nbackground image from Worldview' +
-                         '\nplot created on ' + todays_date,
-                         size='x-small')
-        else:
-            ax.set_title('background image from Worldview' +
-                         '\nplot created on ' + todays_date,
-                         size='x-small')
-
+            vl.overlay_data(ax, cb_ax, odat, cmap=ovr_d['cmap'],
+                            var_label=var_label, alpha=ovr_d['alpha'],
+                            fig_scalefactor=fig_scalefactor)
+    else:
+        cb_ax.set_visible(False)
 
     # during testing, it appears that sometimes the scatter
     # could cause MPL to shift the axis range - I think because one
@@ -1379,31 +1329,17 @@ def do_overlay_plot(
     # so, here force it back to the original domain.
     img_extent = (minx, maxx, miny, maxy)
     ax.axis(img_extent)
+    print('plot_title: ', plot_title)
+    if plot_title == 'auto':
+        title_string = vl.create_plot_title_string(cfg_d, ovr_d, odat)
+    else:
+        title_string = cfg_d['out_plot_title']
+    print('title_string: ', title_string)
+    title_size = int(np.round(30 * np.mean(figsize)/20.0))
+    ax.set_title(title_string, size=title_size, y=1.01)
 
-    inset_extent_x = [minx, maxx]
-    inset_extent_y = [miny, maxy]
+    fig.savefig(out_plot, dpi=150)
 
-    inset_extent_x = [x + 360 if x < 0 else x for x in inset_extent_x]
-    inset_extent_y = [y + 180 if y < 0 else y for y in inset_extent_y]
-
-    inset_extent_x[0] -= 20
-    inset_extent_y[0] -= 20
-    inset_extent_x[1] += 20
-    inset_extent_y[1] += 20
-
-    inset_extent_x = [x - 360 if x > 180 else x for x in inset_extent_x]
-    inset_extent_y = [y - 180 if y > 90 else y for y in inset_extent_y]
-
-    inset_ax = plt.subplot(gs[7:9, 0:3], projection=ccrs.PlateCarree())
-    inset_ax.set_extent([inset_extent_x[0], inset_extent_x[1], inset_extent_y[0], inset_extent_y[1]])
-
-    inset_ax.coastlines()
-    inset_ax.add_feature(cfeature.LAKES, edgecolor='black', facecolor='none')
-    extent_box = sgeom.box(minx, miny, maxx, maxy)
-    inset_ax.add_geometries([extent_box], ccrs.PlateCarree(), color='none', edgecolor='red')
-    inset_ax.set_aspect('auto')
-
-    fig.savefig(out_plot, dpi=150, bbox_inches='tight')
     print("\nFigure saved at "+out_plot)
 
 ### Static Definitions
@@ -1540,11 +1476,8 @@ if __name__ == "__main__":
     if make_background_image:
         if (cfg_d['sensor'] == 'Worldview'):
             do_overlay_plot(
-                cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
-                cfg_d['datetime'], layer_name, np.array([]), np.array([]),
-                np.array([]), np.array([]), layer_url,
-                interest_pt=cfg_d['ground_site'], cmap='black',
-                out_plot=out_background_fullpath, cities=cfg_d['city_labels'])
+                cfg_d, None, None, layer_name, layer_url,
+                out_plot=out_background_fullpath)
         elif (cfg_d['sensor'].startswith('GOES') or cfg_d['sensor'].startswith('Himawari')):
             import satpy_overlay_plots
             satpy_overlay_plots.nonworldview_overlay_plot(
@@ -1585,24 +1518,17 @@ if __name__ == "__main__":
             else:
                 cbar_cap_strings = cbar_cap_strings + cap_s +" "
         cbar_cap_strings = cbar_cap_strings[:-1]
-        cbar_name = cbar_cap_strings+'\n('+odat['data_units']+')'
+        cbar_name = cbar_cap_strings+' ['+odat['data_units']+']'
     else:
         cbar_name = ""
     
     # overlay the data based on the sensor
     if (cfg_d['sensor'] == 'Worldview'):
-        do_overlay_plot(cfg_d['geo_upper_left'], cfg_d['geo_lower_right'],
-                cfg_d['datetime'], layer_name, odat['lat'], odat['lon'], odat['var_data'],
-                cfg_d['out_plot_title'], layer_url,
-                var_vals_missing=odat['data_fill'],
-                lite_sid=odat['sounding_id'],
-                var_lims=ovr_d['var_lims'], interest_pt=cfg_d['ground_site'],
-                cmap=ovr_d['cmap'], alpha=ovr_d['alpha'],
-                lat_name=ovr_d['lat_name'], lon_name=ovr_d['lon_name'],
-                var_name=ovr_d['var_name'],
-                out_plot=out_plot_fullpath,
-                var_label=cbar_name, cities=cfg_d['city_labels'],
-                var_file=os.path.split(ovr_d['var_file'])[1])
+        do_overlay_plot(
+            cfg_d, ovr_d, odat, layer_name, layer_url,
+            out_plot=out_plot_fullpath, var_label=cbar_name,
+            var_file=os.path.split(ovr_d['var_file'])[1])
+
     elif (cfg_d['sensor'].startswith('GOES') or cfg_d['sensor'].startswith('Himawari')):
         import satpy_overlay_plots
         satpy_overlay_plots.nonworldview_overlay_plot(
