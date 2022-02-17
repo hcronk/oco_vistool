@@ -699,116 +699,6 @@ def plot_scene_obj(ax, scn):
     return im
 
 
-def overlay_data(ax, cb_ax, odata, var_label=None,
-                 fig_scalefactor=1.0, **kw):
-    """
-    overlay data onto background image.
-    if vertices are available, shapely polygon obects are used;
-    otherwise mpl.scatter is used.
-    This function also takes care of the colorbar associated to
-    the overlaid data.
-
-    inputs:
-    ax: axis object where polygons will be drawn
-    cb_ax: the colorbar axis object. Note this is only used if
-       the cmap is a colormap.
-    odata: oco2 overlay data dictionary
-
-    var_label: string containing a label to add to the colorbar,
-         typically the name and units of the variable being overlaid.
-    fig_scalefactor: floating point number to scale the annotation
-         text sizes in the colorbar.
-
-    extra kw: cmap (string colormap or color name), vmin, vmax, alpha
-
-    returns:
-    None
-
-    method based on
-    https://scitools.org.uk/cartopy/docs/latest/gallery/hurricane_katrina.html
-    #sphx-glr-gallery-hurricane-katrina-py
-    
-    the add_geometries() method would accept a list of polygons, but then
-    there is no obvious way to color them according to the colorbar - 
-    so, instead do them one at a time.
-    """
-
-    n_vals = odata['lat'].shape[0]
-
-    if 'cmap' in kw:
-        if kw['cmap'] in plt.colormaps():
-            cmap_name = kw['cmap']
-            use_cmap = True
-        elif kw['cmap'] in mpl.colors.cnames.keys():
-            color_name = kw['cmap']
-            use_cmap = False
-        else:
-            print(kw['cmap'] + " is not a recognized color or colormap. "+
-                  "Data will be displayed in red")
-            color_name = 'red'
-            use_cmap = False
-    else:
-        cmap_name = 'jet'
-        use_cmap = True
-
-    if 'alpha' in kw:
-        alpha = kw['alpha']
-    else:
-        alpha = 1.0
-
-    if use_cmap:
-        if 'vmin' in kw:
-            vmin = kw['vmin']
-        else:
-            vmin = odata['var_data'].min()
-        if 'vmax' in kw:
-            vmax = kw['vmax']
-        else:
-            vmax = odata['var_data'].max()
-
-        C_func = mpl.cm.get_cmap(cmap_name)
-        N_func = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
-
-    # vertices: loop over footprints and use add_geometries()
-    if odata['lat'].ndim == 2:
-
-        for n in range(n_vals):
-            poly_pts = np.ma.stack([odata['lon'][n,:], odata['lat'][n,:]]).T
-            polygon = sgeom.Polygon(poly_pts)
-
-            if use_cmap:
-                facecolor = C_func(N_func(odata['var_data'][n]))
-            else:
-                facecolor = color_name
-            ax.add_geometries([polygon], ccrs.PlateCarree(),
-                              facecolor=facecolor, alpha=alpha,
-                              edgecolor='none')
-
-    # footprint centers, use scatter()
-    else:
-        if use_cmap:
-            ax.scatter(odata['lon'], odata['lat'], c=odata['var_data'],
-                       cmap=cmap_name, vmin=vmin, vmax=vmax,
-                       s=9, edgecolor='none', transform=ccrs.PlateCarree())
-        else:
-            ax.scatter(odata['lon'], odata['lat'], c=color_name,
-                       s=9, edgecolor='none', transform=ccrs.PlateCarree())
-
-    if use_cmap:
-        cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=N_func, cmap=C_func),
-                            extend='both',cax=cb_ax)
-        cbar.set_label(var_label, size=28*fig_scalefactor,
-                       rotation=270, labelpad=35*fig_scalefactor)
-        cbar.ax.tick_params(labelsize=22*fig_scalefactor)
-        cbar.ax.yaxis.get_offset_text().set_fontsize(22*fig_scalefactor)
-    else:
-        # We prefer to have the plots unchanged if the colorbar is not present,
-        # rather than have the axes change shape in the figure.
-        # Simplest way to do this is: always make the colorbar axis, and just
-        # make it invisible if we don't use it.
-        cb_ax.set_visible(False)
-
-
 def nonworldview_overlay_plot(
         cfg_d, ovr_d, odat, out_plot_name=None,
         var_label=None, fignum=10, figsize=(20,20),
@@ -894,7 +784,7 @@ def nonworldview_overlay_plot(
     overlay_present = ovr_d is not None
     cbar_needed = overlay_present and ovr_d['cmap'] in plt.colormaps()
 
-    ax, _, cb_ax, fig_scalefactor = vl.setup_axes(
+    fig, ax, _, cb_ax, fig_scalefactor = vl.setup_axes(
         latlon_extent, crs, fignum=fignum,
         figsize=figsize, create_colorbar_axis=True)
     
@@ -915,6 +805,13 @@ def nonworldview_overlay_plot(
     else:
         cb_ax.set_visible(False)
 
+    # during testing, it appears that sometimes the scatter
+    # could cause MPL to shift the axis range - I think because one
+    # scatter point goes slightly out of the display range.
+    # so, here force it back to the original domain.
+    ax.axis([cfg_d['lon_ul'], cfg_d['lon_lr'],
+             cfg_d['lat_lr'], cfg_d['lat_ul']])
+
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
     
     # formatting the plot
@@ -927,7 +824,6 @@ def nonworldview_overlay_plot(
     ax.set_title(title_string, size=title_size, y=1.01)
 
     if out_plot_name:
-        fig = plt.figure(fignum)
         fig.savefig(out_plot_name, bbox_inches="tight")
         print("\nFigure saved at "+ out_plot_name + "\n")
 
