@@ -379,13 +379,13 @@ def _process_overlay_dict(input_dict):
 
     return ovr_d
 
-def construct_target_box(target_id, delta_degree = 1.5):
+def construct_target_box(target, infoType, delta_degree = 1.5):
     targets = pd.read_csv('targets.csv', index_col = 0)
-    if (target_id not in targets['target_name'].values):
-        raise ValueError('Provide a valid target ID')
+    if (target not in targets[infoType].values):
+        raise ValueError('Cannot find this target. Provide a valid ' + infoType)
         
-    center_lon = targets[targets['target_name'] == target_id]['target_lon'].values[0]
-    center_lat = targets[targets['target_name'] == target_id]['target_lat'].values[0]
+    center_lon = targets[targets[infoType] == target]['target_lon'].values[0]
+    center_lat = targets[targets[infoType] == target]['target_lat'].values[0]
     
     geo_upper_left = [center_lat + delta_degree, center_lon - delta_degree/(np.cos(np.deg2rad(center_lat)))]
     geo_lower_right = [center_lat - delta_degree, center_lon + delta_degree/(np.cos(np.deg2rad(center_lat)))]
@@ -458,18 +458,24 @@ def process_config_dict(input_dict):
     cfg_d['date'] = input_dict['date']
     cfg_d['straight_up_date'] = cfg_d['date'].replace("-", "").replace(":",'').replace(" ","_")
     
-    if (('geo_upper_left' in input_dict or 'geo_lower_right' in input_dict) and 'target_id' in input_dict):
-        raise ValueError('Only one of: corner coordinates and target ID should be provided')
+    if (('geo_upper_left' in input_dict or 'geo_lower_right' in input_dict) and ('target_id' in input_dict or 'target_name' in input_dict)):
+        raise ValueError('Only one of: corner coordinates, target ID or target name should be provided')
     
-    if (('geo_upper_left' not in input_dict or 'geo_lower_right' not in input_dict) and 'target_id' not in input_dict):
-        raise ValueError('Provide corner coordinates or target_id for plotting')
+    if (('geo_upper_left' not in input_dict or 'geo_lower_right' not in input_dict) and ('target_id' not in input_dict and 'target_name' not in input_dict)):
+        raise ValueError('Provide both corner coordinates, target_id or target_name for plotting')
+    
+    if ('target_id' in input_dict and 'target_name' in input_dict):
+        raise ValueError('Only one of: target ID or target name should be provided')
         
     if ('geo_upper_left' in input_dict and 'geo_lower_right' in input_dict):
         cfg_d['geo_upper_left'] = input_dict['geo_upper_left']
         cfg_d['geo_lower_right'] = input_dict['geo_lower_right']
     
     if ('target_id' in input_dict):
-        cfg_d['geo_upper_left'], cfg_d['geo_lower_right'] = construct_target_box(input_dict['target_id'])
+        cfg_d['geo_upper_left'], cfg_d['geo_lower_right'] = construct_target_box(input_dict['target_id'], 'target_id')
+    
+    if ('target_name' in input_dict):
+        cfg_d['geo_upper_left'], cfg_d['geo_lower_right'] = construct_target_box(input_dict['target_name'], 'target_name')
     
     cfg_d['sensor'] = input_dict.get('sensor')
     valid_sensor_names = ('Worldview', 'GOES16_ABI_C', 'GOES16_ABI_F',
