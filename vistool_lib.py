@@ -198,7 +198,7 @@ def setup_axes(latlon_extent, crs, fignum=1,
     inset_marker_size = int(np.round(100 * fig_scalefactor))
     grid_labelsize = int(np.round(24 * fig_scalefactor))
     inset_ax_size = 2.0 * fig_scalefactor
-    cax_width = 0.4 * fig_scalefactor
+    cbax_width = 0.4 * fig_scalefactor
 
     #Load the coastlines
     add_coastlines(latlon_extent, ax1)
@@ -215,8 +215,10 @@ def setup_axes(latlon_extent, crs, fignum=1,
 
     #Colorbar
     divider = make_axes_locatable(ax1)
-    cax = divider.append_axes("right", size=cax_width, pad=0.25,
-                              axes_class=plt.Axes)
+    cbax = divider.append_axes(
+        "right", size=cbax_width, pad=0.25*fig_scalefactor, axes_class=plt.Axes)
+    layer_cbax = divider.append_axes(
+        "bottom", size=cbax_width, pad=1*fig_scalefactor, axes_class=plt.Axes)
 
     #Globe inset
     ax2 = inset_axes(
@@ -228,7 +230,7 @@ def setup_axes(latlon_extent, crs, fignum=1,
                 marker='*',transform=ccrs.PlateCarree())
     ax2.background_img(name='ne_shaded', resolution='low')
 
-    return fig, ax1, ax2, cax, fig_scalefactor
+    return fig, ax1, ax2, cbax, layer_cbax, fig_scalefactor
 
 
 def create_plot_title_string(cfg_d, ovr_d, odat):
