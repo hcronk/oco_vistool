@@ -784,9 +784,9 @@ def nonworldview_overlay_plot(
     overlay_present = ovr_d is not None
     cbar_needed = overlay_present and ovr_d['cmap'] in plt.colormaps()
 
-    fig, ax, _, cb_ax, fig_scalefactor = vl.setup_axes(
+    fig, ax, _, cb_ax, layer_cb_ax, fig_scalefactor = vl.setup_axes(
         latlon_extent, crs, fignum=fignum,
-        figsize=figsize, create_colorbar_axis=True)
+        figsize=figsize)
     
     # plotting the retrieved scene
     im = plot_scene_obj(ax, scn)
@@ -794,16 +794,19 @@ def nonworldview_overlay_plot(
     if overlay_present:
         if ovr_d['var_lims']:
             vmin, vmax = ovr_d['var_lims']
-            overlay_data(ax, cb_ax, odat, cmap=ovr_d['cmap'],
-                         vmin=vmin, vmax=vmax,
-                         var_label=var_label, alpha=ovr_d['alpha'],
-                         fig_scalefactor=fig_scalefactor)
+            vl.overlay_data(ax, cb_ax, odat, cmap=ovr_d['cmap'],
+                            vmin=vmin, vmax=vmax,
+                            var_label=var_label, alpha=ovr_d['alpha'],
+                            fig_scalefactor=fig_scalefactor)
         else:
-            overlay_data(ax, cb_ax, odat, cmap=ovr_d['cmap'],
-                         var_label=var_label, alpha=ovr_d['alpha'],
-                         fig_scalefactor=fig_scalefactor)
+            vl.overlay_data(ax, cb_ax, odat, cmap=ovr_d['cmap'],
+                            var_label=var_label, alpha=ovr_d['alpha'],
+                            fig_scalefactor=fig_scalefactor)
     else:
         cb_ax.set_visible(False)
+
+    # satpy version never uses the layer colorbar, so turn it off
+    layer_cb_ax.set_visible(False)
 
     # during testing, it appears that sometimes the scatter
     # could cause MPL to shift the axis range - I think because one
