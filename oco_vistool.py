@@ -59,6 +59,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.gridspec as gridspec
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 import shapely.geometry as sgeom
 
@@ -1217,7 +1218,7 @@ def do_overlay_plot(
     latlon_extent = (minx, miny, maxx, maxy)
 
     ### Plot prep ###
-    fig, ax, inset_ax, cb_ax, fig_scalefactor = vl.setup_axes(
+    fig, ax, inset_ax, cb_ax, layer_cb_ax, fig_scalefactor = vl.setup_axes(
         latlon_extent, ccrs.PlateCarree())
     
     # request the needed layer and plot it
@@ -1291,23 +1292,30 @@ def do_overlay_plot(
         ax.plot(interest_pt[1], interest_pt[0], 'w*', markersize=10, transform=ccrs.Geodetic())
     
     # if the XML file exists for the chosen layer (the layer is quantitative)
-    if (layer_url != 'Null'):
-        # building the second colorbar
-        cmap2, norm2, ticks_list, bounds_list, units = get_layer_colorbar_params(layer_url)
-        # this needs to be replaced with a new axis.
-        # leaving this commented out until I can fix up the code.
-        #ax2 = plt.subplot(gs[-1, 2:-2])
-        #cb2 = mpl.colorbar.ColorbarBase(ax2, cmap=cmap2, norm=norm2, orientation = 'horizontal',
-        #                                ticks = ticks_list + [bounds_list[0], bounds_list[-1]])
-                
-        #for t in cb2.ax.xaxis.get_ticklabels():
-        #    t.set_weight("bold")
-        #    t.set_fontsize(8)
-        #    t.set_rotation(45)
+    if (layer_url == 'Null'):
+        layer_cb_ax.set_visible(False)
+    else:
+        # building the second colorbar for the Worldview background.
+        cmap2, norm2, ticks_list, bounds_list, layer_units = get_layer_colorbar_params(layer_url)
+
+        #cb_ax2 = inset_axes(
+        #    ax, width=1.0 * fig_scalefactor, height=0.2 * fig_scalefactor,
+        #    loc="lower left")
+        #layer_cb_ax = fig.add_axes([0.125, 0.0625, 0.75, 0.0625])
+        #divider = make_axes_locatable(ax)
+        #layer_cb_ax = divider.append_axes("bottom", size=0.1, pad=0.5, axes_class=plt.Axes)
+
+        cb2 = mpl.colorbar.ColorbarBase(
+            layer_cb_ax, cmap=cmap2, norm=norm2, orientation = 'horizontal',
+            ticks = ticks_list + [bounds_list[0], bounds_list[-1]])
+
+        for t in cb2.ax.xaxis.get_ticklabels():
+            t.set_fontsize(20 * fig_scalefactor)
+            t.set_rotation(45)
 
         # if units were stated in the XML
-        #if (units != None):
-        #    cb2.ax.set_xlabel('# in ' + units, fontdict=dict(weight='bold'))
+        if (layer_units != None):
+            cb2.ax.set_xlabel('# in ' + layer_units, fontdict=dict(weight='bold'))
 
     if ovr_d is not None:
         if ovr_d['var_lims']:
