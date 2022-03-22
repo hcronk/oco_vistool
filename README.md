@@ -94,13 +94,18 @@ It can also be called as a function from within another Python program for expan
      **geo_upper_left** (list, format:[lat, lon]):  
          The latitude and longitude coordinates of the upper left hand corner of your area of 
          interest.
+         
      **geo_lower_right** (list, format:[lat, lon]):  
          The latitude and longitude coordinates of the lower right hand corner of your area of 
          interest.
+         
      OR
+     
      **target_id** (string):
          ID of the SAM target which will be parsed from the targets.csv file (its lat/lon box will be derived).
+     
      OR
+     
      **target_name** (string):
          Name of the SAM target which will be parsed from the targets.csv file (its lat/lon box will be derived).
 
