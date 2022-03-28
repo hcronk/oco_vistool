@@ -9,17 +9,28 @@ date:	year-month-day "YYYY-MM-DD" format, optionally with hours-minutes-
     seconds in "YYYY-MM-DD hh:mm:ss" format. The full format (with h:m:s)
     is useful for ABI-derived images, when a specific time is needed
     (unlike the MODIS-Aqua RGB which is once per day).
-sensor: string sensor name, one of: "MODIS" to retrieve MODIS-Aqua RGB
-    imagery from NASA Worldview; GOES16_ABI_C or GOES16_ABI_F for ABI
-    RGB imagery from GOES-16, from (C)ONUS or (F)ull disk data.
-data_home: If GOES16 is selected, this must specified with the path to the
-    L1b radiance files. This is not needed for MODIS.
+sensor: string sensor name, one of: "Worldview" to retrieve MODIS-Aqua RGB
+    imagery from NASA Worldview; "GOES16_ABI_C" or "GOES16_ABI_F" for ABI
+    RGB imagery from GOES-16, from (C)ONUS or (F)ull disk data; "Himawari-08" for
+    AHI imagery from Himawari.
+layer: if sensor is Worldview, layer code (from Encoding.csv) of the desired background layer
+files_loc: in case of GOES or Himawari sensor, files_loc is the abstract location of background files.
+    Either "aws" if one wants to download them from the S3 bucket, or "local" if wants to use some local ones.
+data_home: if sensor is GOES or Himawari, provides a concrete path to the background files.
+    If files_loc is "aws", data_home is a directory where the files will be downloaded.
+    If files_loc is "local", data_home is the path to the already allocated background files.
+    
+ONLY ONE PART OF THE FOLLOWING NEEDS TO BE PROVIDED:
+(
 geo_upper_left: two element lat, lon values for upper left corner of
     background image (MODIS or GOES-ABI)
 geo_lower_right: two element lat, lon values for lower right corner of
     background image (MODIS or GOES-ABI)
-layer: layer code (from Encoding.csv) of the desired background layer
-
+OR
+target_id: ID of the SAM target which will be parsed from the targets.csv file (its lat/lon box will be derived).
+OR
+target_name: name of the SAM target which will be parsed from the targets.csv file (its lat/lon box will be derived).
+)
 
 Optional Fields
 ---------------

@@ -71,23 +71,43 @@ It can also be called as a function from within another Python program for expan
    #### Required:
      **date** (string, format:"YYYY-MM-DD"):  
          The date of your case study. This is used to get the correct RGB. 
-
-     **geo_upper_left** (list, format:[lat, lon]):  
-         The latitude and longitude coordinates of the upper left hand corner of your area of 
-         interest.
-
-     **geo_lower_right** (list, format:[lat, lon]):  
-         The latitude and longitude coordinates of the lower right hand corner of your area of 
-         interest.
+              
      **sensor** (string):
          The sensor name that is desired to be used for the background image. Supported sensors at the moment are: 
-         "Worldview", "GOES16_ABI_C", "GOES16_ABI_F", "GOES17_ABI_C", "GOES17_ABI_F".
-   #### Required if the sensor field, required above, is "Worldview" (otherwise, not needed):
+         "Worldview", "GOES16_ABI_C", "GOES16_ABI_F", "GOES17_ABI_C", "GOES17_ABI_F", "Himawari-08".
+   #### Required if sensor is "Worldview":
      **layer** (integer, format: integer between 0 and maximum code number in Encoding.csv):
          The code of the background layer to be used by the vistool. Each layer is given its code (encoded) 
          in the Encoding.csv file in the code directory. The file contains the relation: layer name (by the
          NASA Worldview standards) - code (generated unique number). So, when adding new
          layers to the CSV, use the above standards.
+   #### Required if sensor is GOES or Himawari:
+     **files_loc** (string, format: "local" or "aws"):
+         Abstract location of the background files for plotting.
+         Either "aws" if one wants to download those files from the AWS S3 bucket,
+         Or "local" if wants to use some local pre-downloaded files.
+     
+     **data_home** (string):
+        If files_loc is "aws", data_home is a directory where the files will be downloaded.
+        If files_loc is "local", data_home is the path to the already allocated background files.
+   #### Only one of the following parts is required: 
+     **geo_upper_left** (list, format:[lat, lon]):  
+         The latitude and longitude coordinates of the upper left hand corner of your area of 
+         interest.
+         
+     **geo_lower_right** (list, format:[lat, lon]):  
+         The latitude and longitude coordinates of the lower right hand corner of your area of 
+         interest.
+         
+     OR
+     
+     **target_id** (string):
+         ID of the SAM target which will be parsed from the targets.csv file (its lat/lon box will be derived).
+     
+     OR
+     
+     **target_name** (string):
+         Name of the SAM target which will be parsed from the targets.csv file (its lat/lon box will be derived).
 
    #### Optional:
 	**region** (string, default: none):  
@@ -181,6 +201,13 @@ The parser used a copy of the wmts capabilities file which was downloaded into t
 
 #### AWS functionality
 When either GOES or Himawari is chosen as a desired sensor in config.json, there will appear a required "files_loc" key. Two options for this key are: "aws" and "local". Starting with November 2021, if a user wants to use NOAA AWS S3 buckets as a source of background imagery ("files_loc": "aws"), one doesn't need to provide any personal AWS keys to the program. Downloading data from NOAA S3 buckets is handled automatically and anonymously by the vistool.
+
+#### Encoding.csv
+File with encodings for the Worldview layers, supported by the vistool. Each layer should be provided as its code in the configuration file.
+
+#### Targets.csv
+File with all accepted SAM targets. It has targets' names, ID's and centre coordinates which are used in the script for the
+lat/lon box construction. 
 
 Minimum command line call:  
 `python oco_vistool.py`
