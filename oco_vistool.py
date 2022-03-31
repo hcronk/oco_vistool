@@ -396,7 +396,7 @@ def _process_overlay_dict(input_dict):
     return ovr_d
 
 def construct_target_box(target, infoType, delta_degree = 1.5):
-    targets = pd.read_csv('targets.csv', index_col = 0)
+    targets = pd.read_csv(code_dir + '/targets.csv', index_col = 0)
     if (target not in targets[infoType].values):
         raise ValueError('Cannot find this target. Provide a valid ' + infoType)
         
