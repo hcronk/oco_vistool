@@ -808,13 +808,6 @@ def nonworldview_overlay_plot(
     # satpy version never uses the layer colorbar, so turn it off
     layer_cb_ax.set_visible(False)
 
-    # during testing, it appears that sometimes the scatter
-    # could cause MPL to shift the axis range - I think because one
-    # scatter point goes slightly out of the display range.
-    # so, here force it back to the original domain.
-    ax.axis([cfg_d['lon_ul'], cfg_d['lon_lr'],
-             cfg_d['lat_lr'], cfg_d['lat_ul']])
-
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
     
     # formatting the plot

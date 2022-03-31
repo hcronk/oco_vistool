@@ -1331,12 +1331,6 @@ def do_overlay_plot(
     else:
         cb_ax.set_visible(False)
 
-    # during testing, it appears that sometimes the scatter
-    # could cause MPL to shift the axis range - I think because one
-    # scatter point goes slightly out of the display range.
-    # so, here force it back to the original domain.
-    img_extent = (minx, maxx, miny, maxy)
-    ax.axis(img_extent)
     print('plot_title: ', plot_title)
     if plot_title == 'auto':
         title_string = vl.create_plot_title_string(cfg_d, ovr_d, odat)
