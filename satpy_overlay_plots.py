@@ -820,7 +820,7 @@ def nonworldview_overlay_plot(
     ax.set_title(title_string, size=title_size, y=1.01)
 
     if out_plot_name:
-        fig.savefig(out_plot_name, bbox_inches="tight")
+        fig.savefig(out_plot_name)
         print("\nFigure saved at "+ out_plot_name + "\n")
 
     ax_dict = dict(
