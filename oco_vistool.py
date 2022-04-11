@@ -1227,10 +1227,6 @@ def do_overlay_plot(
             print(cmap + " is not a recognized color or colormap. Data will be displayed in red")
             cmap = 'red'
             color_or_cmap = "color"
-        # note - if var_vals.shape is zero, the var_lims are not needed, since
-        # the colorbar and scatter or polygon collection will not be plotted.
-        if var_lims is None and var_vals.shape[0] > 0:
-            var_lims = [var_vals.min(), var_vals.max()]
 
     if odat:
         var_lat = odat['lat']
@@ -1238,6 +1234,10 @@ def do_overlay_plot(
         var_vals = odat['var_data']
         var_vals_missing = odat['data_fill']
         lite_sid = odat['sounding_id']
+        # note - if var_vals.shape is zero, the var_lims are not needed, since
+        # the colorbar and scatter or polygon collection will not be plotted.
+        if var_lims is None and var_vals.shape[0] > 0:
+            var_lims = [var_vals.min(), var_vals.max()]
 
     #Calculate lat/lon lims of RGB
     maxy = geo_upper_left[0]
@@ -1248,7 +1248,7 @@ def do_overlay_plot(
 
     ### Plot prep ###
     fig, ax, inset_ax, cb_ax, layer_cb_ax, fig_scalefactor = vl.setup_axes(
-        latlon_extent, ccrs.PlateCarree())
+        latlon_extent, ccrs.PlateCarree(), figsize=figsize)
     
     # request the needed layer and plot it
     url = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi'
@@ -1360,12 +1360,11 @@ def do_overlay_plot(
     else:
         cb_ax.set_visible(False)
 
-    print('plot_title: ', plot_title)
     if plot_title == 'auto':
         title_string = vl.create_plot_title_string(cfg_d, ovr_d, odat)
     else:
         title_string = cfg_d['out_plot_title']
-    print('title_string: ', title_string)
+
     title_size = int(np.round(30 * np.mean(figsize)/20.0))
     ax.set_title(title_string, size=title_size, y=1.01)
 
