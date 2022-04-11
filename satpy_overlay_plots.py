@@ -15,6 +15,7 @@ import numpy as np
 from satpy import Scene 
 from satpy.writers import get_enhanced_image
 import pyresample
+from pyorbital.orbital import get_observer_look
 
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -44,6 +45,33 @@ import vistool_lib as vl
 # to get the location of the city data (a subdir from where the
 # code is located).
 _code_dir = os.path.dirname(os.path.realpath(__file__))
+
+def _get_view_zenith(scn, obs_lon, obs_lat):
+    """
+    helper function to compute the view zenith angle to a observed lat/lon
+    point (at zero altitude) for the given satellite.
+    The satellite position is stored within the satpy Scene object,
+    so we get the required info from the scn metadata. Note this only works
+    after the true_color composite is loaded.
+    """
+    obs_datetime = scn.attrs['start_time']
+    obs_alt = 0.0
+    orb_pars = scn['true_color'].attrs['orbital_parameters']
+    sat_lon = orb_pars['satellite_nominal_longitude']
+    sat_lat = orb_pars['satellite_nominal_latitude']
+    sat_alt = orb_pars['satellite_nominal_altitude']
+    # in scn object, this is units [m], need [km] for pyorbital function.
+    sat_alt *= 1e-3
+    # get_observer_look expects array like inputs; if we put sat_lon inside
+    # a 1-element list, everything gets broadcast to that shape.
+    _, view_el = get_observer_look(
+        [sat_lon], sat_lat, sat_alt,
+        obs_datetime, obs_lon, obs_lat, obs_alt)
+    # convert back to scalar while changing from elevation to zenith.
+    view_zenith = 90 - view_el[0]
+
+    return view_zenith
+
 
 def _get_AHI_times(file_list):
     """
@@ -737,6 +765,7 @@ def nonworldview_overlay_plot(
     latlon_extent = [cfg_d['lon_ul'], cfg_d['lat_lr'],
                      cfg_d['lon_lr'], cfg_d['lat_ul']]
     center_lat = (latlon_extent[1] + latlon_extent[3]) / 2.0
+    center_lon = (latlon_extent[0] + latlon_extent[2]) / 2.0
 
     # accessing the needed files depending on the geostation and files location;
     # downloading if needed
@@ -813,6 +842,15 @@ def nonworldview_overlay_plot(
     # formatting the plot
     if cfg_d['out_plot_title'] == 'auto':
         title_string = vl.create_plot_title_string(cfg_d, ovr_d, odat)
+        # add some specific information for Geo backgrounds:
+        # view zenith of Geo, and the time offset.
+        view_zenith = _get_view_zenith(scn, center_lon, center_lat)
+        extra_title_info = (
+            ' (Zenith = {:2.0f}$^\\circ$, '.format(view_zenith) +
+            '$\\Delta$t = {:4.1f} min.)'.format(time_offset) )
+        title_string_lines = title_string.split('\n')
+        title_string_lines[0] = title_string_lines[0] + extra_title_info
+        title_string = '\n'.join(title_string_lines)
     else:
         title_string = cfg_d['out_plot_title']
 
