@@ -54,12 +54,22 @@ def _get_view_zenith(scn, obs_lon, obs_lat):
     so we get the required info from the scn metadata. Note this only works
     after the true_color composite is loaded.
     """
+
     obs_datetime = scn.attrs['start_time']
     obs_alt = 0.0
-    orb_pars = scn['true_color'].attrs['orbital_parameters']
-    sat_lon = orb_pars['satellite_nominal_longitude']
-    sat_lat = orb_pars['satellite_nominal_latitude']
-    sat_alt = orb_pars['satellite_nominal_altitude']
+
+    # orbital parameters are stored in different keys for
+    # GOES and Himawari; first branch is the GOES version.
+    if 'orbital_parameters' in scn['true_color'].attrs:
+        orb_pars = scn['true_color'].attrs['orbital_parameters']
+        sat_lon = orb_pars['satellite_nominal_longitude']
+        sat_lat = orb_pars['satellite_nominal_latitude']
+        sat_alt = orb_pars['satellite_nominal_altitude']
+    else:
+        sat_lon = scn['true_color'].attrs['satellite_longitude']
+        sat_lat = 0.0
+        sat_alt = scn['true_color'].attrs['satellite_altitude']
+
     # in scn object, this is units [m], need [km] for pyorbital function.
     sat_alt *= 1e-3
     # get_observer_look expects array like inputs; if we put sat_lon inside
