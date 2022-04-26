@@ -158,14 +158,15 @@ def _process_overlay_dict(input_dict):
     else:
         ovr_d['sensor'] = ''
 
+    ovr_d['var_name'] = input_dict['variable']
+
     # TBD - might need other ways to make "nicer" title strings...
     # for now, just making a proper "XCO2" with subscripting
-    if input_dict['variable'] == 'xco2':
+    if ovr_d['var_name'] == 'xco2':
         ovr_d['var_title_string'] = '$X_{CO_2}$'
     else:
         ovr_d['var_title_string'] = ovr_d['var_name']
 
-    ovr_d['var_name'] = input_dict['variable']
     # trims off group names (for certain vars) - this is needed at the end
     # for the auto generated filename
     ovr_d['var_name_only'] = re.split('/', ovr_d['var_name'])[-1]
