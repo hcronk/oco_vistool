@@ -1537,19 +1537,7 @@ if __name__ == "__main__":
     # create a compact colorbar label, including var name and units.
     if odat['data_long_name']:
         oco2_data_long_name = re.sub("_", " ", odat['data_long_name'])
-        cbar_strings = re.split(' ', oco2_data_long_name)
-        cbar_cap_strings = ""
-
-        for i, s in enumerate(cbar_strings):
-            cap_s = s
-            if not s[0].isupper():
-                cap_s = s.capitalize()
-            if i % 2 != 0:
-                cbar_cap_strings = cbar_cap_strings + cap_s +"\n"
-            else:
-                cbar_cap_strings = cbar_cap_strings + cap_s +" "
-        cbar_cap_strings = cbar_cap_strings[:-1]
-        cbar_name = cbar_cap_strings+' ['+odat['data_units']+']'
+        cbar_name = oco2_data_long_name + ' ['+odat['data_units']+']'
     else:
         cbar_name = ""
     
