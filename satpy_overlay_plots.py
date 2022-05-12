@@ -11,14 +11,16 @@ import tempfile, shutil
 import bz2
 
 import numpy as np
-import pandas as pd
 
 from satpy import Scene 
 from satpy.writers import get_enhanced_image
 import pyresample
+from pyorbital.orbital import get_observer_look
 
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+from cartopy.io import shapereader
+
 import shapely.geometry as sgeom
 
 import matplotlib.pyplot as plt
@@ -38,9 +40,48 @@ from oco_vistool import read_shp
 from geo_scan_time import compute_time_offset, approx_scanline_time
 from geo_scan_time import get_ABI_timerange_from_filename, get_AHI_timerange_from_filename
 
+import vistool_lib as vl
+
 # to get the location of the city data (a subdir from where the
 # code is located).
 _code_dir = os.path.dirname(os.path.realpath(__file__))
+
+def _get_view_zenith(scn, obs_lon, obs_lat):
+    """
+    helper function to compute the view zenith angle to a observed lat/lon
+    point (at zero altitude) for the given satellite.
+    The satellite position is stored within the satpy Scene object,
+    so we get the required info from the scn metadata. Note this only works
+    after the true_color composite is loaded.
+    """
+
+    obs_datetime = scn.attrs['start_time']
+    obs_alt = 0.0
+
+    # orbital parameters are stored in different keys for
+    # GOES and Himawari; first branch is the GOES version.
+    if 'orbital_parameters' in scn['true_color'].attrs:
+        orb_pars = scn['true_color'].attrs['orbital_parameters']
+        sat_lon = orb_pars['satellite_nominal_longitude']
+        sat_lat = orb_pars['satellite_nominal_latitude']
+        sat_alt = orb_pars['satellite_nominal_altitude']
+    else:
+        sat_lon = scn['true_color'].attrs['satellite_longitude']
+        sat_lat = 0.0
+        sat_alt = scn['true_color'].attrs['satellite_altitude']
+
+    # in scn object, this is units [m], need [km] for pyorbital function.
+    sat_alt *= 1e-3
+    # get_observer_look expects array like inputs; if we put sat_lon inside
+    # a 1-element list, everything gets broadcast to that shape.
+    _, view_el = get_observer_look(
+        [sat_lon], sat_lat, sat_alt,
+        obs_datetime, obs_lon, obs_lat, obs_alt)
+    # convert back to scalar while changing from elevation to zenith.
+    view_zenith = 90 - view_el[0]
+
+    return view_zenith
+
 
 def _get_AHI_times(file_list):
     """
@@ -500,7 +541,7 @@ def get_scene_obj(file_list, latlon_extent, sensor, width=750, height=750,
     scn.load(['true_color'])
 
     my_area = pyresample.create_area_def(
-        'testC', {'proj':'eqc'}, width=width, height=height,
+        'testC', "epsg:3857", width=width, height=height,
         area_extent=latlon_extent, units='degrees')
 
     if resample_method.startswith('native'):
@@ -518,8 +559,11 @@ def get_scene_obj(file_list, latlon_extent, sensor, width=750, height=750,
     return new_scn
 
 
-def setup_axes(fignum, crs, figsize=(10,8), create_colorbar_axis=True):
+def _setup_axes(fignum, crs, figsize=(10,8), create_colorbar_axis=True):
     """
+    Note: this is the OLD method, which is superseded by what is in
+    vistool_lib. Leaving it in here for now, until we decided it isn't needed...
+
     setup gridspec axes
 
     fignum: MPL figure number
@@ -693,106 +737,10 @@ def plot_scene_obj(ax, scn):
     return im
 
 
-def overlay_data(ax, cb_ax, odata, var_label=None, **kw):
-    """
-    overlay data onto image with vertex lat/lon points.
-
-    inputs:
-    ax: axis object where polygons will be drawn
-    cb_ax: the colorbar axis object. Note this is only used if
-       the cmap is a colormap.
-    odata: oco2 overlay data dictionary
-
-    extra kw: cmap (string colormap or color name), vmin, vmax, alpha
-
-    returns:
-    None
-
-    method based on
-    https://scitools.org.uk/cartopy/docs/latest/gallery/hurricane_katrina.html
-    #sphx-glr-gallery-hurricane-katrina-py
-    
-    the add_geometries() method would accept a list of polygons, but then
-    there is no obvious way to color them according to the colorbar - 
-    so, instead do them one at a time.
-    """
-
-    n_vals = odata['lat'].shape[0]
-
-    if 'cmap' in kw:
-        if kw['cmap'] in plt.colormaps():
-            cmap_name = kw['cmap']
-            use_cmap = True
-        elif kw['cmap'] in mpl.colors.cnames.keys():
-            color_name = kw['cmap']
-            use_cmap = False
-        else:
-            print(kw['cmap'] + " is not a recognized color or colormap. "+
-                  "Data will be displayed in red")
-            color_name = 'red'
-            use_cmap = False
-    else:
-        cmap_name = 'jet'
-        use_cmap = True
-
-    if 'alpha' in kw:
-        alpha = kw['alpha']
-    else:
-        alpha = 1.0
-
-    if use_cmap:
-        if 'vmin' in kw:
-            vmin = kw['vmin']
-        else:
-            vmin = odata['var_data'].min()
-        if 'vmax' in kw:
-            vmax = kw['vmax']
-        else:
-            vmax = odata['var_data'].max()
-
-        C_func = mpl.cm.get_cmap(cmap_name)
-        N_func = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
-
-    # vertices: loop over footprints and use add_geometries()
-    if odata['lat'].ndim == 2:
-
-        for n in range(n_vals):
-            poly_pts = np.ma.stack([odata['lon'][n,:], odata['lat'][n,:]]).T
-            polygon = sgeom.Polygon(poly_pts)
-
-            if use_cmap:
-                facecolor = C_func(N_func(odata['var_data'][n]))
-            else:
-                facecolor = color_name
-            ax.add_geometries([polygon], ccrs.PlateCarree(),
-                              facecolor=facecolor, alpha=alpha,
-                              edgecolor='none')
-
-    # footprint centers, use scatter()
-    else:
-        if use_cmap:
-            ax.scatter(odata['lon'], odata['lat'], c=odata['var_data'],
-                       cmap=cmap_name, vmin=vmin, vmax=vmax,
-                       s=9, edgecolor='none', transform=ccrs.PlateCarree())
-        else:
-            ax.scatter(odata['lon'], odata['lat'], c=color_name,
-                       s=9, edgecolor='none', transform=ccrs.PlateCarree())
-
-    if use_cmap:
-        cb = mpl.colorbar.ColorbarBase(
-            cb_ax, cmap=C_func, orientation = 'vertical', norm = N_func)
-        if var_label:
-            cb_lab = cb.ax.set_xlabel(var_label, labelpad=8,
-                                      fontweight='bold')
-            cb_lab.set_fontsize(10)
-            cb.ax.xaxis.set_label_position("top")
-        for t in cb.ax.yaxis.get_ticklabels():
-            t.set_weight("bold")
-            t.set_fontsize(12)
-
-
-def nonworldview_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
-                          var_label=None, fignum=10):
+def nonworldview_overlay_plot(
+        cfg_d, ovr_d, odat, out_plot_name=None,
+        var_label=None, fignum=10, figsize=(20,20),
+        img_xsize=2000):
     """
     Make an overlay plot - GOES/Himawari. 
     This is function to integrate with the vistool plot data flow.
@@ -802,22 +750,35 @@ def nonworldview_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     ovr_d: overlay information dictionary
     odat: oco2 data dictionary
 
+    optional inputs:
+    out_plot_name: string file path to create an output file. The default
+        value of None means no output image file is creted.
+    var_label: a string to set to the overlay data method (used for the
+        colorbar label).
+    fignum: matplotlib figure number.
+    figsize: matplotlib figure size (width, height) in inches.
+    img_xsize: this is used in combination with a vistool_lib function to
+        get the number of pixels for the satpy regridded image. This input
+        sets the x-size, and the y-size is computed based on the aspect
+        ratio of the requested Lat/Lon box.
+
     returns a dictionary, containing all the axis objects created;
         this is generally most useful for testing or debugging.
         the dictionary contents are:
-    gridspec: the gridspec object
     image_ax: the MPL axis object containing the image
-    cb_ax: the MPL axis object for the colorbar; None if the colorbar
-         was not created
-    anno_axes: a list containing the 4 dummy axes where the lat/lon corner
-         values are displayed
-    inset_ax: the MPL axis object with the inset image
+    cb_ax: the MPL axis object for the colorbar. This will be set to
+        invisible if the colorbar was not needed.
     """
 
     dt = cfg_d['datetime']
-    center_lat = (cfg_d['lat_lr'] + cfg_d['lat_ul']) / 2.0
     
-    # accessing the needed files depending on the geostation and files location; downloading if needed
+    latlon_extent = [cfg_d['lon_ul'], cfg_d['lat_lr'],
+                     cfg_d['lon_lr'], cfg_d['lat_ul']]
+    center_lat = (latlon_extent[1] + latlon_extent[3]) / 2.0
+    center_lon = (latlon_extent[0] + latlon_extent[2]) / 2.0
+
+    # accessing the needed files depending on the geostation and files location;
+    # downloading if needed
     # also getting the time offset of the background image
     if (cfg_d['sensor'].startswith('GOES')):
         file_list, time_offsets = get_ABI_files(
@@ -831,17 +792,21 @@ def nonworldview_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     if len(file_list) == 0:
         raise ValueError('No files were found for requested date')
 
-    # convert the LL box corners (in degrees LL) to an extent box
-    # [min_lon, min_lat, max_lon, max_lat]
-    latlon_extent = [cfg_d['lon_ul'], cfg_d['lat_lr'], 
-                     cfg_d['lon_lr'], cfg_d['lat_ul']]
-    
+    # need to setup xpixels/ypixels here - the pixel size is input
+    # to the Scene's area def.
+    # note that Rob's method changes ypixels depending on the positions
+    # of W,S,E,N., as computed by a Proj object.
+    image_size = vl.get_image_size(latlon_extent, "epsg:3857",
+                                   img_xsize=img_xsize)
+
     # getting the scene by the background files
     if (cfg_d['sensor'].startswith('GOES')):
         scn = get_scene_obj(file_list, latlon_extent, 'abi_l1b',
+                            width=image_size[0], height=image_size[1],
                             resample_method=cfg_d['resample_method'])
     else:
         scn = get_scene_obj(file_list, latlon_extent, 'ahi_hsd',
+                            width=image_size[0], height=image_size[1],
                             resample_method=cfg_d['resample_method'])
     crs = scn['true_color'].attrs['area'].to_cartopy_crs()
 
@@ -858,8 +823,9 @@ def nonworldview_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     overlay_present = ovr_d is not None
     cbar_needed = overlay_present and ovr_d['cmap'] in plt.colormaps()
 
-    gs, ax, cb_ax, inset_ax = setup_axes(
-        fignum, crs, create_colorbar_axis=cbar_needed)
+    fig, ax, _, cb_ax, layer_cb_ax, fig_scalefactor = vl.setup_axes(
+        latlon_extent, crs, fignum=fignum,
+        figsize=figsize)
     
     # plotting the retrieved scene
     im = plot_scene_obj(ax, scn)
@@ -867,59 +833,46 @@ def nonworldview_overlay_plot(cfg_d, ovr_d, odat, out_plot_name=None,
     if overlay_present:
         if ovr_d['var_lims']:
             vmin, vmax = ovr_d['var_lims']
-            overlay_data(ax, cb_ax, odat, cmap=ovr_d['cmap'],
-                         vmin=vmin, vmax=vmax, var_label=var_label,
-                         alpha=ovr_d['alpha'])
+            vl.overlay_data(ax, cb_ax, odat, cmap=ovr_d['cmap'],
+                            vmin=vmin, vmax=vmax,
+                            var_label=var_label, alpha=ovr_d['alpha'],
+                            fig_scalefactor=fig_scalefactor)
         else:
-            overlay_data(ax, cb_ax, odat, cmap=ovr_d['cmap'],
-                         var_label=var_label, alpha=ovr_d['alpha'])
+            vl.overlay_data(ax, cb_ax, odat, cmap=ovr_d['cmap'],
+                            var_label=var_label, alpha=ovr_d['alpha'],
+                            fig_scalefactor=fig_scalefactor)
+    else:
+        cb_ax.set_visible(False)
 
-    make_inset_map(inset_ax, cfg_d['geo_upper_left'], cfg_d['geo_lower_right'])
+    # satpy version never uses the layer colorbar, so turn it off
+    layer_cb_ax.set_visible(False)
+
     todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
     
     # formatting the plot
     if cfg_d['out_plot_title'] == 'auto':
-        if ovr_d:
-            title_string = (
-                'Overlay data from {0:s}' +
-                '\nBackground from {1:s}, '+
-                '\nOverlay time = {2:s},   '+
-                'time offset = {3:4.1f} min.,  '+
-                'plot created on {4:s}' )
-            title_string = title_string.format(
-                os.path.split(ovr_d['var_file'])[1],
-                os.path.split(file_list[1])[1], 
-                dt.strftime('%Y-%m-%d %H:%M:%S'),
-                time_offset, todays_date)
-        else:
-            title_string = (
-                'Background from  {0:s}' + 
-                '\n Request time = {1:s},   '+
-                'time offset = {2:4.1f} min.,  '+
-                'plot created on {3:s}' )
-            title_string = title_string.format(
-                os.path.split(file_list[1])[1],
-                dt.strftime('%Y-%m-%d %H:%M:%S'),
-                time_offset, todays_date)
-            
+        title_string = vl.create_plot_title_string(cfg_d, ovr_d, odat)
+        # add some specific information for Geo backgrounds:
+        # view zenith of Geo, and the time offset.
+        view_zenith = _get_view_zenith(scn, center_lon, center_lat)
+        extra_title_info = (
+            ' (Zenith = {:2.0f}$^\\circ$, '.format(view_zenith) +
+            '$\\Delta$t = {:4.1f} min.)'.format(time_offset) )
+        title_string_lines = title_string.split('\n')
+        title_string_lines[0] = title_string_lines[0] + extra_title_info
+        title_string = '\n'.join(title_string_lines)
     else:
         title_string = cfg_d['out_plot_title']
 
-
-    ax.set_title(title_string, size='x-small')
-    ax.coastlines(resolution='10m', color='lightgray') 
-    anno_axes = annotate_ll_axes(
-        gs, cfg_d['geo_upper_left'], cfg_d['geo_lower_right'])
-
-    annotate_locations(ax, cfg_d)
+    title_size = int(np.round(30 * np.mean(figsize)/20.0))
+    ax.set_title(title_string, size=title_size, y=1.01)
 
     if out_plot_name:
-        fig = plt.figure(fignum)
-        fig.savefig(out_plot_name, dpi=150)
+        fig.savefig(out_plot_name)
         print("\nFigure saved at "+ out_plot_name + "\n")
 
     ax_dict = dict(
-        gridspec = gs, image_ax = ax, cb_ax = cb_ax,
-        anno_axes = anno_axes, inset_ax = inset_ax)
+        image_ax = ax, cb_ax = cb_ax,
+    )
 
     return ax_dict
