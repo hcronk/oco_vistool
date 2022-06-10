@@ -1518,8 +1518,15 @@ if __name__ == "__main__":
 
 
 
-    # at this point, if there is no overlay to process, can exit here.
+    # at this point, if there is no overlay to process (this was a
+    # "background only" run, can exit here.
     if len(ovr_d) == 0:
+        sys.exit()
+
+    # or, if the overlay was loaded, and had no data, also exit.
+    # the downstream calls may have runtime errors if the overlay
+    # data was empty.
+    if len(odat['time']) == 0:
         sys.exit()
 
     # here, handle the var limit options.
