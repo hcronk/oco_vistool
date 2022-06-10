@@ -314,6 +314,8 @@ def get_loc_AHI_files(datetime_utc, data_home, offsets, bands_list):
     data_home: origin for the background files (by format: data_home/YYYY/...)
     offsets: different time offsets to iterate
     bands_list: list of needed bands
+    resolutions_list: list of desired image resolutions, same length as bands_list
+        (himawari data has multiple resolution products for each band, in separate files)
     """   
     files = collections.defaultdict(list)
 
@@ -325,13 +327,13 @@ def get_loc_AHI_files(datetime_utc, data_home, offsets, bands_list):
 
     # access and record all the background files by the known path format
     strftime_template = '%Y/%Y_%m_%d_%j/%H%M/HS_H08_%Y%m%d_%H%M'
-    for offset, band in itertools.product(offsets, bands_list):
+    for offset, (band, res) in itertools.product(offsets, zip(bands_list, resolutions_list)):
         offset_dt = rounded_datetime_utc + datetime.timedelta(minutes=offset)
-        # searches for files with the selected band, at any resolution (R??)
-        # and for all segments (S????)
+        # searches for files with the selected band Bnn, at specified
+        # resolution Rnn and for all segments (S????)
         glob_str = os.path.join(
             data_home, (offset_dt.strftime(strftime_template) +
-                        '_B{0:02d}_FLDK_R??_S????.DAT'.format(band)))
+                        '_B{0:02d}_FLDK_R{1:02d}_S????.DAT'.format(band, res)))
         files_at_offset = glob.glob(glob_str)
         files_at_offset.sort()
 
@@ -342,7 +344,7 @@ def get_loc_AHI_files(datetime_utc, data_home, offsets, bands_list):
 
     return files
 
-def get_aws_AHI_files(datetime_utc, offsets, bands_list):
+def get_aws_AHI_files(datetime_utc, offsets, bands_list, resolutions_list):
     """
     Helper function for accessing the paths of relevant AWS Himawari background files.
 
@@ -352,6 +354,8 @@ def get_aws_AHI_files(datetime_utc, offsets, bands_list):
     datetime_utc: datetime object for the needed timeslot
     offsets: different time offsets to iterate
     bands_list: list of needed bands
+    resolutions_list: list of desired image resolutions, same length as bands_list
+        (himawari data has multiple resolution products for each band, in separate files)
     """
     files = collections.defaultdict(list)
 
@@ -371,15 +375,15 @@ def get_aws_AHI_files(datetime_utc, offsets, bands_list):
     # known AWS Hima filepath format
     strftime_template = 'AHI-L1b-FLDK/%Y/%m/%d/%H%M/'
 
-    for offset, band in itertools.product(offsets, bands_list):
+    for offset, (band, res) in itertools.product(offsets, zip(bands_list, resolutions_list)):
         offset_dt = rounded_datetime_utc + datetime.timedelta(minutes=offset)
 
         # access the background files by the known path format
         hima_files = hima_bucket.objects.filter(Prefix=offset_dt.strftime(strftime_template))
 
-        # searches for files with the selected band, at any resolution (R??)
-        # and for all segments (S????)
-        glob_str = offset_dt.strftime(strftime_template + 'HS_H08_%Y%m%d_%H%M') + '_B{0:02d}_FLDK_R??_S????.DAT.bz2'.format(band)
+        # searches for files with the selected band Bnn, at specified
+        # resolution Rnn and for all segments (S????)
+        glob_str = offset_dt.strftime(strftime_template + 'HS_H08_%Y%m%d_%H%M') + '_B{0:02d}_FLDK_R{1:02d}_S????.DAT.bz2'.format(band,res)
 
         # record the AWS files by the needed format
         keys = list()
@@ -447,14 +451,20 @@ def get_AHI_files(datetime_utc, center_lat, files_loc, data_home):
 
     bands_list = [1, 2, 3, 4]
     offsets = (-10, 0, 10)
-    
+    # himawari data contains multiple resolutions for each band;
+    # we only want to download the highest resolution for each, as this
+    # is what satpy uses to make the composite RGB.
+    resolutions_list = [10, 10, 5, 10]
+
     # accessing the Himawari files paths and bucket from AWS
     if (files_loc == 'aws'):
-        files, hima_bucket = get_aws_AHI_files(datetime_utc, offsets, bands_list)
+        files, hima_bucket = get_aws_AHI_files(
+            datetime_utc, offsets, bands_list, resolutions_list)
 
     # accessing the local files
     else:
-        files = get_loc_AHI_files(datetime_utc, data_home, offsets, bands_list)
+        files = get_loc_AHI_files(
+            datetime_utc, data_home, offsets, bands_list, resolutions_list)
 
     flist = []
     time_offset = []
