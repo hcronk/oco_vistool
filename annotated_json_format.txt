@@ -89,10 +89,12 @@ band_number: for some variables that have an extra per-band axis, this
     variable can be used to extract the desired OCO band. Right now this only
     used for Retrieval/reduced_chi_squared_per_band in older Lite file formats.
 variable_plot_lims: this can be set to a two element numeric list, to directly
-    specify the color map plot range; or to "autoscale_by_orbit", to pick the 
-    color map plot range by the min/max value seen in the orbit; or
-    "autoscale_by_overlay" to use the min/max value seen in the data actually
-    used in the overlay plot.
+    specify the color map plot range; or a string set to one of three options:
+    "autoscale_by_orbit", will pick the color map plot range by the min/max
+    value seen in the orbit; "autoscale_by_overlay" to use the min/max value
+    seen in the data actually used in the overlay plot; and finally
+    "autoscale_by_overlay90pct" will use a min/max equal to the 10 and 90th
+    percentiles of the data within the overlay plot.
     Skipping this field, or specifying an empty string, will use the
     "autoscale_by_orbit" as a default.
 cmap: string containing the matplotlib colormap name. If skipped or set to an

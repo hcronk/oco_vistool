@@ -202,7 +202,8 @@ def _process_overlay_dict(input_dict):
             # if this was a string option, then make sure it is one
             # of the two options we have implemented. if not, revert to default.
             if isinstance(ovr_d['var_lims'], string_types):
-                if ovr_d['var_lims'] not in ('autoscale_by_orbit', 'autoscale_by_overlay'):
+                if ovr_d['var_lims'] not in ('autoscale_by_orbit', 'autoscale_by_overlay',
+                                             'autoscale_by_overlay90pct',):
                     print('var_lims "' + ovr_d['var_lims'] +
                           '" is not valid, reverting to "autoscale_by_orbit"')
                     ovr_d['var_lims'] = 'autoscale_by_orbit'
@@ -455,7 +456,8 @@ def process_config_dict(input_dict):
     lat_name: lat variable to use (to control footprint lat, or vertices)
     lon_name: lon variable to use
     orbit: integer orbit number
-    var_lims: plot limits, or "autoscale_by_orbit", "autoscale_by_overlay"
+    var_lims: plot limits, or "autoscale_by_orbit", "autoscale_by_overlay",
+        or "autoscale_by_overlay90pct"
     cmap: string colormap name, defaults to 'jet'
     cmap_obj: the MPL linearSegmentedColormap object
     alpha: transparency variable (1=opaque, 0=transparent), float in range [0,1]
@@ -1421,7 +1423,13 @@ if __name__ == "__main__":
             odat = load_OCO2_Lite_overlay_data(ovr_d)
         else:
             odat = load_OCO2_L1L2_overlay_data(ovr_d)
-    
+        # compute 10/90th percentile limits, to match oco3 QL imagery.
+        if len(odat['time']) > 0:
+            odat['var_limits_90pct'] = np.percentile(
+                odat['var_data'], [10.0, 90.0], interpolation='nearest').tolist()
+        else:
+            odat['var_limits_90pct'] = None
+
     # defining both name and XML url of the chosen layer (from the user's code)
     if (cfg_d['sensor'] == 'Worldview'): 
         layer_name = layers_encoding[layers_encoding['Code'] == cfg_d['layer']]['Name'].values[0]
@@ -1553,6 +1561,8 @@ if __name__ == "__main__":
     # min/max according to the points within the overlay.
     if ovr_d['var_lims'] == 'autoscale_by_overlay':
         ovr_d['var_lims'] = None
+    if ovr_d['var_lims'] == 'autoscale_by_overlay90pct':
+        ovr_d['var_lims'] = odat['var_limits_90pct']
 
     ### Plot prep ###
     # create a compact colorbar label, including var name and units.
