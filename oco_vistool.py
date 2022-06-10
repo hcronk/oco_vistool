@@ -1050,11 +1050,25 @@ def load_OCO2_Lite_overlay_data(ovr_d):
     dd['sounding_id'] = lite_sid[combined_msk]
     dd['time'] = lite_time[combined_msk]
 
-    # for the remaining metadata-like values, take just the first value.
-    # there isn't an obvious way to deal with data that changes modes
-    dd['target_id'] = lite_target_id[combined_msk][0]
-    dd['target_name'] = lite_target_name[combined_msk][0]
-    dd['operation_mode'] = lite_operation_mode[combined_msk][0]
+    # for the remaining metadata-like values:
+    # there isn't an obvious way to deal with data that changes modes:
+    # if there is a bit of ND data just before or after a SAM,
+    # this could cause a problem. As a simple "hack" for that case,
+    # pick the middle value, assuming that should be inside the
+    # group of soundings that is the SAM or TG obs.
+    #
+    # We also need to trap for the case that there are no soundings:
+    # in that case, just use blank strings.
+    combined_idx = np.where(combined_msk)[0]
+    if combined_idx.shape[0] == 0:
+        dd['target_id'] = ''
+        dd['target_name'] = ''
+        dd['operation_mode'] = ''
+    else:
+        n_mid = combined_idx.shape[0] // 2
+        dd['target_id'] = lite_target_id[combined_idx[n_mid]]
+        dd['target_name'] = lite_target_name[combined_idx[n_mid]]
+        dd['operation_mode'] = lite_operation_mode[combined_idx[n_mid]]
 
     return dd
 
