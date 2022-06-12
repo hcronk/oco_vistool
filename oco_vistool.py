@@ -1511,20 +1511,30 @@ if __name__ == "__main__":
             
     out_background_fullpath = os.path.join(cfg_d['out_plot_dir'], out_background_name)
 
-    # if there is no overlay data present, or the 'background image'
-    # flag is set, then generate the image without overlay data.
+    # now that the input is fully prepared, make some decisions about
+    # what imagery to generate, based on whether there is an ovr_d
+    # (the overlay dictionary) and actual overlay data was loaded.
     if ovr_d:
-        make_background_image = ovr_d['make_background_image']
-        # there can be an overlay dict, but it might have no data.
+        # if overlay data was successfully loaded (e.g., the Quality filter
+        # might have removed it all)
         if len(odat['time']) > 0:
             # here, replace the datetime in the config with the mean
             # time from the overlay data, adding the optional time shift.
+            # this is now we ensure time matching from overlay to background.
             dt = datetime.datetime.utcfromtimestamp(np.mean(odat['time']))
             dt = dt + datetime.timedelta(minutes = ovr_d['time_shift'])
             cfg_d['datetime'] = dt
+            make_background_image = ovr_d['make_background_image']
+        # or, if no overlay data was located, then do not make a background
+        # image regardless of the input setting; we have no way to know the
+        # desired background time in this case.
+        else:
+            make_background_image = False
     else:
+        # otherwise, if NO overlay dictionary was specified in the input config,
+        # then this is automatically a background-only run.
         make_background_image = True
-    
+
     # create the background image based on the sensor
     if make_background_image:
         if (cfg_d['sensor'] == 'Worldview'):
@@ -1537,8 +1547,6 @@ if __name__ == "__main__":
                 cfg_d, None, None, out_plot_name=out_background_fullpath)
         else:
             raise ValueError('Unknown sensor: '+cfg_d['sensor'])
-
-
 
     # at this point, if there is no overlay to process (this was a
     # "background only" run, can exit here.
