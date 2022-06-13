@@ -330,10 +330,10 @@ def get_loc_AHI_files(datetime_utc, data_home, offsets, bands_list):
     for offset, (band, res) in itertools.product(offsets, zip(bands_list, resolutions_list)):
         offset_dt = rounded_datetime_utc + datetime.timedelta(minutes=offset)
         # searches for files with the selected band Bnn, at specified
-        # resolution Rnn and for all segments (S????)
+        # resolution Rnn and use S0101 (no segmenting)
         glob_str = os.path.join(
             data_home, (offset_dt.strftime(strftime_template) +
-                        '_B{0:02d}_FLDK_R{1:02d}_S????.DAT'.format(band, res)))
+                        '_B{0:02d}_FLDK_R{1:02d}_S0101.DAT'.format(band, res)))
         files_at_offset = glob.glob(glob_str)
         files_at_offset.sort()
 
@@ -382,8 +382,8 @@ def get_aws_AHI_files(datetime_utc, offsets, bands_list, resolutions_list):
         hima_files = hima_bucket.objects.filter(Prefix=offset_dt.strftime(strftime_template))
 
         # searches for files with the selected band Bnn, at specified
-        # resolution Rnn and for all segments (S????)
-        glob_str = offset_dt.strftime(strftime_template + 'HS_H08_%Y%m%d_%H%M') + '_B{0:02d}_FLDK_R{1:02d}_S????.DAT.bz2'.format(band,res)
+        # resolution Rnn and use S0101 (no segmenting)
+        glob_str = offset_dt.strftime(strftime_template + 'HS_H08_%Y%m%d_%H%M') + '_B{0:02d}_FLDK_R{1:02d}_S0101.DAT.bz2'.format(band,res)
 
         # record the AWS files by the needed format
         keys = list()
