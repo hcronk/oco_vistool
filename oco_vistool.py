@@ -849,7 +849,10 @@ def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
     combined_msk = np.logical_and(ll_msk, sounding_qf==0)
 
     dd['var_data'] = var_data[combined_msk]
-    dd['orbit_var_lims'] = np.ma.min(dd['var_data']), np.ma.max(dd['var_data'])
+    if dd['var_data'].shape[0] > 1:
+        dd['orbit_var_lims'] = np.ma.min(dd['var_data']), np.ma.max(dd['var_data'])
+    else:
+        dd['orbit_var_lims'] = None
 
     # note the ellipsis will work equally well for 1D or 2D (vertex) data
     dd['lat'] = lat_data[combined_msk, ...]
@@ -1036,7 +1039,10 @@ def load_OCO2_Lite_overlay_data(ovr_d):
     # apply the combined mask to this point (includes all
     # but latlon), to get the by orbit data range.
     tmp_data = data[combined_msk]
-    dd['orbit_var_lims'] = np.ma.min(tmp_data), np.ma.max(tmp_data)
+    if tmp_data.shape[0] > 1:
+        dd['orbit_var_lims'] = np.ma.min(tmp_data), np.ma.max(tmp_data)
+    else:
+        dd['orbit_var_lims'] = None
 
     # now apply the latlon mask, and proceed to do the
     # subsetting.
