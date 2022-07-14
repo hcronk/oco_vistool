@@ -202,7 +202,8 @@ def _process_overlay_dict(input_dict):
             # if this was a string option, then make sure it is one
             # of the two options we have implemented. if not, revert to default.
             if isinstance(ovr_d['var_lims'], string_types):
-                if ovr_d['var_lims'] not in ('autoscale_by_orbit', 'autoscale_by_overlay'):
+                if ovr_d['var_lims'] not in ('autoscale_by_orbit', 'autoscale_by_overlay',
+                                             'autoscale_by_overlay90pct',):
                     print('var_lims "' + ovr_d['var_lims'] +
                           '" is not valid, reverting to "autoscale_by_orbit"')
                     ovr_d['var_lims'] = 'autoscale_by_orbit'
@@ -455,7 +456,8 @@ def process_config_dict(input_dict):
     lat_name: lat variable to use (to control footprint lat, or vertices)
     lon_name: lon variable to use
     orbit: integer orbit number
-    var_lims: plot limits, or "autoscale_by_orbit", "autoscale_by_overlay"
+    var_lims: plot limits, or "autoscale_by_orbit", "autoscale_by_overlay",
+        or "autoscale_by_overlay90pct"
     cmap: string colormap name, defaults to 'jet'
     cmap_obj: the MPL linearSegmentedColormap object
     alpha: transparency variable (1=opaque, 0=transparent), float in range [0,1]
@@ -847,7 +849,10 @@ def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
     combined_msk = np.logical_and(ll_msk, sounding_qf==0)
 
     dd['var_data'] = var_data[combined_msk]
-    dd['orbit_var_lims'] = np.ma.min(dd['var_data']), np.ma.max(dd['var_data'])
+    if dd['var_data'].shape[0] > 1:
+        dd['orbit_var_lims'] = np.ma.min(dd['var_data']), np.ma.max(dd['var_data'])
+    else:
+        dd['orbit_var_lims'] = None
 
     # note the ellipsis will work equally well for 1D or 2D (vertex) data
     dd['lat'] = lat_data[combined_msk, ...]
@@ -1034,7 +1039,10 @@ def load_OCO2_Lite_overlay_data(ovr_d):
     # apply the combined mask to this point (includes all
     # but latlon), to get the by orbit data range.
     tmp_data = data[combined_msk]
-    dd['orbit_var_lims'] = np.ma.min(tmp_data), np.ma.max(tmp_data)
+    if tmp_data.shape[0] > 1:
+        dd['orbit_var_lims'] = np.ma.min(tmp_data), np.ma.max(tmp_data)
+    else:
+        dd['orbit_var_lims'] = None
 
     # now apply the latlon mask, and proceed to do the
     # subsetting.
@@ -1050,11 +1058,25 @@ def load_OCO2_Lite_overlay_data(ovr_d):
     dd['sounding_id'] = lite_sid[combined_msk]
     dd['time'] = lite_time[combined_msk]
 
-    # for the remaining metadata-like values, take just the first value.
-    # there isn't an obvious way to deal with data that changes modes
-    dd['target_id'] = lite_target_id[combined_msk][0]
-    dd['target_name'] = lite_target_name[combined_msk][0]
-    dd['operation_mode'] = lite_operation_mode[combined_msk][0]
+    # for the remaining metadata-like values:
+    # there isn't an obvious way to deal with data that changes modes:
+    # if there is a bit of ND data just before or after a SAM,
+    # this could cause a problem. As a simple "hack" for that case,
+    # pick the middle value, assuming that should be inside the
+    # group of soundings that is the SAM or TG obs.
+    #
+    # We also need to trap for the case that there are no soundings:
+    # in that case, just use blank strings.
+    combined_idx = np.where(combined_msk)[0]
+    if combined_idx.shape[0] == 0:
+        dd['target_id'] = ''
+        dd['target_name'] = ''
+        dd['operation_mode'] = ''
+    else:
+        n_mid = combined_idx.shape[0] // 2
+        dd['target_id'] = lite_target_id[combined_idx[n_mid]]
+        dd['target_name'] = lite_target_name[combined_idx[n_mid]]
+        dd['operation_mode'] = lite_operation_mode[combined_idx[n_mid]]
 
     return dd
 
@@ -1407,7 +1429,13 @@ if __name__ == "__main__":
             odat = load_OCO2_Lite_overlay_data(ovr_d)
         else:
             odat = load_OCO2_L1L2_overlay_data(ovr_d)
-    
+        # compute 10/90th percentile limits, to match oco3 QL imagery.
+        if len(odat['time']) > 0:
+            odat['var_limits_90pct'] = np.percentile(
+                odat['var_data'], [10.0, 90.0], interpolation='nearest').tolist()
+        else:
+            odat['var_limits_90pct'] = None
+
     # defining both name and XML url of the chosen layer (from the user's code)
     if (cfg_d['sensor'] == 'Worldview'): 
         layer_name = layers_encoding[layers_encoding['Code'] == cfg_d['layer']]['Name'].values[0]
@@ -1489,20 +1517,33 @@ if __name__ == "__main__":
             
     out_background_fullpath = os.path.join(cfg_d['out_plot_dir'], out_background_name)
 
-    # if there is no overlay data present, or the 'background image'
-    # flag is set, then generate the image without overlay data.
+    # now that the input is fully prepared, make some decisions about
+    # what imagery to generate, based on whether there is an ovr_d
+    # (the overlay dictionary) and actual overlay data was loaded.
     if ovr_d:
-        make_background_image = ovr_d['make_background_image']
-        # there can be an overlay dict, but it might have no data.
+        # if overlay data was successfully loaded (e.g., the Quality filter
+        # might have removed it all)
         if len(odat['time']) > 0:
             # here, replace the datetime in the config with the mean
             # time from the overlay data, adding the optional time shift.
+            # this is now we ensure time matching from overlay to background.
             dt = datetime.datetime.utcfromtimestamp(np.mean(odat['time']))
             dt = dt + datetime.timedelta(minutes = ovr_d['time_shift'])
             cfg_d['datetime'] = dt
+            make_background_image = ovr_d['make_background_image']
+        # or, if no overlay data was located, then do not make a background
+        # image regardless of the input setting; we have no way to know the
+        # desired background time in this case.
+        else:
+            if ovr_d['make_background_image']:
+                print('No overlay data present in the target box after applying filters. '+
+                      'stopping background image creation')
+                make_background_image = False
     else:
+        # otherwise, if NO overlay dictionary was specified in the input config,
+        # then this is automatically a background-only run.
         make_background_image = True
-    
+
     # create the background image based on the sensor
     if make_background_image:
         if (cfg_d['sensor'] == 'Worldview'):
@@ -1516,10 +1557,15 @@ if __name__ == "__main__":
         else:
             raise ValueError('Unknown sensor: '+cfg_d['sensor'])
 
-
-
-    # at this point, if there is no overlay to process, can exit here.
+    # at this point, if there is no overlay to process (this was a
+    # "background only" run, can exit here.
     if len(ovr_d) == 0:
+        sys.exit()
+
+    # or, if the overlay was loaded, and had no data, also exit.
+    # the downstream calls may have runtime errors if the overlay
+    # data was empty.
+    if len(odat['time']) == 0:
         sys.exit()
 
     # here, handle the var limit options.
@@ -1532,6 +1578,8 @@ if __name__ == "__main__":
     # min/max according to the points within the overlay.
     if ovr_d['var_lims'] == 'autoscale_by_overlay':
         ovr_d['var_lims'] = None
+    if ovr_d['var_lims'] == 'autoscale_by_overlay90pct':
+        ovr_d['var_lims'] = odat['var_limits_90pct']
 
     ### Plot prep ###
     # create a compact colorbar label, including var name and units.
