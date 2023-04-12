@@ -1535,10 +1535,10 @@ if __name__ == "__main__":
         # image regardless of the input setting; we have no way to know the
         # desired background time in this case.
         else:
+            print("There is no valid data in the target box after applying filters.")
             if ovr_d['make_background_image']:
-                print('No overlay data present in the target box after applying filters. '+
-                      'stopping background image creation')
-                make_background_image = False
+                print('No overlay data present, stopping background image creation')
+            make_background_image = False
     else:
         # otherwise, if NO overlay dictionary was specified in the input config,
         # then this is automatically a background-only run.
