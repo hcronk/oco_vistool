@@ -174,8 +174,12 @@ def get_aws_ABI_files(datetime_utc, domain, platform, hour_offsets, bands_list, 
     
     if (platform[-2:] == '16'):
         g_bucket = s3.Bucket('noaa-goes16')
-    else:
+    elif (platform[-2:] == '17'):
         g_bucket = s3.Bucket('noaa-goes17')
+    elif (platform[-2:] == '18'):
+        g_bucket = s3.Bucket('noaa-goes18')
+    else:
+        raise ValueError('unknown platform: ', platform)
         
     flists = collections.defaultdict(list)
     
@@ -259,10 +263,10 @@ def get_ABI_files(datetime_utc, center_lat,
     valid_domains = 'C', 'F'
     if domain not in valid_domains:
         raise ValueError('domain must be in '+str(valid_domains))
-    valid_platforms = 'GOES16', 'GOES17'
+    valid_platforms = 'GOES16', 'GOES17', 'GOES18'
     if platform not in valid_platforms:
         raise ValueError('platform must be in '+str(valid_platforms))
-    # code used in filename is G16 or G17 for GOES16, GOES17.
+    # code used in filename is G16,G17,G18 for GOES16, GOES17, GOES18
     platform = platform.replace('GOES','G')
 
     # search within hour of input datetime, and +/-1 hour
@@ -344,7 +348,7 @@ def get_loc_AHI_files(datetime_utc, data_home, offsets, bands_list):
 
     return files
 
-def get_aws_AHI_files(datetime_utc, offsets, bands_list, resolutions_list):
+def get_aws_AHI_files(datetime_utc, platform, offsets, bands_list, resolutions_list):
     """
     Helper function for accessing the paths of relevant AWS Himawari background files.
 
@@ -352,6 +356,7 @@ def get_aws_AHI_files(datetime_utc, offsets, bands_list, resolutions_list):
     
     inputs:
     datetime_utc: datetime object for the needed timeslot
+    platform: string specifying which platform (himawari-08 or himawari-09)
     offsets: different time offsets to iterate
     bands_list: list of needed bands
     resolutions_list: list of desired image resolutions, same length as bands_list
@@ -370,20 +375,29 @@ def get_aws_AHI_files(datetime_utc, offsets, bands_list, resolutions_list):
     
     # See https://stackoverflow.com/questions/34865927/can-i-use-boto3-anonymously for reference
     s3.meta.client.meta.events.register('choose-signer.s3.*', disable_signing)
-    hima_bucket = s3.Bucket('noaa-himawari8')
+    if platform == 'Himawari-08':
+        hima_bucket = s3.Bucket('noaa-himawari8')
+        hima_num = 9
+    elif platform == 'Himawari-09':
+        hima_bucket = s3.Bucket('noaa-himawari9')
+        hima_num = 9
+    else:
+        raise ValueError('unknown platform: ', platform)
     
     # known AWS Hima filepath format
-    strftime_template = 'AHI-L1b-FLDK/%Y/%m/%d/%H%M/'
+    # prefix path and full path.
+    hima_ppath_template = 'AHI-L1b-FLDK/%Y/%m/%d/%H%M/'
+    hima_fpath_template = hima_ppath_template + 'HS_H{0:02d}_%Y%m%d_%H%M_B{1:02d}_FLDK_R{2:02d}_S??10.DAT.bz2'
 
     for offset, (band, res) in itertools.product(offsets, zip(bands_list, resolutions_list)):
         offset_dt = rounded_datetime_utc + datetime.timedelta(minutes=offset)
 
         # access the background files by the known path format
-        hima_files = hima_bucket.objects.filter(Prefix=offset_dt.strftime(strftime_template))
+        hima_files = hima_bucket.objects.filter(Prefix=offset_dt.strftime(hima_ppath_template))
 
         # searches for files with the selected band Bnn, at specified
         # resolution Rnn and use S??10 (ignore the not-segmented file)
-        glob_str = offset_dt.strftime(strftime_template + 'HS_H08_%Y%m%d_%H%M') + '_B{0:02d}_FLDK_R{1:02d}_S??10.DAT.bz2'.format(band,res)
+        glob_str = offset_dt.strftime(hima_fpath_template).format(hima_num,band,res)
 
         # record the AWS files by the needed format
         keys = list()
@@ -436,7 +450,7 @@ def download_aws_AHI_files(flist, hima_bucket, data_home):
     flist = list(set(files))
     return flist
 
-def get_AHI_files(datetime_utc, center_lat, files_loc, data_home):
+def get_AHI_files(datetime_utc, center_lat, platform, files_loc, data_home):
     """
     Using the helpers above, accesses the needed Himawari files by date & time and downloads them (if needed).
     
@@ -445,6 +459,7 @@ def get_AHI_files(datetime_utc, center_lat, files_loc, data_home):
     inputs:
     datetime_utc: datetime object for the needed point of time
     center_lat: center latitude of the background image
+    platform: string specifying which platform (himawari-08 or himawari-09)
     files_loc: if the background images are local or on AWS
     data_home: origin directory for the background files 
     """
@@ -459,7 +474,7 @@ def get_AHI_files(datetime_utc, center_lat, files_loc, data_home):
     # accessing the Himawari files paths and bucket from AWS
     if (files_loc == 'aws'):
         files, hima_bucket = get_aws_AHI_files(
-            datetime_utc, offsets, bands_list, resolutions_list)
+            datetime_utc, platform, offsets, bands_list, resolutions_list)
 
     # accessing the local files
     else:
@@ -796,7 +811,7 @@ def nonworldview_overlay_plot(
         time_offset = np.mean(time_offsets)/60.0
     else:
         file_list, time_offsets = get_AHI_files(
-            dt, center_lat, cfg_d['files_loc'], cfg_d['data_home'])
+            dt, center_lat, cfg_d['sensor'], cfg_d['files_loc'], cfg_d['data_home'])
         time_offset = np.mean(time_offsets)/60.0
         
     if len(file_list) == 0:

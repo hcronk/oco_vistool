@@ -526,8 +526,11 @@ def process_config_dict(input_dict):
         cfg_d['geo_upper_left'], cfg_d['geo_lower_right'] = construct_target_box(cfg_d['datetime'], input_dict['target_name'], 'target_name')
     
     cfg_d['sensor'] = input_dict.get('sensor')
-    valid_sensor_names = ('Worldview', 'GOES16_ABI_C', 'GOES16_ABI_F',
-                          'GOES17_ABI_C', 'GOES17_ABI_F', 'Himawari-08',)
+    valid_sensor_names = ('Worldview',
+                          'GOES16_ABI_C', 'GOES16_ABI_F',
+                          'GOES17_ABI_C', 'GOES17_ABI_F',
+                          'GOES18_ABI_C', 'GOES18_ABI_F',
+                          'Himawari-08', 'Himawari-09')
 
     if cfg_d['sensor'] not in valid_sensor_names:
         raise ValueError('sensor name: ' + cfg_d['sensor'] + ' is not valid')
