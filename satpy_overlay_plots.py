@@ -55,7 +55,7 @@ def _get_view_zenith(scn, obs_lon, obs_lat):
     after the true_color composite is loaded.
     """
 
-    obs_datetime = scn.attrs['start_time']
+    obs_datetime = scn['true_color'].attrs['start_time']
     obs_alt = 0.0
 
     # orbital parameters are stored in different keys for
