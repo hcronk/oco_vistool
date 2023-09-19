@@ -258,7 +258,7 @@ def create_plot_title_string(cfg_d, ovr_d, odat):
         title += odat['data_version'] + '\n'
 
     if odat is not None:
-        dt = datetime.fromtimestamp(odat['time'][0])
+        dt = datetime.utcfromtimestamp(odat['time'][0])
         time_string = dt.strftime('%H:%M UTC %d %b %Y')
     else:
         time_string = cfg_d['datetime'].strftime('%H:%M UTC %d %b %Y')
