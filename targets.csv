@@ -42,1105 +42,1245 @@
 40,  50.552,   4.746,2020-06-12T14,06281,ecostress_be_vie,ecostress_be_vie
 41, -13.287, -56.088,2019-10-08T12,02439,ecostress_br_cmt,ecostress_br_cmt
 42, -16.617, -56.767,2019-09-23T18,02210,ecostress_br_no,ecostress_br_no
-43,  46.815,   9.856,2020-06-13T10,06294,ecostress_ch_dav,ecostress_ch_dav
-44,  47.116,   8.538,2020-04-03T14,05197,ecostress_ch_fru,ecostress_ch_fru
-45,  47.478,   8.364,2020-06-11T14,06266,ecostress_ch_lae,ecostress_ch_lae
-46,  10.419, -85.473,2020-02-18T21,04505,ecostress_cr_fsc,ecostress_cr_fsc
-47,  10.842, -85.616,2019-10-08T15,02441,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
-48,  10.969, -85.521,2021-11-19T21,14415,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
-49,  10.707, -85.516,2022-04-22T19,16799,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
-50,  10.969, -85.521,2022-07-20T21,18179,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
-51,  10.707, -85.516,2022-10-18T20,19573,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
-52,  10.969, -85.521,2022-11-19T21,20069,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
-53,  10.707, -85.516,2022-12-26T17,20640,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
-54,  10.969, -85.521,2023-01-19T21,21014,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
-55,  49.502,  18.537,2020-06-01T14,06111,ecostress_cz_bk1,ecostress_cz_bk1
-56,  50.866,   6.447,2020-04-22T08,05488,ecostress_de_rus,ecostress_de_rus
-57,  50.962,  13.565,2020-04-05T14,05228,ecostress_de_tha,ecostress_de_tha
-58,  48.476,   2.780,2020-06-11T11,06264,ecostress_fr_fon,ecostress_fr_fon
-59,  31.345,  35.052,2020-04-04T10,05210,ecostress_il_yat,ecostress_il_yat
-60,  41.704,  12.357,2020-02-10T10,04374,ecostress_it_cp2,ecostress_it_cp2
-61,  41.814,  12.467,2021-12-18T12,14858,ecostress_it_cp2,ecostress_it_cp2
-62,  45.844,   7.578,2020-02-12T10,04405,ecostress_it_tor,ecostress_it_tor
-63,  -3.426,  38.141,2019-10-07T07,02420,ecostress_ke_mak,ecostress_ke_mak
-64,  37.748, 127.162,2020-04-14T07,05363,ecostress_kr_gck,ecostress_kr_gck
-65,  13.648,   2.634,2019-08-08T10,01492,ecostress_ne_waf,ecostress_ne_waf
-66, -43.593, 171.928,2020-05-24T00,05978,ecostress_nz_bfm,ecostress_nz_bfm
-67, -37.388, 175.554,2019-09-22T01,02184,ecostress_nz_kop,ecostress_nz_kop
-68, -43.262, 172.211,2019-09-16T21,02104,ecostress_nz_oxf,ecostress_nz_oxf
-69, -37.460, 175.220,2019-09-18T03,02123,ecostress_nz_sco,ecostress_nz_sco
-70,  51.207,  -2.828,2019-10-12T12,02501,ecostress_sleg,ecostress_sleg
-71,  34.608, -81.722,2020-06-27T16,06515,ecostress_ssh_czo_cal,ecostress_ssh_czo_cal
-72,  40.666, -77.904,2020-04-02T19,05185,ecostress_ssh_czo_shale,ecostress_ssh_czo_shale
-73,  36.606, -97.489,2020-12-26T17,09334,ecostress_us_arm,ecostress_us_arm
-74,  44.065, -71.288,2019-10-08T17,02442,ecostress_us_bar,ecostress_us_bar
-75,  38.102,-121.504,2020-04-04T21,05217,ecostress_us_bi1,ecostress_us_bi1
-76,  43.471,-119.691,2019-10-08T20,02444,ecostress_us_bsg,ecostress_us_bsg
-77,  39.838, -74.379,2021-05-29T20,11720,ecostress_us_ced,ecostress_us_ced
-78,  46.781,-117.082,2020-02-16T21,04474,ecostress_us_cf1,ecostress_us_cf1
-79,  44.103, -89.538,2020-02-12T16,04409,ecostress_us_cs1,ecostress_us_cs1
-80,  37.109,-119.731,2019-10-06T20,02413,ecostress_us_cz1,ecostress_us_cz1
-81,  37.031,-119.256,2020-03-31T22,05156,ecostress_us_cz2,ecostress_us_cz2
-82,  46.409,-119.275,2020-04-11T23,05327,ecostress_us_hn1,ecostress_us_hn1
-83,  46.689,-119.464,2020-06-14T18,06315,ecostress_us_hn2,ecostress_us_hn2
-84,  39.056, -95.191,2019-08-07T18,01482,ecostress_us_kfs,ecostress_us_kfs
-85,  39.082, -96.560,2019-08-06T19,01467,ecostress_us_kon,ecostress_us_kon
-86,  46.083, -89.979,2020-06-09T22,06240,ecostress_us_los,ecostress_us_los
-87,  44.452,-121.557,2019-10-15T18,02551,ecostress_us_me2,ecostress_us_me2
-88,  43.077, -89.403,2020-02-09T17,04363,ecostress_us_men,ecostress_us_men
-89,  39.323, -86.413,2020-03-28T21,05109,ecostress_us_mms,ecostress_us_mms
-90,  44.646,-123.551,2020-04-26T18,05556,ecostress_us_mrf,ecostress_us_mrf
-91,  44.678, -93.072,2020-06-12T21,06286,ecostress_us_ro4,ecostress_us_ro4
-92,  38.558,-121.863,2021-02-07T19,10001,ecostress_us_rr,ecostress_us_rr
-93,  33.610,-116.450,2020-01-30T21,04211,ecostress_us_scc,ecostress_us_scc
-94,  33.734,-117.696,2020-10-11T17,08157,ecostress_us_scs,ecostress_us_scs
-95,  34.335,-106.744,2020-02-12T16,04409,ecostress_us_ses,ecostress_us_ses
-96,  39.914, -74.596,2020-12-14T13,09146,ecostress_us_slt,ecostress_us_slt
-97,  36.235,-119.925,2021-08-10T17,12849,ecostress_us_sp,ecostress_us_sp
-98,  46.242, -89.348,2020-05-02T13,05646,ecostress_us_syv,ecostress_us_syv
-99,  31.480, -96.883,2021-03-06T14,10416,ecostress_us_tx2,ecostress_us_tx2
-100,  27.667, -98.209,2020-02-18T21,04505,ecostress_us_tx6,ecostress_us_tx6
-101,  28.781, -95.614,2019-11-30T20,03265,ecostress_us_tx9,ecostress_us_tx9
-102,  38.413,-120.951,2020-08-19T21,07339,ecostress_us_var,ecostress_us_var
-103,  35.888,-106.532,2019-08-06T19,01467,ecostress_us_vcm,ecostress_us_vcm
-104,  34.425,-105.862,2020-02-26T18,04627,ecostress_us_wjs,ecostress_us_wjs
-105,  31.737,-109.942,2020-08-14T15,07258,ecostress_us_wkg,ecostress_us_wkg
-106,  44.137,-123.182,2020-02-10T19,04380,ecostress_us_wpp,ecostress_us_wpp
-107,  45.109,-122.666,2020-02-15T22,04459,ecostress_us_wwt,ecostress_us_wwt
-108,  37.568, 126.978,2020-06-04T04,06151,fossil0001,fossil_Seoul_South_Korea
-109,  23.117, 113.250,2019-10-12T01,02494,fossil0002,fossil_Guangzhou_China
-110,  23.231, 113.147,2021-10-29T03,14078,fossil0002,fossil_Guangzhou_China
-111,  23.127, 113.240,2021-11-23T08,14468,fossil0002,fossil_Guangzhou_China
-112,  23.231, 113.147,2021-12-31T02,15053,fossil0002,fossil_Guangzhou_China
-113,  23.127, 113.240,2022-01-21T08,15382,fossil0002,fossil_Guangzhou_China
-114,  23.231, 113.147,2022-02-15T08,15769,fossil0002,fossil_Guangzhou_China
-115,  23.127, 113.240,2022-04-08T02,16571,fossil0002,fossil_Guangzhou_China
-116,  23.231, 113.147,2022-04-14T08,16668,fossil0002,fossil_Guangzhou_China
-117,  23.127, 113.240,2022-05-20T09,17226,fossil0002,fossil_Guangzhou_China
-118,  23.231, 113.147,2022-06-14T08,17613,fossil0002,fossil_Guangzhou_China
-119,  23.127, 113.240,2022-06-15T23,17638,fossil0002,fossil_Guangzhou_China
-120,  23.231, 113.147,2022-06-18T07,17674,fossil0002,fossil_Guangzhou_China
-121,  23.127, 113.240,2022-07-20T09,18171,fossil0002,fossil_Guangzhou_China
-122,  23.231, 113.147,2022-08-14T08,18558,fossil0002,fossil_Guangzhou_China
-123,  23.127, 113.240,2022-09-19T09,19116,fossil0002,fossil_Guangzhou_China
-124,  40.715, -74.007,2020-06-14T20,06316,fossil0003,fossil_New_York_USA
-125,  40.804, -74.163,2021-12-15T19,14816,fossil0003,fossil_New_York_USA
-126,  22.365, 114.134,2019-11-30T06,03256,fossil0004,fossil_Hong_Kong_China
-127,  22.625, 114.044,2021-10-25T04,14017,fossil0004,fossil_Hong_Kong_China
-128,  22.497, 114.131,2022-01-29T05,15504,fossil0004,fossil_Hong_Kong_China
-129,  22.625, 114.044,2022-03-03T01,16013,fossil0004,fossil_Hong_Kong_China
-130,  22.497, 114.131,2022-03-24T07,16342,fossil0004,fossil_Hong_Kong_China
-131,  34.053,-118.245,2020-02-24T19,04597,fossil0005,fossil_Los_Angeles_USA
-132,  31.222, 121.458,2020-02-20T06,04526,fossil0006,fossil_Shanghai_China
-133,  31.252, 121.358,2021-12-18T06,14854,fossil0006,fossil_Shanghai_China
-134,  31.060, 121.276,2022-01-25T07,15443,fossil0006,fossil_Shanghai_China
-135,  31.252, 121.358,2022-02-14T07,15753,fossil0006,fossil_Shanghai_China
-136,  31.060, 121.276,2022-04-08T02,16571,fossil0006,fossil_Shanghai_China
-137,  31.252, 121.358,2022-04-24T04,16820,fossil0006,fossil_Shanghai_China
-138,  31.060, 121.276,2022-05-24T07,17287,fossil0006,fossil_Shanghai_China
-139,  31.252, 121.358,2022-06-13T08,17597,fossil0006,fossil_Shanghai_China
-140,  31.060, 121.276,2022-06-15T23,17638,fossil0006,fossil_Shanghai_China
-141,  31.252, 121.358,2022-06-17T06,17658,fossil0006,fossil_Shanghai_China
-142,  31.060, 121.276,2022-07-20T09,18171,fossil0006,fossil_Shanghai_China
-143,  31.252, 121.358,2022-08-13T07,18542,fossil0006,fossil_Shanghai_China
-144,  31.060, 121.276,2022-08-15T22,18583,fossil0006,fossil_Shanghai_China
-145,  31.252, 121.358,2022-09-01T00,18832,fossil0006,fossil_Shanghai_China
-146,  31.060, 121.276,2022-09-30T05,19284,fossil0006,fossil_Shanghai_China
-147,  31.252, 121.358,2022-10-24T03,19655,fossil0006,fossil_Shanghai_China
-148,  31.060, 121.276,2022-12-08T01,20351,fossil0006,fossil_Shanghai_China
-149,  31.252, 121.358,2023-01-01T00,20722,fossil0006,fossil_Shanghai_China
-150,  31.060, 121.276,2023-01-23T07,21067,fossil0006,fossil_Shanghai_China
-151,   1.465, 103.757,2019-09-24T08,02219,fossil0007,fossil_Singapore_Singapore
-152,   1.601, 103.661,2021-12-19T08,14871,fossil0007,fossil_Singapore_Singapore
-153,   1.579, 103.837,2022-01-18T09,15336,fossil0007,fossil_Singapore_Singapore
-154,   1.601, 103.661,2022-03-06T02,16060,fossil0007,fossil_Singapore_Singapore
-155,   1.579, 103.837,2022-03-21T08,16296,fossil0007,fossil_Singapore_Singapore
-156,   1.601, 103.661,2022-04-21T08,16776,fossil0007,fossil_Singapore_Singapore
-157,   1.579, 103.837,2022-05-21T08,17241,fossil0007,fossil_Singapore_Singapore
-158,   1.601, 103.661,2022-06-29T04,17843,fossil0007,fossil_Singapore_Singapore
-159,   1.579, 103.837,2022-07-25T06,18247,fossil0007,fossil_Singapore_Singapore
-160,   1.601, 103.661,2022-08-29T04,18788,fossil0007,fossil_Singapore_Singapore
-161,   1.579, 103.837,2022-09-16T09,19070,fossil0007,fossil_Singapore_Singapore
-162,   1.601, 103.661,2022-10-17T09,19550,fossil0007,fossil_Singapore_Singapore
-163,   1.579, 103.837,2022-11-20T08,20076,fossil0007,fossil_Singapore_Singapore
-164,   1.601, 103.661,2022-12-21T07,20556,fossil0007,fossil_Singapore_Singapore
-165,   1.579, 103.837,2023-01-20T08,21021,fossil0007,fossil_Singapore_Singapore
-166,  41.884, -87.632,2019-10-10T17,02473,fossil0008,fossil_Chicago_USA
-167,  35.689, 139.692,2020-06-17T22,06364,fossil0009,fossil_Tokyo_Japan
-168,  24.682,  46.687,2020-05-24T13,05986,fossil0010,fossil_Riyadh_Saudi_Arabia
-169,  25.270,  55.309,2019-10-10T06,02466,fossil0011,fossil_Dubai_UAE
-170,  25.006,  55.557,2021-10-23T09,13989,fossil0011,fossil_Dubai_UAE
-171,  25.130,  55.449,2021-11-29T09,14562,fossil0011,fossil_Dubai_UAE
-172,  25.006,  55.557,2021-12-18T11,14857,fossil0011,fossil_Dubai_UAE
-173,  25.130,  55.449,2022-02-11T04,15705,fossil0011,fossil_Dubai_UAE
-174,  25.006,  55.557,2022-03-05T04,16046,fossil0011,fossil_Dubai_UAE
-175,  25.130,  55.449,2022-04-02T08,16482,fossil0011,fossil_Dubai_UAE
-176,  25.006,  55.557,2022-04-20T10,16762,fossil0011,fossil_Dubai_UAE
-177,  25.130,  55.449,2022-05-22T12,17259,fossil0011,fossil_Dubai_UAE
-178,  25.006,  55.557,2022-07-02T05,17890,fossil0011,fossil_Dubai_UAE
-179,  25.130,  55.449,2022-07-26T10,18265,fossil0011,fossil_Dubai_UAE
-180,  25.006,  55.557,2022-08-24T08,18713,fossil0011,fossil_Dubai_UAE
-181,  25.130,  55.449,2022-09-28T09,19256,fossil0011,fossil_Dubai_UAE
-182,  25.006,  55.557,2022-10-16T11,19536,fossil0011,fossil_Dubai_UAE
-183,  25.130,  55.449,2022-12-02T08,20262,fossil0011,fossil_Dubai_UAE
-184,  25.006,  55.557,2022-12-20T09,20542,fossil0011,fossil_Dubai_UAE
-185,  25.130,  55.449,2023-01-21T11,21039,fossil0011,fossil_Dubai_UAE
-186,  31.569, 120.289,2020-05-27T07,06029,fossil0012,fossil_Wuxi_China
-187, -26.205,  28.040,2019-09-19T13,02145,fossil0013,fossil_Johannesburg_South_Africa
-188,  35.694,  51.422,2019-10-11T07,02482,fossil0014,fossil_Tehran_Iran
-189,  51.506,  -0.127,2019-10-15T12,02547,fossil0015,fossil_London_UK
-190,  30.459,  31.179,2019-10-09T08,02452,fossil0016,fossil_Benha_Egypt
-191,  39.907, 116.397,2019-10-09T04,02449,fossil0017,fossil_Beijing_China
-192,  -6.172, 106.826,2019-10-07T02,02417,fossil0018,fossil_Jakarta_Indonesia
-193,  -6.325, 106.936,2021-10-24T07,14003,fossil0018,fossil_Jakarta_Indonesia
-194,  -6.322, 106.719,2021-11-18T08,14391,fossil0018,fossil_Jakarta_Indonesia
-195,  -6.325, 106.936,2022-01-07T01,15161,fossil0018,fossil_Jakarta_Indonesia
-196,  -6.322, 106.719,2022-02-04T02,15595,fossil0018,fossil_Jakarta_Indonesia
-197,  -6.325, 106.936,2022-02-18T08,15816,fossil0018,fossil_Jakarta_Indonesia
-198,  -6.322, 106.719,2022-03-26T06,16372,fossil0018,fossil_Jakarta_Indonesia
-199,  -6.325, 106.936,2022-05-10T01,17066,fossil0018,fossil_Jakarta_Indonesia
-200,  -6.322, 106.719,2022-06-07T01,17500,fossil0018,fossil_Jakarta_Indonesia
-201,  -6.325, 106.936,2022-06-29T05,17843,fossil0018,fossil_Jakarta_Indonesia
-202,  -6.322, 106.719,2022-07-19T08,18155,fossil0018,fossil_Jakarta_Indonesia
-203,  -6.325, 106.936,2022-08-17T09,18605,fossil0018,fossil_Jakarta_Indonesia
-204,  -6.322, 106.719,2022-09-25T05,19207,fossil0018,fossil_Jakarta_Indonesia
-205,  -6.325, 106.936,2022-12-21T07,20556,fossil0018,fossil_Jakarta_Indonesia
-206,  -6.322, 106.719,2023-01-29T03,21158,fossil0018,fossil_Jakarta_Indonesia
-207,  29.094,  48.076,2019-10-08T08,02436,fossil0019,fossil_Al-Ahmadi_Kuwait
-208,  29.177,  47.879,2021-11-04T04,14172,fossil0019,fossil_Al-Ahmadi_Kuwait
-209,  28.922,  47.895,2021-11-27T11,14532,fossil0019,fossil_Al-Ahmadi_Kuwait
-210,  29.177,  47.879,2022-02-25T07,15924,fossil0019,fossil_Al-Ahmadi_Kuwait
-211,  28.922,  47.895,2022-04-04T08,16513,fossil0019,fossil_Al-Ahmadi_Kuwait
-212,  29.177,  47.879,2022-04-12T13,16640,fossil0019,fossil_Al-Ahmadi_Kuwait
-213,  28.922,  47.895,2022-06-12T05,17580,fossil0019,fossil_Al-Ahmadi_Kuwait
-214,  25.775, -80.198,2019-10-07T16,02426,fossil0020,fossil_Miami_USA
-215,  25.775, -80.468,2021-11-30T18,14583,fossil0020,fossil_Miami_USA
-216,  26.040, -80.453,2021-12-15T21,14817,fossil0020,fossil_Miami_USA
-217,  25.775, -80.468,2022-03-26T20,16381,fossil0020,fossil_Miami_USA
-218,  26.040, -80.453,2022-04-21T18,16783,fossil0020,fossil_Miami_USA
-219,  25.775, -80.468,2022-06-07T15,17509,fossil0020,fossil_Miami_USA
-220,  26.040, -80.453,2022-06-10T22,17560,fossil0020,fossil_Miami_USA
-221,  25.775, -80.468,2022-06-11T13,17570,fossil0020,fossil_Miami_USA
-222,  26.040, -80.453,2022-07-03T14,17911,fossil0020,fossil_Miami_USA
-223,  25.775, -80.468,2022-07-19T22,18164,fossil0020,fossil_Miami_USA
-224,  26.040, -80.453,2022-08-10T22,18505,fossil0020,fossil_Miami_USA
-225,  25.775, -80.468,2022-08-11T13,18515,fossil0020,fossil_Miami_USA
-226,  26.040, -80.453,2022-08-29T15,18795,fossil0020,fossil_Miami_USA
-227,  25.775, -80.468,2022-09-25T19,19216,fossil0020,fossil_Miami_USA
-228,  26.040, -80.453,2022-10-17T20,19557,fossil0020,fossil_Miami_USA
-229,  25.775, -80.468,2022-11-29T18,20222,fossil0020,fossil_Miami_USA
-230,  26.040, -80.453,2022-12-25T16,20624,fossil0020,fossil_Miami_USA
-231,  25.775, -80.468,2023-01-29T18,21167,fossil0020,fossil_Miami_USA
-232,  13.599, 100.597,2019-11-29T07,03241,fossil0021,fossil_Samut_Prakan_Thailand
-233,  13.773, 100.465,2021-10-25T06,14018,fossil0021,fossil_Samut_Prakan_Thailand
-234,  13.776, 100.732,2022-01-20T09,15367,fossil0021,fossil_Samut_Prakan_Thailand
-235,  13.773, 100.465,2022-03-03T03,16014,fossil0021,fossil_Samut_Prakan_Thailand
-236,  13.776, 100.732,2022-03-19T10,16266,fossil0021,fossil_Samut_Prakan_Thailand
-237,  13.773, 100.465,2022-04-18T08,16730,fossil0021,fossil_Samut_Prakan_Thailand
-238,  13.776, 100.732,2022-05-19T10,17211,fossil0021,fossil_Samut_Prakan_Thailand
-239,  13.773, 100.465,2022-07-04T02,17919,fossil0021,fossil_Samut_Prakan_Thailand
-240,  13.776, 100.732,2022-07-27T06,18278,fossil0021,fossil_Samut_Prakan_Thailand
-241,  13.773, 100.465,2022-08-22T07,18681,fossil0021,fossil_Samut_Prakan_Thailand
-242,  13.776, 100.732,2022-09-18T09,19101,fossil0021,fossil_Samut_Prakan_Thailand
-243,  13.773, 100.465,2022-10-18T08,19565,fossil0021,fossil_Samut_Prakan_Thailand
-244,  13.776, 100.732,2022-11-22T08,20107,fossil0021,fossil_Samut_Prakan_Thailand
-245,  13.773, 100.465,2022-12-22T06,20571,fossil0021,fossil_Samut_Prakan_Thailand
-246,  13.776, 100.732,2023-01-18T09,20991,fossil0021,fossil_Samut_Prakan_Thailand
-247,  48.857,   2.341,2020-02-19T11,04514,fossil0022,fossil_Paris_France
-248,  32.778, -96.795,2020-02-10T16,04378,fossil0023,fossil_Dallas_USA
-249,  39.142, 117.177,2019-10-06T05,02403,fossil0024,fossil_Tianjin_China
-250,  41.014,  28.950,2019-10-10T09,02468,fossil0025,fossil_Istanbul_Turkey
-251,  41.073,  29.055,2022-02-11T07,15707,fossil0025,fossil_Istanbul_Turkey
-252,  42.332, -83.048,2019-10-07T18,02427,fossil0026,fossil_Detroit_USA
-253,  39.952, -75.162,2020-02-08T16,04347,fossil0027,fossil_Philadelphia_USA
-254,  37.339,-121.885,2019-08-07T20,01483,fossil0028,fossil_San_Jose_USA
-255,  28.631,  77.217,2019-10-09T05,02450,fossil0029,fossil_New_Delhi_India
-256,  50.942,   6.955,2019-10-13T12,02516,fossil0030,fossil_Cologne_Germany
-257,  29.761, -95.370,2020-04-26T18,05556,fossil0031,fossil_Houston_USA
-258,  21.482,  39.183,2019-10-08T08,02436,fossil0032,fossil_Jeddah_Saudi_Arabia
-259,  21.415,  39.340,2021-10-24T10,14005,fossil0032,fossil_Jeddah_Saudi_Arabia
-260,  21.642,  39.322,2021-11-23T12,14471,fossil0032,fossil_Jeddah_Saudi_Arabia
-261,  21.415,  39.340,2022-02-22T10,15879,fossil0032,fossil_Jeddah_Saudi_Arabia
-262,  21.642,  39.322,2022-03-23T13,16330,fossil0032,fossil_Jeddah_Saudi_Arabia
-263,  21.415,  39.340,2022-04-17T12,16717,fossil0032,fossil_Jeddah_Saudi_Arabia
-264,  21.642,  39.322,2022-06-04T08,17458,fossil0032,fossil_Jeddah_Saudi_Arabia
-265,  21.415,  39.340,2022-06-17T12,17662,fossil0032,fossil_Jeddah_Saudi_Arabia
-266,  21.642,  39.322,2022-07-20T14,18174,fossil0032,fossil_Jeddah_Saudi_Arabia
-267,  21.415,  39.340,2022-08-21T10,18668,fossil0032,fossil_Jeddah_Saudi_Arabia
-268,  21.642,  39.322,2022-09-26T11,19226,fossil0032,fossil_Jeddah_Saudi_Arabia
-269,  21.415,  39.340,2022-10-17T12,19552,fossil0032,fossil_Jeddah_Saudi_Arabia
-270,  21.642,  39.322,2022-11-30T09,20232,fossil0032,fossil_Jeddah_Saudi_Arabia
-271,  21.415,  39.340,2022-12-25T09,20619,fossil0032,fossil_Jeddah_Saudi_Arabia
-272,  21.642,  39.322,2023-01-30T09,21177,fossil0032,fossil_Jeddah_Saudi_Arabia
-273,  38.890, -77.032,2020-05-28T20,06053,fossil0033,fossil_Washington_DC_USA
-274,  34.694, 135.502,2019-10-06T03,02402,fossil0034,fossil_Osaka_Japan
-275, -34.609, -58.373,2019-09-18T18,02133,fossil0035,fossil_Buenos_Aires_Argentina
-276, -34.758, -58.523,2021-11-09T13,14255,fossil0035,fossil_Buenos_Aires_Argentina
-277, -34.861, -58.699,2021-11-14T19,14336,fossil0035,fossil_Buenos_Aires_Argentina
-278, -34.758, -58.523,2021-12-22T20,14925,fossil0035,fossil_Buenos_Aires_Argentina
-279, -34.861, -58.699,2022-01-16T18,15311,fossil0035,fossil_Buenos_Aires_Argentina
-280, -34.758, -58.523,2022-02-22T19,15885,fossil0035,fossil_Buenos_Aires_Argentina
-281, -34.861, -58.699,2022-03-11T20,16149,fossil0035,fossil_Buenos_Aires_Argentina
-282, -34.758, -58.523,2022-05-02T16,16952,fossil0035,fossil_Buenos_Aires_Argentina
-283, -34.861, -58.699,2022-05-15T19,17155,fossil0035,fossil_Buenos_Aires_Argentina
-284, -34.758, -58.523,2022-07-06T15,17958,fossil0035,fossil_Buenos_Aires_Argentina
-285, -34.861, -58.699,2022-07-15T19,18100,fossil0035,fossil_Buenos_Aires_Argentina
-286, -34.758, -58.523,2022-08-24T19,18720,fossil0035,fossil_Buenos_Aires_Argentina
-287, -34.861, -58.699,2022-09-14T18,19045,fossil0035,fossil_Buenos_Aires_Argentina
-288, -34.758, -58.523,2022-10-28T17,19726,fossil0035,fossil_Buenos_Aires_Argentina
-289, -34.861, -58.699,2022-11-14T18,19990,fossil0035,fossil_Buenos_Aires_Argentina
-290, -34.758, -58.523,2023-01-01T16,20732,fossil0035,fossil_Buenos_Aires_Argentina
-291, -34.861, -58.699,2023-01-22T15,21057,fossil0035,fossil_Buenos_Aires_Argentina
-292,  19.432, -99.133,2020-02-08T16,04347,fossil0036,fossil_Mexico_City_Mexico
-293,   3.092, 101.494,2019-12-24T08,03629,fossil0037,fossil_Shah_Alam_Malaysia
-294,   3.008, 101.614,2021-10-24T07,14003,fossil0037,fossil_Shah_Alam_Malaysia
-295,   3.176, 101.554,2021-11-20T08,14422,fossil0037,fossil_Shah_Alam_Malaysia
-296,   3.008, 101.614,2022-02-26T05,15938,fossil0037,fossil_Shah_Alam_Malaysia
-297,   3.176, 101.554,2022-03-24T07,16342,fossil0037,fossil_Shah_Alam_Malaysia
-298,   3.008, 101.614,2022-04-17T09,16715,fossil0037,fossil_Shah_Alam_Malaysia
-299,   3.176, 101.554,2022-06-05T03,17470,fossil0037,fossil_Shah_Alam_Malaysia
-300,   3.008, 101.614,2022-08-17T09,18605,fossil0037,fossil_Shah_Alam_Malaysia
-301,   3.176, 101.554,2022-09-27T05,19238,fossil0037,fossil_Shah_Alam_Malaysia
-302,  25.037, 121.564,2020-08-17T07,07299,fossil0038,fossil_Taipei_Taiwan
-303,  24.892, 121.603,2021-12-17T07,14839,fossil0038,fossil_Taipei_Taiwan
-304,  24.887, 121.422,2022-01-22T07,15397,fossil0038,fossil_Taipei_Taiwan
-305,  24.892, 121.603,2022-02-13T08,15738,fossil0038,fossil_Taipei_Taiwan
-306,  24.887, 121.422,2022-05-21T08,17241,fossil0038,fossil_Taipei_Taiwan
-307,  24.892, 121.603,2022-06-12T08,17582,fossil0038,fossil_Taipei_Taiwan
-308,  24.887, 121.422,2022-07-21T08,18186,fossil0038,fossil_Taipei_Taiwan
-309,  24.892, 121.603,2022-08-12T08,18527,fossil0038,fossil_Taipei_Taiwan
-310,  24.887, 121.422,2022-09-20T08,19131,fossil0038,fossil_Taipei_Taiwan
-311,  24.892, 121.603,2022-10-19T06,19579,fossil0038,fossil_Taipei_Taiwan
-312,  24.887, 121.422,2022-11-24T06,20137,fossil0038,fossil_Taipei_Taiwan
-313,  24.892, 121.603,2022-12-27T02,20646,fossil0038,fossil_Taipei_Taiwan
-314,  24.887, 121.422,2023-01-20T08,21021,fossil0038,fossil_Taipei_Taiwan
-315,  33.448,-112.076,2019-10-08T19,02443,fossil0039,fossil_Phoenix_USA
-316,  30.644, 114.325,2019-10-11T02,02479,fossil0040,fossil_Wuhan_China
-317,  30.294, 120.161,2019-10-08T03,02433,fossil0041,fossil_Hangzhou_China
-318,  43.649, -79.385,2019-10-11T16,02488,fossil0042,fossil_Toronto_Canada
-319,  32.062, 118.778,2020-06-28T03,06522,fossil0043,fossil_Nanjing_China
-320,  41.792, 123.433,2019-10-10T03,02464,fossil0044,fossil_Shenyang_China
-321, -37.818, 144.967,2019-09-14T00,02059,fossil0045,fossil_Melbourne_Australia
-322,  23.368, 116.715,2020-02-12T00,04399,fossil0046,fossil_Shantou_China
-323,  23.518, 116.565,2021-11-24T07,14483,fossil0046,fossil_Shantou_China
-324,  40.420,  -3.706,2020-05-28T16,06050,fossil0047,fossil_Madrid_Spain
-325,  22.571,  88.371,2019-10-12T03,02495,fossil0048,fossil_Kolkata_India
-326,  35.310, 129.040,2019-10-16T00,02555,fossil0049,fossil_Pusan_South_Korea
-327, -33.870, 151.207,2020-02-24T06,04588,fossil0050,fossil_Sydney_Australia
-328, -33.676, 150.966,2021-10-23T06,13987,fossil0050,fossil_Sydney_Australia
-329, -33.918, 150.968,2021-11-13T06,14312,fossil0050,fossil_Sydney_Australia
-330, -33.676, 150.966,2021-12-30T03,15038,fossil0050,fossil_Sydney_Australia
-331,  34.271, 108.925,2020-02-09T03,04354,fossil0051,fossil_Xian_China
-332,  30.672, 104.076,2020-02-17T08,04481,fossil0052,fossil_Chengdu_China
-333,  25.764, 118.546,2019-12-22T06,03597,fossil0053,fossil_Huhot_China
-334,  42.359, -71.057,2019-10-16T14,02564,fossil0054,fossil_Boston_USA
-335,  42.425, -71.187,2021-10-22T16,13978,fossil0054,fossil_Boston_USA
-336,  42.259, -71.251,2022-04-16T13,16702,fossil0054,fossil_Boston_USA
-337,  42.425, -71.187,2022-04-19T17,16751,fossil0054,fossil_Boston_USA
-338,  42.259, -71.251,2022-04-20T11,16763,fossil0054,fossil_Boston_USA
-339,  42.425, -71.187,2022-04-30T13,16919,fossil0054,fossil_Boston_USA
-340,  42.259, -71.251,2022-07-28T20,18302,fossil0054,fossil_Boston_USA
-341,  42.425, -71.187,2022-08-07T21,18458,fossil0054,fossil_Boston_USA
-342,  42.259, -71.251,2022-10-12T14,19476,fossil0054,fossil_Boston_USA
-343,  42.425, -71.187,2022-10-15T18,19525,fossil0054,fossil_Boston_USA
-344,  42.259, -71.251,2022-10-16T12,19537,fossil0054,fossil_Boston_USA
-345,  42.425, -71.187,2022-12-23T15,20592,fossil0054,fossil_Boston_USA
-346,  40.652, 109.822,2019-10-08T05,02434,fossil0055,fossil_Baotou_China
-347,  37.881, 112.549,2020-06-05T05,06167,fossil0056,fossil_Taiyuan_China
-348,  39.740,-104.992,2019-10-08T19,02443,fossil0057,fossil_Denver_USA
-349,  37.976,  23.736,2020-06-06T10,06186,fossil0058,fossil_Athens_Greece
-350,  38.078,  23.889,2021-11-29T12,14564,fossil0058,fossil_Athens_Greece
-351,  38.135,  23.723,2021-12-15T13,14812,fossil0058,fossil_Athens_Greece
-352,  33.748, -84.391,2020-05-24T22,05992,fossil0059,fossil_Atlanta_USA
-353,  47.604,-122.329,2019-10-10T20,02475,fossil0060,fossil_Seattle_USA
-354,  38.467, 106.265,2020-06-04T06,06152,fossil0061,fossil_Yinchuan_China
-355, -23.563, -46.655,2019-09-22T17,02194,fossil0062,fossil_Sao_Paulo_Brazil
-356,  44.979, -93.265,2020-04-19T19,05448,fossil0064,fossil_Minneapolis_USA
-357,  34.758, 113.649,2019-10-10T03,02464,fossil0065,fossil_Zhengzhou_China
-358,  29.563, 106.553,2019-10-10T03,02464,fossil0066,fossil_Chongqing_China
-359,  25.295,  51.519,2019-10-13T05,02512,fossil0067,fossil_Doha_Qatar
-360,  25.367,  51.301,2021-12-21T10,14903,fossil0067,fossil_Doha_Qatar
-361,  25.076,  51.313,2022-01-22T12,15400,fossil0067,fossil_Doha_Qatar
-362,  25.367,  51.301,2022-04-27T08,16869,fossil0067,fossil_Doha_Qatar
-363,  25.076,  51.313,2022-05-21T13,17244,fossil0067,fossil_Doha_Qatar
-364,  25.367,  51.301,2022-06-16T11,17646,fossil0067,fossil_Doha_Qatar
-365,  25.076,  51.313,2022-07-25T11,18250,fossil0067,fossil_Doha_Qatar
-366,  25.367,  51.301,2022-08-16T11,18591,fossil0067,fossil_Doha_Qatar
-367,  25.076,  51.313,2022-09-20T13,19134,fossil0067,fossil_Doha_Qatar
-368,  18.940,  72.835,2019-10-10T04,02465,fossil0068,fossil_Mumbai_India
-369,  19.219,  73.066,2021-11-21T11,14439,fossil0068,fossil_Mumbai_India
-370,  18.909,  73.062,2021-12-28T06,15009,fossil0068,fossil_Mumbai_India
-371,  19.219,  73.066,2022-02-11T02,15704,fossil0068,fossil_Mumbai_India
-372,  18.909,  73.062,2022-04-26T07,16853,fossil0068,fossil_Mumbai_India
-373,  19.219,  73.066,2022-06-06T05,17487,fossil0068,fossil_Mumbai_India
-374,  18.909,  73.062,2022-08-30T05,18804,fossil0068,fossil_Mumbai_India
-375,  19.219,  73.066,2022-09-28T08,19255,fossil0068,fossil_Mumbai_India
-376,  18.909,  73.062,2022-10-18T09,19566,fossil0068,fossil_Mumbai_India
-377,  19.219,  73.066,2022-12-02T06,20261,fossil0068,fossil_Mumbai_India
-378,  18.909,  73.062,2023-01-03T03,20755,fossil0068,fossil_Mumbai_India
-379,  26.440,  50.060,2019-10-09T07,02451,fossil0069,fossil_Ad_Damman_Saudi_Arabia
-380,  26.183,  49.810,2021-12-02T08,14608,fossil0069,fossil_Ad_Damman_Saudi_Arabia
-381,  26.425,  49.818,2022-04-23T09,16808,fossil0069,fossil_Ad_Damman_Saudi_Arabia
-382,  26.183,  49.810,2022-06-09T06,17534,fossil0069,fossil_Ad_Damman_Saudi_Arabia
-383,  26.425,  49.818,2022-10-23T09,19643,fossil0069,fossil_Ad_Damman_Saudi_Arabia
-384,  26.183,  49.810,2022-12-01T08,20247,fossil0069,fossil_Ad_Damman_Saudi_Arabia
-385,  27.999, 120.667,2019-12-23T05,03612,fossil0070,fossil_Wenzhou_China
-386,  28.180, 120.483,2021-11-04T00,14169,fossil0070,fossil_Wenzhou_China
-387,  28.059, 120.607,2022-01-29T05,15504,fossil0070,fossil_Wenzhou_China
-388,  28.180, 120.483,2022-04-12T08,16637,fossil0070,fossil_Wenzhou_China
-389,  28.059, 120.607,2022-06-01T04,17409,fossil0070,fossil_Wenzhou_China
-390,  28.180, 120.483,2022-06-16T07,17643,fossil0070,fossil_Wenzhou_China
-391,  28.059, 120.607,2022-08-01T04,18354,fossil0070,fossil_Wenzhou_China
-392,  28.180, 120.483,2022-08-16T07,18588,fossil0070,fossil_Wenzhou_China
-393,  28.059, 120.607,2022-09-23T07,19177,fossil0070,fossil_Wenzhou_China
-394,  24.912, 118.581,2019-10-09T02,02448,fossil0071,fossil_Quanzhou_China
-395,  25.018, 118.481,2022-02-20T05,15845,fossil0071,fossil_Quanzhou_China
-396, -27.468, 153.023,2019-09-13T22,02058,fossil0072,fossil_Brisbane_Australia
-397, -27.646, 152.845,2021-11-25T01,14495,fossil0072,fossil_Brisbane_Australia
-398, -27.458, 152.923,2021-12-31T02,15053,fossil0072,fossil_Brisbane_Australia
-399, -27.646, 152.845,2022-01-22T02,15394,fossil0072,fossil_Brisbane_Australia
-400, -27.458, 152.923,2022-02-19T06,15830,fossil0072,fossil_Brisbane_Australia
-401, -27.646, 152.845,2022-03-17T05,16232,fossil0072,fossil_Brisbane_Australia
-402, -27.458, 152.923,2022-05-03T02,16958,fossil0072,fossil_Brisbane_Australia
-403, -27.646, 152.845,2022-07-29T00,18305,fossil0072,fossil_Brisbane_Australia
-404, -27.458, 152.923,2022-09-02T01,18848,fossil0072,fossil_Brisbane_Australia
-405, -27.646, 152.845,2022-09-16T05,19067,fossil0072,fossil_Brisbane_Australia
-406, -27.458, 152.923,2022-11-02T01,19793,fossil0072,fossil_Brisbane_Australia
-407, -27.646, 152.845,2022-11-20T03,20073,fossil0072,fossil_Brisbane_Australia
-408,  38.912, 121.602,2020-06-14T01,06304,fossil0073,fossil_Dalian_China
-409,  32.086,  34.790,2020-04-12T07,05332,fossil0074,fossil_Tel_Aviv-Yafo_Israel
-410,  32.096,  35.020,2022-01-26T12,15462,fossil0074,fossil_Tel_Aviv-Yafo_Israel
-411,  31.868,  35.042,2022-02-23T09,15894,fossil0074,fossil_Tel_Aviv-Yafo_Israel
-412,  32.096,  35.020,2022-03-25T13,16361,fossil0074,fossil_Tel_Aviv-Yafo_Israel
-413,  31.868,  35.042,2022-04-14T13,16671,fossil0074,fossil_Tel_Aviv-Yafo_Israel
-414,  32.096,  35.020,2022-04-17T04,16712,fossil0074,fossil_Tel_Aviv-Yafo_Israel
-415,  31.868,  35.042,2022-06-18T11,17677,fossil0074,fossil_Tel_Aviv-Yafo_Israel
-416,  32.096,  35.020,2022-08-02T10,18373,fossil0074,fossil_Tel_Aviv-Yafo_Israel
-417,  31.868,  35.042,2022-08-18T11,18622,fossil0074,fossil_Tel_Aviv-Yafo_Israel
-418,  32.096,  35.020,2022-11-24T12,20141,fossil0074,fossil_Tel_Aviv-Yafo_Israel
-419,  45.468,   9.182,2019-10-13T10,02515,fossil0075,fossil_Milan_Italy
-420,  24.469,  54.372,2019-12-02T09,03289,fossil0076,fossil_Abu_Dhabi_UAE
-421,  24.212,  54.610,2021-10-31T06,14111,fossil0076,fossil_Abu_Dhabi_UAE
-422,  39.921,  32.854,2019-10-15T07,02544,fossil0077,fossil_Ankara_Turkey
-423,  36.099, 120.372,2019-10-07T04,02418,fossil0078,fossil_Qingdao_China
-424,  36.209, 120.262,2021-11-30T05,14575,fossil0078,fossil_Qingdao_China
-425,  36.300, 120.095,2022-04-21T04,16774,fossil0078,fossil_Qingdao_China
-426,  36.209, 120.262,2022-06-11T01,17562,fossil0078,fossil_Qingdao_China
-427,  36.300, 120.095,2022-07-06T22,17963,fossil0078,fossil_Qingdao_China
-428,  36.209, 120.262,2022-07-23T08,18217,fossil0078,fossil_Qingdao_China
-429,  36.300, 120.095,2022-08-29T01,18786,fossil0078,fossil_Qingdao_China
-430,  36.209, 120.262,2022-09-29T05,19269,fossil0078,fossil_Qingdao_China
-431,  36.300, 120.095,2022-10-17T06,19548,fossil0078,fossil_Qingdao_China
-432,  36.209, 120.262,2022-12-03T04,20275,fossil0078,fossil_Qingdao_China
-433,  36.300, 120.095,2022-12-25T02,20615,fossil0078,fossil_Qingdao_China
-434,  35.181, 136.907,2020-02-09T01,04353,fossil0079,fossil_Nagoya_Japan
-435,  45.512, -73.555,2019-10-07T18,02427,fossil0080,fossil_Montreal_Canada
-436,  38.628, -90.200,2020-05-30T20,06084,fossil0081,fossil_St_Louis_USA
-437,  32.716,-117.162,2020-04-06T19,05247,fossil0082,fossil_San_Diego_USA
-438,  32.899,-116.942,2021-12-05T19,14661,fossil0082,fossil_San_Diego_USA
-439,  36.668, 116.997,2019-12-06T04,03348,fossil0083,fossil_Jinan_China
-440, -33.437, -70.650,2019-12-01T14,03277,fossil0084,fossil_Santiago_Chile
-441,  51.923,   4.478,2021-02-06T13,09982,fossil0085,fossil_Rotterdam_Netherlands
-442, -33.919,  18.422,2019-09-14T07,02064,fossil0086,fossil_Cape_Town_South_Africa
-443, -33.977,  18.662,2021-10-25T14,14023,fossil0086,fossil_Cape_Town_South_Africa
-444, -33.729,  18.659,2021-11-19T12,14409,fossil0086,fossil_Cape_Town_South_Africa
-445, -33.977,  18.662,2021-12-31T12,15059,fossil0086,fossil_Cape_Town_South_Africa
-446, -33.729,  18.659,2022-01-17T12,15323,fossil0086,fossil_Cape_Town_South_Africa
-447, -33.977,  18.662,2022-02-19T16,15836,fossil0086,fossil_Cape_Town_South_Africa
-448, -33.729,  18.659,2022-03-27T09,16390,fossil0086,fossil_Cape_Town_South_Africa
-449, -33.977,  18.662,2022-05-03T11,16964,fossil0086,fossil_Cape_Town_South_Africa
-450, -33.729,  18.659,2022-05-16T13,17167,fossil0086,fossil_Cape_Town_South_Africa
-451, -33.977,  18.662,2022-06-26T13,17802,fossil0086,fossil_Cape_Town_South_Africa
-452, -33.729,  18.659,2022-07-24T10,18234,fossil0086,fossil_Cape_Town_South_Africa
-453, -33.977,  18.662,2022-09-02T11,18854,fossil0086,fossil_Cape_Town_South_Africa
-454, -33.729,  18.659,2022-09-11T15,18996,fossil0086,fossil_Cape_Town_South_Africa
-455, -33.977,  18.662,2022-11-02T10,19799,fossil0086,fossil_Cape_Town_South_Africa
-456, -33.729,  18.659,2022-11-19T11,20063,fossil0086,fossil_Cape_Town_South_Africa
-457, -33.977,  18.662,2023-01-10T07,20866,fossil0086,fossil_Cape_Town_South_Africa
-458, -33.729,  18.659,2023-01-15T13,20947,fossil0086,fossil_Cape_Town_South_Africa
-459,  17.395,  78.471,2019-10-11T04,02480,fossil0087,fossil_Hyderabad_India
-460,  10.778, 106.703,2019-12-22T08,03598,fossil0088,fossil_Ho_Chi_Minh_City_Vietnam
-461,  41.388,   2.170,2020-06-09T11,06233,fossil0089,fossil_Barcelona_Spain
-462,  41.518,   2.040,2021-12-07T11,14687,fossil0089,fossil_Barcelona_Spain
-463,  41.599,   1.782,2022-02-12T14,15727,fossil0089,fossil_Barcelona_Spain
-464,  41.518,   2.040,2022-03-25T16,16363,fossil0089,fossil_Barcelona_Spain
-465,  41.599,   1.782,2022-04-11T15,16626,fossil0089,fossil_Barcelona_Spain
-466,  41.518,   2.040,2022-06-02T13,17430,fossil0089,fossil_Barcelona_Spain
-467,  41.599,   1.782,2022-06-11T15,17571,fossil0089,fossil_Barcelona_Spain
-468,  41.518,   2.040,2022-08-02T13,18375,fossil0089,fossil_Barcelona_Spain
-469,  41.599,   1.782,2022-08-11T15,18516,fossil0089,fossil_Barcelona_Spain
-470,  41.518,   2.040,2022-09-24T16,19198,fossil0089,fossil_Barcelona_Spain
-471,  39.291, -76.609,2020-02-12T15,04408,fossil0090,fossil_Baltimore_USA
-472,  39.417, -76.813,2021-10-28T14,14070,fossil0090,fossil_Baltimore_USA
-473,  43.884, 125.304,2019-08-07T04,01473,fossil0091,fossil_Changchun_China
-474,  43.251,  76.888,2019-08-06T08,01460,fossil0092,fossil_Almaty_Kazakhstan
-475,  31.864, 117.281,2020-04-14T00,05359,fossil0094,fossil_Hefei_China
-476,  38.041, 114.479,2020-06-29T02,06537,fossil0095,fossil_Shijiazhuang_China
-477,  45.756, 126.640,2019-10-09T04,02449,fossil0096,fossil_Harbin_China
-478,  41.505, -81.691,2019-10-15T15,02549,fossil0097,fossil_Cleveland_USA
-479, -32.047, 115.754,2019-09-19T07,02141,fossil0098,fossil_Fremantle_Australia
-480, -32.172, 115.979,2021-10-30T05,14095,fossil0098,fossil_Fremantle_Australia
-481, -31.913, 115.979,2021-11-19T06,14405,fossil0098,fossil_Fremantle_Australia
-482, -32.172, 115.979,2021-12-20T09,14887,fossil0098,fossil_Fremantle_Australia
-483, -31.913, 115.979,2022-01-17T06,15319,fossil0098,fossil_Fremantle_Australia
-484, -32.172, 115.979,2022-02-20T09,15847,fossil0098,fossil_Fremantle_Australia
-485, -31.913, 115.979,2022-03-12T09,16157,fossil0098,fossil_Fremantle_Australia
-486, -32.172, 115.979,2022-04-26T07,16853,fossil0098,fossil_Fremantle_Australia
-487, -31.913, 115.979,2022-05-16T07,17163,fossil0098,fossil_Fremantle_Australia
-488, -32.172, 115.979,2022-07-12T01,18042,fossil0098,fossil_Fremantle_Australia
-489, -31.913, 115.979,2022-07-20T06,18169,fossil0098,fossil_Fremantle_Australia
-490, -32.172, 115.979,2022-08-30T05,18804,fossil0098,fossil_Fremantle_Australia
-491, -31.913, 115.979,2022-09-15T07,19053,fossil0098,fossil_Fremantle_Australia
-492, -32.172, 115.979,2022-10-26T07,19688,fossil0098,fossil_Fremantle_Australia
-493, -31.913, 115.979,2022-11-11T08,19937,fossil0098,fossil_Fremantle_Australia
-494, -32.172, 115.979,2023-01-03T03,20755,fossil0098,fossil_Fremantle_Australia
-495, -31.913, 115.979,2023-01-19T05,21004,fossil0098,fossil_Fremantle_Australia
-496, -29.847,  31.026,2019-09-20T12,02160,fossil0099,fossil_Durban_South_Africa
-497, -29.597,  30.758,2021-10-28T11,14068,fossil0099,fossil_Durban_South_Africa
-498, -29.717,  30.906,2022-01-14T13,15277,fossil0099,fossil_Durban_South_Africa
-499, -29.597,  30.758,2022-02-26T12,15942,fossil0099,fossil_Durban_South_Africa
-500, -29.717,  30.906,2022-03-13T14,16176,fossil0099,fossil_Durban_South_Africa
-501, -29.597,  30.758,2022-05-02T10,16948,fossil0099,fossil_Durban_South_Africa
-502, -29.717,  30.906,2022-05-17T13,17182,fossil0099,fossil_Durban_South_Africa
-503, -29.597,  30.758,2022-09-01T10,18838,fossil0099,fossil_Durban_South_Africa
-504, -29.717,  30.906,2022-09-12T14,19011,fossil0099,fossil_Durban_South_Africa
-505, -29.597,  30.758,2022-09-13T05,19021,fossil0099,fossil_Durban_South_Africa
-506, -29.717,  30.906,2022-09-16T12,19072,fossil0099,fossil_Durban_South_Africa
-507, -29.597,  30.758,2022-11-01T10,19783,fossil0099,fossil_Durban_South_Africa
-508, -29.717,  30.906,2022-11-12T14,19956,fossil0099,fossil_Durban_South_Africa
-509, -29.597,  30.758,2023-01-05T08,20789,fossil0099,fossil_Durban_South_Africa
-510, -29.717,  30.906,2023-01-16T12,20962,fossil0099,fossil_Durban_South_Africa
-511,  36.172,-115.140,2020-02-17T22,04490,fossil0100,fossil_Las_Vegas_USA
-512, -12.043, -77.028,2019-09-13T13,02052,fossil0101,fossil_Lima_Peru
-513, -11.953, -76.928,2021-10-24T19,14011,fossil0101,fossil_Lima_Peru
-514, -11.819, -76.860,2022-01-13T22,15267,fossil0101,fossil_Lima_Peru
-515, -11.953, -76.928,2022-02-22T19,15885,fossil0101,fossil_Lima_Peru
-516, -11.819, -76.860,2022-03-16T21,16227,fossil0101,fossil_Lima_Peru
-517, -11.953, -76.928,2022-04-21T20,16784,fossil0101,fossil_Lima_Peru
-518, -11.819, -76.860,2022-06-01T15,17416,fossil0101,fossil_Lima_Peru
-519, -11.953, -76.928,2022-06-29T17,17851,fossil0101,fossil_Lima_Peru
-520, -11.819, -76.860,2022-07-28T16,18300,fossil0101,fossil_Lima_Peru
-521, -11.953, -76.928,2022-08-21T20,18674,fossil0101,fossil_Lima_Peru
-522, -11.819, -76.860,2022-09-15T21,19062,fossil0101,fossil_Lima_Peru
-523, -11.953, -76.928,2022-10-17T21,19558,fossil0101,fossil_Lima_Peru
-524, -11.819, -76.860,2022-11-19T19,20068,fossil0101,fossil_Lima_Peru
-525, -11.953, -76.928,2022-12-21T20,20564,fossil0101,fossil_Lima_Peru
-526, -11.819, -76.860,2023-01-19T19,21013,fossil0101,fossil_Lima_Peru
-527,  36.316,  59.568,2019-10-16T04,02558,fossil0102,fossil_Mashhad_Iran
-528,  39.103, -94.583,2020-02-17T20,04489,fossil0103,fossil_Kansas_City_USA
-529,  26.572, 106.695,2020-02-10T02,04369,fossil0104,fossil_Guiyang_China
-530,  13.084,  80.283,2019-10-08T04,02434,fossil0105,fossil_Chennai_India
-531,  13.249,  80.125,2021-11-03T03,14156,fossil0105,fossil_Chennai_India
-532,  13.032,  80.148,2021-11-23T09,14469,fossil0105,fossil_Chennai_India
-533,  13.249,  80.125,2022-01-01T04,15070,fossil0105,fossil_Chennai_India
-534,  13.032,  80.148,2022-03-31T07,16450,fossil0105,fossil_Chennai_India
-535,  13.249,  80.125,2022-05-04T04,16975,fossil0105,fossil_Chennai_India
-536,  13.032,  80.148,2022-06-08T03,17517,fossil0105,fossil_Chennai_India
-537,  13.249,  80.125,2022-06-15T11,17630,fossil0105,fossil_Chennai_India
-538,  13.032,  80.148,2022-07-20T10,18172,fossil0105,fossil_Chennai_India
-539,  13.249,  80.125,2022-09-07T02,18926,fossil0105,fossil_Chennai_India
-540,  13.032,  80.148,2022-09-30T06,19285,fossil0105,fossil_Chennai_India
-541,  13.249,  80.125,2022-11-07T02,19871,fossil0105,fossil_Chennai_India
-542,  13.032,  80.148,2022-12-04T04,20291,fossil0105,fossil_Chennai_India
-543,  10.488, -66.879,2019-11-29T17,03248,fossil0106,fossil_Caracas_Venezuela
-544,  10.335, -66.767,2021-12-19T19,14878,fossil0106,fossil_Caracas_Venezuela
-545,  10.324, -67.000,2022-01-20T20,15374,fossil0106,fossil_Caracas_Venezuela
-546,  10.335, -66.767,2022-02-15T20,15777,fossil0106,fossil_Caracas_Venezuela
-547,  10.324, -67.000,2022-03-19T21,16273,fossil0106,fossil_Caracas_Venezuela
-548,  10.335, -66.767,2022-04-25T17,16844,fossil0106,fossil_Caracas_Venezuela
-549,  10.324, -67.000,2022-05-19T21,17218,fossil0106,fossil_Caracas_Venezuela
-550,  10.335, -66.767,2022-06-14T21,17621,fossil0106,fossil_Caracas_Venezuela
-551,  10.324, -67.000,2022-07-27T17,18285,fossil0106,fossil_Caracas_Venezuela
-552,  10.335, -66.767,2022-08-29T15,18795,fossil0106,fossil_Caracas_Venezuela
-553,  10.324, -67.000,2022-09-18T20,19108,fossil0106,fossil_Caracas_Venezuela
-554,  10.335, -66.767,2022-10-21T18,19618,fossil0106,fossil_Caracas_Venezuela
-555,  10.324, -67.000,2022-11-18T20,20053,fossil0106,fossil_Caracas_Venezuela
-556,  10.335, -66.767,2023-01-02T13,20746,fossil0106,fossil_Caracas_Venezuela
-557,  10.324, -67.000,2023-01-18T20,20998,fossil0106,fossil_Caracas_Venezuela
-558,  12.967,  77.587,2020-02-22T09,04559,fossil0107,fossil_Bangalore_India
-559,  28.538, -81.377,2019-10-10T15,02472,fossil0108,fossil_Orlando_USA
-560,  33.342,  44.393,2019-08-08T08,01491,fossil0109,fossil_Baghdad_Iraq
-561,  38.579,-121.491,2019-10-13T18,02520,fossil0110,fossil_Sacramento_USA
-562,   4.615, -74.069,2019-08-08T14,01495,fossil0111,fossil_Bogota_Colombia
-563,  35.870, 128.591,2019-12-26T03,03657,fossil0112,fossil_Taegu_South_Korea
-564,  43.788,  87.586,2019-10-11T05,02481,fossil0113,fossil_Urumqi_China
-565,  48.203,  16.368,2019-10-12T11,02500,fossil0114,fossil_Vienna_Austria
-566,  14.589, 120.985,2019-10-07T02,02417,fossil0115,fossil_Manila_Philippines
-567,  39.962, -83.003,2020-03-29T21,05124,fossil0116,fossil_Columbus_USA
-568,  32.657,  51.678,2019-12-24T09,03630,fossil0117,fossil_Esfahan_Iran
-569,  45.512,-122.676,2019-10-07T21,02429,fossil0118,fossil_Portland_USA
-570,  39.767, -86.150,2020-07-05T13,06637,fossil0119,fossil_Indianapolis_USA
-571,  36.791, 118.063,2020-02-10T02,04369,fossil0120,fossil_Zibo_China
-572,  29.425, -98.495,2020-07-01T16,06577,fossil0121,fossil_San_Antonio_USA
-573,  36.081, 127.190,2020-08-20T05,07344,fossil0122,fossil_Taejon_South_Korea
-574,  42.272, 118.955,2020-02-08T04,04339,fossil0123,fossil_Chifeng_China
-575,  18.504,  73.853,2019-10-14T03,02526,fossil0125,fossil_Pune_India
-576,  24.207,  55.686,2020-04-19T11,05443,fossil0126,fossil_Al_Ain_UAE
-577,  21.421,  39.822,2019-10-12T06,02497,fossil0127,fossil_Mecca_Saudi_Arabia
-578,  49.260,-123.113,2019-10-09T21,02460,fossil0128,fossil_Vancouver_Canada
-579,  49.361,-122.671,2021-12-06T21,14678,fossil0128,fossil_Vancouver_Canada
-580,  49.174,-122.744,2021-12-15T20,14817,fossil0128,fossil_Vancouver_Canada
-581,  49.361,-122.671,2022-02-02T22,15577,fossil0128,fossil_Vancouver_Canada
-582,  49.174,-122.744,2022-02-11T21,15716,fossil0128,fossil_Vancouver_Canada
-583,  49.361,-122.671,2022-02-13T18,15745,fossil0128,fossil_Vancouver_Canada
-584,  49.174,-122.744,2022-02-15T20,15777,fossil0128,fossil_Vancouver_Canada
-585,  49.361,-122.671,2022-04-01T00,16461,fossil0128,fossil_Vancouver_Canada
-586,  49.174,-122.744,2022-04-07T00,16554,fossil0128,fossil_Vancouver_Canada
-587,  49.361,-122.671,2022-04-08T21,16583,fossil0128,fossil_Vancouver_Canada
-588,  49.174,-122.744,2022-04-10T22,16615,fossil0128,fossil_Vancouver_Canada
-589,  49.361,-122.671,2022-04-11T20,16629,fossil0128,fossil_Vancouver_Canada
-590,  49.174,-122.744,2022-04-14T21,16676,fossil0128,fossil_Vancouver_Canada
-591,  49.361,-122.671,2022-04-16T17,16705,fossil0128,fossil_Vancouver_Canada
-592,  49.174,-122.744,2022-04-18T19,16737,fossil0128,fossil_Vancouver_Canada
-593,  49.361,-122.671,2022-04-19T17,16751,fossil0128,fossil_Vancouver_Canada
-594,  49.174,-122.744,2022-04-21T18,16783,fossil0128,fossil_Vancouver_Canada
-595,  49.361,-122.671,2022-04-23T15,16812,fossil0128,fossil_Vancouver_Canada
-596,  49.174,-122.744,2022-04-25T17,16844,fossil0128,fossil_Vancouver_Canada
-597,  49.361,-122.671,2022-06-01T00,17406,fossil0128,fossil_Vancouver_Canada
-598,  49.174,-122.744,2022-06-03T01,17438,fossil0128,fossil_Vancouver_Canada
-599,  49.361,-122.671,2022-06-04T22,17467,fossil0128,fossil_Vancouver_Canada
-600,  49.174,-122.744,2022-06-07T00,17499,fossil0128,fossil_Vancouver_Canada
-601,  49.361,-122.671,2022-06-08T21,17528,fossil0128,fossil_Vancouver_Canada
-602,  49.174,-122.744,2022-06-10T22,17560,fossil0128,fossil_Vancouver_Canada
-603,  49.361,-122.671,2022-06-12T19,17589,fossil0128,fossil_Vancouver_Canada
-604,  49.174,-122.744,2022-06-14T21,17621,fossil0128,fossil_Vancouver_Canada
-605,  49.361,-122.671,2022-06-16T17,17650,fossil0128,fossil_Vancouver_Canada
-606,  49.174,-122.744,2022-06-18T19,17682,fossil0128,fossil_Vancouver_Canada
-607,  49.361,-122.671,2022-06-23T15,17757,fossil0128,fossil_Vancouver_Canada
-608,  49.174,-122.744,2022-06-26T16,17804,fossil0128,fossil_Vancouver_Canada
-609,  49.361,-122.671,2022-07-28T01,18290,fossil0128,fossil_Vancouver_Canada
-610,  49.174,-122.744,2022-08-03T01,18383,fossil0128,fossil_Vancouver_Canada
-611,  49.361,-122.671,2022-08-04T22,18412,fossil0128,fossil_Vancouver_Canada
-612,  49.174,-122.744,2022-08-07T00,18444,fossil0128,fossil_Vancouver_Canada
-613,  49.361,-122.671,2022-08-08T20,18473,fossil0128,fossil_Vancouver_Canada
-614,  49.174,-122.744,2022-08-10T22,18505,fossil0128,fossil_Vancouver_Canada
-615,  49.361,-122.671,2022-08-12T19,18534,fossil0128,fossil_Vancouver_Canada
-616,  49.174,-122.744,2022-08-14T20,18566,fossil0128,fossil_Vancouver_Canada
-617,  49.361,-122.671,2022-08-15T18,18580,fossil0128,fossil_Vancouver_Canada
-618,  49.174,-122.744,2022-08-18T19,18627,fossil0128,fossil_Vancouver_Canada
-619,  49.361,-122.671,2022-08-20T16,18656,fossil0128,fossil_Vancouver_Canada
-620,  49.174,-122.744,2022-08-29T15,18795,fossil0128,fossil_Vancouver_Canada
-621,  49.361,-122.671,2022-09-30T23,19296,fossil0128,fossil_Vancouver_Canada
-622,  49.174,-122.744,2022-10-06T23,19389,fossil0128,fossil_Vancouver_Canada
-623,  49.361,-122.671,2022-10-07T21,19403,fossil0128,fossil_Vancouver_Canada
-624,  49.174,-122.744,2022-10-10T22,19450,fossil0128,fossil_Vancouver_Canada
-625,  49.361,-122.671,2022-10-12T19,19479,fossil0128,fossil_Vancouver_Canada
-626,  49.174,-122.744,2022-10-14T20,19511,fossil0128,fossil_Vancouver_Canada
-627,  49.361,-122.671,2022-10-15T18,19525,fossil0128,fossil_Vancouver_Canada
-628,  49.174,-122.744,2022-10-17T19,19557,fossil0128,fossil_Vancouver_Canada
-629,  49.361,-122.671,2022-12-08T20,20363,fossil0128,fossil_Vancouver_Canada
-630,  40.094, 113.291,2019-10-16T01,02556,fossil0129,fossil_Datong_Shanxi_China
-631,  24.544, 118.128,2019-12-26T04,03658,fossil0130,fossil_Xiamen_China
-632,  24.726, 117.958,2022-02-16T07,15784,fossil0130,fossil_Xiamen_China
-633,  29.866, 121.539,2020-02-12T01,04399,fossil0131,fossil_Ningbo_China
-634,  29.738, 121.401,2021-12-06T02,14666,fossil0131,fossil_Ningbo_China
-635,  24.163, 120.648,2020-04-22T06,05486,fossil0132,fossil_Taichung_Taiwan
-636,  24.043, 120.759,2022-02-28T02,15967,fossil0132,fossil_Taichung_Taiwan
-637, -22.912, -43.175,2020-01-09T12,03880,fossil0133,fossil_Rio_de_Janeiro_Brazil
-638, -22.711, -43.355,2021-10-24T18,14010,fossil0133,fossil_Rio_de_Janeiro_Brazil
-639, -22.708, -43.163,2021-11-23T15,14473,fossil0133,fossil_Rio_de_Janeiro_Brazil
-640, -22.711, -43.355,2021-12-19T19,14878,fossil0133,fossil_Rio_de_Janeiro_Brazil
-641, -22.708, -43.163,2022-01-28T13,15494,fossil0133,fossil_Rio_de_Janeiro_Brazil
-642, -22.711, -43.355,2022-03-02T15,16006,fossil0133,fossil_Rio_de_Janeiro_Brazil
-643, -22.708, -43.163,2022-03-15T19,16210,fossil0133,fossil_Rio_de_Janeiro_Brazil
-644, -22.711, -43.355,2022-04-21T19,16783,fossil0133,fossil_Rio_de_Janeiro_Brazil
-645, -22.708, -43.163,2022-05-31T13,17399,fossil0133,fossil_Rio_de_Janeiro_Brazil
-646, -22.711, -43.355,2022-06-29T15,17850,fossil0133,fossil_Rio_de_Janeiro_Brazil
-647, -22.708, -43.163,2022-08-04T11,18405,fossil0133,fossil_Rio_de_Janeiro_Brazil
-648, -22.711, -43.355,2022-08-21T18,18673,fossil0133,fossil_Rio_de_Janeiro_Brazil
-649, -22.708, -43.163,2022-09-22T15,19167,fossil0133,fossil_Rio_de_Janeiro_Brazil
-650, -22.711, -43.355,2022-10-21T18,19618,fossil0133,fossil_Rio_de_Janeiro_Brazil
-651, -22.708, -43.163,2022-11-26T14,20173,fossil0133,fossil_Rio_de_Janeiro_Brazil
-652, -22.711, -43.355,2022-12-21T18,20563,fossil0133,fossil_Rio_de_Janeiro_Brazil
-653, -22.708, -43.163,2023-01-26T13,21118,fossil0133,fossil_Rio_de_Janeiro_Brazil
-654,  27.771, -82.639,2019-12-06T17,03356,fossil0134,fossil_St_Petersburg_USA
-655,  27.651, -82.517,2022-02-11T22,15716,fossil0134,fossil_St_Petersburg_USA
-656,  27.888, -82.520,2022-06-14T13,17616,fossil0134,fossil_St_Petersburg_USA
-657,  27.651, -82.517,2022-06-29T15,17850,fossil0134,fossil_St_Petersburg_USA
-658,  27.888, -82.520,2022-12-10T14,20390,fossil0134,fossil_St_Petersburg_USA
-659,  27.651, -82.517,2022-12-21T18,20563,fossil0134,fossil_St_Petersburg_USA
-660,  25.671,-100.310,2020-03-29T21,05124,fossil0135,fossil_Monterrey_Mexico
-661,  21.029, 105.855,2019-10-11T02,02479,fossil0136,fossil_Hanoi_Vietnam
-662,  41.903,  12.496,2019-10-07T12,02423,fossil0137,fossil_Rome_Italy
-663,  41.994,  12.668,2021-11-30T13,14580,fossil0137,fossil_Rome_Italy
-664,  41.898,  12.505,2021-12-26T09,14980,fossil0137,fossil_Rome_Italy
-665,  41.994,  12.668,2022-02-04T11,15601,fossil0137,fossil_Rome_Italy
-666,  41.898,  12.505,2022-02-14T13,15757,fossil0137,fossil_Rome_Italy
-667,  41.994,  12.668,2022-03-26T15,16378,fossil0137,fossil_Rome_Italy
-668,  41.898,  12.505,2022-04-09T15,16595,fossil0137,fossil_Rome_Italy
-669,  41.994,  12.668,2022-04-11T09,16622,fossil0137,fossil_Rome_Italy
-670,  41.898,  12.505,2022-04-13T14,16656,fossil0137,fossil_Rome_Italy
-671,  41.994,  12.668,2022-04-15T07,16683,fossil0137,fossil_Rome_Italy
-672,  41.898,  12.505,2022-04-17T12,16717,fossil0137,fossil_Rome_Italy
-673,  41.994,  12.668,2022-05-23T16,17277,fossil0137,fossil_Rome_Italy
-674,  41.898,  12.505,2022-06-09T15,17540,fossil0137,fossil_Rome_Italy
-675,  41.994,  12.668,2022-06-11T09,17567,fossil0137,fossil_Rome_Italy
-676,  41.898,  12.505,2022-06-13T14,17601,fossil0137,fossil_Rome_Italy
-677,  41.994,  12.668,2022-06-15T07,17628,fossil0137,fossil_Rome_Italy
-678,  41.898,  12.505,2022-06-17T12,17662,fossil0137,fossil_Rome_Italy
-679,  41.994,  12.668,2022-06-19T06,17689,fossil0137,fossil_Rome_Italy
-680,  41.898,  12.505,2022-06-29T07,17845,fossil0137,fossil_Rome_Italy
-681,  41.994,  12.668,2022-07-27T14,18283,fossil0137,fossil_Rome_Italy
-682,  41.898,  12.505,2022-08-13T14,18546,fossil0137,fossil_Rome_Italy
-683,  41.994,  12.668,2022-08-15T07,18573,fossil0137,fossil_Rome_Italy
-684,  41.898,  12.505,2022-08-17T12,18607,fossil0137,fossil_Rome_Italy
-685,  41.994,  12.668,2022-08-19T05,18634,fossil0137,fossil_Rome_Italy
-686,  41.898,  12.505,2022-08-21T10,18668,fossil0137,fossil_Rome_Italy
-687,  41.994,  12.668,2022-09-25T15,19213,fossil0137,fossil_Rome_Italy
-688,  41.898,  12.505,2022-12-13T13,20436,fossil0137,fossil_Rome_Italy
-689,  41.994,  12.668,2023-01-29T13,21164,fossil0137,fossil_Rome_Italy
-690,  29.954, -90.078,2020-08-14T14,07257,fossil0138,fossil_New_Orleans_USA
-691,  25.368,  49.588,2020-02-23T09,04575,fossil0139,fossil_Al_Hofuf_Saudi_Arabia
-692,  40.192,  29.047,2020-02-10T08,04373,fossil0140,fossil_Chios_Turkey
-693,  40.840,  14.252,2019-10-08T11,02438,fossil0141,fossil_Naples_Italy
-694,  40.999,  14.533,2021-12-01T12,14595,fossil0141,fossil_Naples_Italy
-695,  40.970,  14.372,2022-05-06T05,17007,fossil0141,fossil_Naples_Italy
-696,  40.999,  14.533,2022-05-31T13,17399,fossil0141,fossil_Naples_Italy
-697,  20.688,-103.351,2019-10-08T17,02442,fossil0142,fossil_Guadalajara_Mexico
-698,  22.620, 120.312,2020-01-03T01,03780,fossil0143,fossil_Kaoshsiung_Taiwan
-699,  22.863, 120.538,2021-12-07T01,14681,fossil0143,fossil_Kaoshsiung_Taiwan
-700,  22.750, 120.442,2022-01-05T00,15129,fossil0143,fossil_Kaoshsiung_Taiwan
-701,  22.863, 120.538,2022-02-03T03,15580,fossil0143,fossil_Kaoshsiung_Taiwan
-702,  23.713,  90.400,2020-06-08T04,06213,fossil0144,fossil_Dhaka_Bangladesh
-703,  51.045,-114.063,2019-10-15T19,02552,fossil0145,fossil_Calgary_Canada
-704,  40.439, -79.997,2019-10-08T17,02442,fossil0146,fossil_Pittsburgh_USA
-705,  31.952,  35.940,2020-02-09T08,04357,fossil0148,fossil_Amman_Jordan
-706,  40.760,-111.888,2020-06-27T17,06516,fossil0149,fossil_Salt_Lake_City_USA
-707,  24.467,  39.606,2019-10-15T05,02543,fossil0150,fossil_Medina_Saudi_Arabia
-708, -34.926, 138.600,2019-09-23T04,02201,fossil0151,fossil_Adelaide_Australia
-709, -35.055, 138.768,2021-11-02T03,14140,fossil0151,fossil_Adelaide_Australia
-710, -34.797, 138.767,2021-12-01T23,14602,fossil0151,fossil_Adelaide_Australia
-711, -35.055, 138.768,2022-01-04T02,15115,fossil0151,fossil_Adelaide_Australia
-712, -34.797, 138.767,2022-01-17T05,15318,fossil0151,fossil_Adelaide_Australia
-713, -35.055, 138.768,2022-02-23T06,15892,fossil0151,fossil_Adelaide_Australia
-714, -34.797, 138.767,2022-03-12T07,16156,fossil0151,fossil_Adelaide_Australia
-715, -35.055, 138.768,2022-05-07T02,17020,fossil0151,fossil_Adelaide_Australia
-716, -34.797, 138.767,2022-05-16T06,17162,fossil0151,fossil_Adelaide_Australia
-717, -35.055, 138.768,2022-09-06T01,18910,fossil0151,fossil_Adelaide_Australia
-718, -34.797, 138.767,2022-09-15T05,19052,fossil0151,fossil_Adelaide_Australia
-719, -35.055, 138.768,2022-11-13T22,19977,fossil0151,fossil_Adelaide_Australia
-720, -34.797, 138.767,2022-11-19T04,20058,fossil0151,fossil_Adelaide_Australia
-721,  52.236,  21.010,2020-04-25T06,05533,fossil0152,fossil_Warsaw_Poland
-722,  51.128,  71.428,2019-10-12T08,02498,fossil0154,fossil_Astana_Kazakhstan
-723,  36.390, 139.063,2020-04-04T04,05206,fossil0155,fossil_Maebashi_Japan
-724,  38.080,  46.292,2019-10-10T08,02467,fossil0156,fossil_Tabriz_Iran
-725,  23.028,  72.600,2019-12-22T09,03599,fossil0157,fossil_Ahmadabad_India
-726,  26.555,  31.695,2019-10-10T08,02467,fossil0158,fossil_Sohag_Egypt
-727,  48.136,  11.578,2019-10-08T12,02439,fossil0159,fossil_Munich_Germany
-728,  31.320,  48.669,2020-06-16T04,06337,fossil0160,fossil_Ahvaz_Iran
-729,  34.515,  35.968,2019-12-26T09,03661,fossil0161,fossil_Baabda_Lebanon
-730,  34.288,  36.256,2021-10-26T08,14035,fossil0161,fossil_Baabda_Lebanon
-731,  34.395,  36.088,2022-04-05T09,16529,fossil0161,fossil_Baabda_Lebanon
-732,  34.288,  36.256,2022-04-11T14,16625,fossil0161,fossil_Baabda_Lebanon
-733,  47.227,  39.717,2019-10-06T11,02407,fossil0162,fossil_Rostov-on-Don_Russia
-734,  50.079,  14.433,2019-10-11T12,02485,fossil0163,fossil_Prague_Czech_Republic
-735,  18.417, -70.100,2019-08-07T15,01480,fossil0164,fossil_San_Cristobal_Dominican_Republic
-736,  18.640, -70.283,2021-10-25T17,14025,fossil0164,fossil_San_Cristobal_Dominican_Republic
-737,  18.517, -70.200,2021-11-25T18,14506,fossil0164,fossil_San_Cristobal_Dominican_Republic
-738,  18.640, -70.283,2022-02-23T17,15899,fossil0164,fossil_San_Cristobal_Dominican_Republic
-739,  18.517, -70.200,2022-03-21T21,16304,fossil0164,fossil_San_Cristobal_Dominican_Republic
-740,  18.640, -70.283,2022-04-14T21,16676,fossil0164,fossil_San_Cristobal_Dominican_Republic
-741,  18.517, -70.200,2022-06-06T14,17493,fossil0164,fossil_San_Cristobal_Dominican_Republic
-742,  18.640, -70.283,2022-06-26T16,17804,fossil0164,fossil_San_Cristobal_Dominican_Republic
-743,  18.517, -70.200,2022-07-18T21,18148,fossil0164,fossil_San_Cristobal_Dominican_Republic
-744,  18.640, -70.283,2022-08-18T19,18627,fossil0164,fossil_San_Cristobal_Dominican_Republic
-745,  18.517, -70.200,2022-09-24T19,19200,fossil0164,fossil_San_Cristobal_Dominican_Republic
-746,  18.640, -70.283,2022-10-14T20,19511,fossil0164,fossil_San_Cristobal_Dominican_Republic
-747,  18.517, -70.200,2022-11-28T17,20206,fossil0164,fossil_San_Cristobal_Dominican_Republic
-748,  18.640, -70.283,2022-12-22T17,20578,fossil0164,fossil_San_Cristobal_Dominican_Republic
-749,  18.517, -70.200,2023-01-28T17,21151,fossil0164,fossil_San_Cristobal_Dominican_Republic
-750,  44.434,  26.103,2019-10-12T09,02499,fossil0166,fossil_Bucharest_Romania
-751,  10.688, -71.598,2020-07-27T18,06981,fossil0167,fossil_Maracaibo_Venezuela
-752,  10.806, -71.791,2021-12-30T15,15046,fossil0167,fossil_Maracaibo_Venezuela
-753,  10.698, -71.738,2022-01-31T16,15542,fossil0167,fossil_Maracaibo_Venezuela
-754,  10.806, -71.791,2022-02-14T21,15762,fossil0167,fossil_Maracaibo_Venezuela
-755,  10.698, -71.738,2022-03-22T20,16319,fossil0167,fossil_Maracaibo_Venezuela
-756,  10.806, -71.791,2022-05-02T14,16951,fossil0167,fossil_Maracaibo_Venezuela
-757,  10.698, -71.738,2022-05-30T17,17386,fossil0167,fossil_Maracaibo_Venezuela
-758,  10.806, -71.791,2022-06-17T20,17667,fossil0167,fossil_Maracaibo_Venezuela
-759,  10.698, -71.738,2022-07-30T16,18331,fossil0167,fossil_Maracaibo_Venezuela
-760,  10.806, -71.791,2022-08-13T21,18551,fossil0167,fossil_Maracaibo_Venezuela
-761,  10.698, -71.738,2022-09-17T21,19093,fossil0167,fossil_Maracaibo_Venezuela
-762,  10.806, -71.791,2022-11-01T14,19786,fossil0167,fossil_Maracaibo_Venezuela
-763,  10.698, -71.738,2022-11-21T19,20099,fossil0167,fossil_Maracaibo_Venezuela
-764,  31.550,  74.344,2019-10-08T06,02435,fossil0168,fossil_Lahore_Pakistan
-765,  47.500,  19.055,2019-10-10T11,02469,fossil0169,fossil_Budapest_Hungary
-766,  37.950,  58.383,2019-10-08T08,02436,fossil0170,fossil_Ashgabat_Turkmenistan
-767,  50.844,   4.356,2020-04-08T15,05275,fossil0171,fossil_Brussels_Belgium
-768,  50.256,  19.031,2020-06-07T14,06204,fossil0172,fossil_Katowice_Poland
-769,  24.906,  67.082,2019-10-08T06,02435,fossil0174,fossil_Karachi_Pakistan
-770,  25.066,  67.233,2021-11-23T11,14470,fossil0174,fossil_Karachi_Pakistan
-771,  24.916,  67.182,2021-12-28T06,15009,fossil0174,fossil_Karachi_Pakistan
-772,  25.066,  67.233,2022-01-21T11,15384,fossil0174,fossil_Karachi_Pakistan
-773,  24.916,  67.182,2022-03-03T04,16015,fossil0174,fossil_Karachi_Pakistan
-774,  25.066,  67.233,2022-04-04T07,16512,fossil0174,fossil_Karachi_Pakistan
-775,  24.916,  67.182,2022-04-26T07,16853,fossil0174,fossil_Karachi_Pakistan
-776,  25.066,  67.233,2022-05-20T12,17228,fossil0174,fossil_Karachi_Pakistan
-777,  24.916,  67.182,2022-08-30T05,18804,fossil0174,fossil_Karachi_Pakistan
-778,  25.066,  67.233,2022-09-30T08,19286,fossil0174,fossil_Karachi_Pakistan
-779,  24.916,  67.182,2022-10-18T09,19566,fossil0174,fossil_Karachi_Pakistan
-780,  25.066,  67.233,2022-12-04T06,20292,fossil0174,fossil_Karachi_Pakistan
-781,   6.455,   3.389,2019-10-08T09,02437,fossil0175,fossil_Lagos_Nigeria
-782,   6.649,   3.250,2021-10-24T13,14007,fossil0175,fossil_Lagos_Nigeria
-783,   6.649,   3.528,2021-11-19T15,14411,fossil0175,fossil_Lagos_Nigeria
-784,   6.649,   3.250,2022-01-07T07,15165,fossil0175,fossil_Lagos_Nigeria
-785,   6.649,   3.528,2022-02-05T09,15615,fossil0175,fossil_Lagos_Nigeria
-786,   6.649,   3.250,2022-02-18T15,15820,fossil0175,fossil_Lagos_Nigeria
-787,   6.649,   3.528,2022-03-23T14,16331,fossil0175,fossil_Lagos_Nigeria
-788,   6.649,   3.250,2022-04-17T15,16719,fossil0175,fossil_Lagos_Nigeria
-789,   6.649,   3.528,2022-06-04T10,17459,fossil0175,fossil_Lagos_Nigeria
-790,   6.649,   3.250,2022-06-17T15,17664,fossil0175,fossil_Lagos_Nigeria
-791,   6.649,   3.528,2022-07-20T15,18175,fossil0175,fossil_Lagos_Nigeria
-792,   6.649,   3.250,2022-08-17T15,18609,fossil0175,fossil_Lagos_Nigeria
-793,   6.649,   3.528,2022-09-22T14,19166,fossil0175,fossil_Lagos_Nigeria
-794,   6.649,   3.250,2022-12-21T13,20560,fossil0175,fossil_Lagos_Nigeria
-795,   6.649,   3.528,2023-01-30T10,21178,fossil0175,fossil_Lagos_Nigeria
-796,  -8.816,  13.233,2019-09-22T14,02192,fossil0176,fossil_Luanda_Angola
-797,  -9.096,  13.437,2021-11-05T08,14190,fossil0176,fossil_Luanda_Angola
-798,  -8.806,  13.453,2022-01-16T15,15309,fossil0176,fossil_Luanda_Angola
-799,  -9.096,  13.437,2022-02-18T15,15820,fossil0176,fossil_Luanda_Angola
-800,  -8.806,  13.453,2022-03-19T14,16269,fossil0176,fossil_Luanda_Angola
-801,  -9.096,  13.437,2022-05-02T10,16948,fossil0176,fossil_Luanda_Angola
-802,  -8.806,  13.453,2022-05-19T14,17214,fossil0176,fossil_Luanda_Angola
-803,  -9.096,  13.437,2022-08-17T15,18609,fossil0176,fossil_Luanda_Angola
-804,  -8.806,  13.453,2022-09-18T14,19104,fossil0176,fossil_Luanda_Angola
-805,  -9.096,  13.437,2022-11-05T08,19844,fossil0176,fossil_Luanda_Angola
-806,  -8.806,  13.453,2022-11-18T14,20049,fossil0176,fossil_Luanda_Angola
-807,  -9.096,  13.437,2023-01-09T06,20850,fossil0176,fossil_Luanda_Angola
-808,  -8.806,  13.453,2023-01-18T14,20994,fossil0176,fossil_Luanda_Angola
-809,  34.008,  71.578,2019-10-11T05,02481,fossil0177,fossil_Peshawar_Pakistan
-810,  15.501,  32.560,2019-12-22T12,03601,fossil0178,fossil_Khartoum_Sudan
-811,  -1.292,  36.822,2020-02-25T11,04607,fossil0179,fossil_Nairobi_Kenya
-812,  33.640, -87.120,2019-12-25T18,03651,fossil0180,fossil_Miller_Power_Plant_USA
-813, -29.950,  29.560,2020-01-12T07,03923,fossil0181,fossil_Tutuka_and_Majuba_Powerplant
-814, -26.950,  29.560,2020-03-18T13,04949,fossil0181,fossil_Tutuka_and_Majuba_Powerplant
-815,  51.620,  14.500,2020-06-12T12,06280,fossil0182,fossil_Janschwalde_Germany
-816,  45.882,-106.611,2020-02-09T18,04364,fossil0183,fossil_Colstrip_powerplant
-817,  41.895, -83.342,2020-04-13T15,05353,fossil0184,fossil_Monroe_powerplant
-818,  38.200,-104.580,2020-02-19T20,04520,fossil0185,fossil_Comanche_powerplant
-819,  40.415, -80.560,2020-02-16T19,04473,fossil0186,fossil_Sammis_Cardinal_Mansfield_powerplants
-820,  40.513, -79.194,2020-06-16T13,06343,fossil0187,fossil_Keystone_HomerCity_Conemaugh_Powerplants
-821,  34.124, -84.922,2020-02-08T16,04347,fossil0188,fossil_Bowen_powerplant
-822,  33.061, -83.810,2020-02-12T14,04408,fossil0189,fossil_Scherer_powerplant
-823,  49.096,-103.031,2020-02-16T19,04473,fossil0190,fossil_Boundary_Dam_powerplant
-824,  51.532,-111.786,2020-04-06T22,05249,fossil0191,fossil_Sheerness_powerplant
-825,  43.260, -79.811,2020-02-10T16,04378,fossil0192,fossil_Dofasco_powerplant
-826,  51.268,  19.331,2020-02-19T09,04513,fossil0193,fossil_Belchatow_powerplant
-827,  37.057, 126.511,2020-08-12T08,07222,fossil0194,fossil_Dangjin_Yonghungdo_Taean_powerplants
-828,  36.844, 126.815,2022-10-11T07,19456,fossil0194,fossil_Dangjin_Yonghungdo_Taean_powerplants
-829,  20.663,  39.555,2020-03-25T13,05057,fossil0195,fossil_Shaiba_powerplant
-830,  20.673,  39.775,2022-02-18T11,15818,fossil0195,fossil_Shaiba_powerplant
-831,  20.884,  39.744,2022-05-20T14,17229,fossil0195,fossil_Shaiba_powerplant
-832,  20.673,  39.775,2022-08-13T14,18546,fossil0195,fossil_Shaiba_powerplant
-833,  25.844,  50.126,2020-02-19T11,04514,fossil0196,fossil_AlQurayyah_powerplant
-834,  25.854,  49.916,2022-07-09T03,17997,fossil0196,fossil_AlQurayyah_powerplant
-835, -26.033,  29.611,2020-03-26T10,05071,fossil0197,fossil_Arnot_Duvha_Hendrina_powerplants
-836, -25.878,  29.175,2020-04-28T12,05583,fossil0198,fossil_Duvha_Kendal_Kriel_Matla_powerplants
-837,  24.097,  82.674,2020-02-20T09,04528,fossil0199,fossil_Vindhyachal_Sasan_Singrauli_Rihand_powerplants
-838,  32.686, 116.901,2020-03-28T07,05100,fossil0200,fossil_Pingwei_Tianji_Bengbu_Fengtai_Luohe_powerplants
-839, -38.264, 146.395,2020-07-12T00,06737,fossil0201,fossil_Hazelwood_Yallourn_Loy_Yang_powerplants
-840, -23.511, 150.318,2020-01-31T00,04213,fossil0202,fossil_Stanwell_powerplant
-841,  37.739,-122.185,2020-06-13T17,06299,fossil0203,fossil_San_Francisco_USA
-842,  39.178, -76.527,2021-02-07T16,09999,fossil0204,fossil_Wagner_powerplant
-843,  39.210, -77.464,2021-02-11T21,10064,fossil0205,fossil_Dickerson_powerplant
-844,  41.495, -88.124,2021-02-08T16,10015,fossil0206,fossil_Joliet_powerplant
-845,  43.359, -78.605,2021-02-05T17,09969,fossil0207,fossil_Somerset_Operating_powerplant
-846,  41.633, -88.063,2021-02-14T20,10110,fossil0208,fossil_Will_County_powerplant
-847,  34.253, -85.346,2021-03-26T21,10730,fossil0209,fossil_Hammond_powerplant
-848,  41.505, -82.055,2021-02-13T14,10091,fossil0210,fossil_Avon_Lake_powerplant
-849,  40.881,-117.152,2021-02-13T22,10096,fossil0211,fossil_North_Valmy_powerplant
-850,  38.402, -90.336,2021-02-05T17,09969,fossil0212,fossil_Meramec_powerplant
-851,  35.190, -81.012,2021-04-14T21,11024,fossil0213,fossil_GG_Allen_powerplant
-852,  40.195, 111.359,2021-02-06T04,09976,fossil0214,fossil_Datang_Tuoketuo_powerplant
-853,  31.354, 121.600,2021-02-27T02,10300,fossil0215,fossil_Waigaoqiao_powerplant
-854,  31.476, 121.461,2022-02-22T04,15875,fossil0215,fossil_Waigaoqiao_powerplant
-855,  50.993,   6.669,2021-02-15T10,10119,fossil0217,fossil_Niederaussem_powerplant
-856,  22.816,  69.528,2021-02-07T05,09992,fossil0218,fossil_Mundra_Umpp_powerplant
-857,  23.017,  69.708,2021-11-24T10,14485,fossil0218,fossil_Mundra_Umpp_powerplant
-858,  23.022,  69.439,2021-12-16T11,14826,fossil0218,fossil_Mundra_Umpp_powerplant
-859,  23.017,  69.708,2022-02-02T06,15567,fossil0218,fossil_Mundra_Umpp_powerplant
-860,  23.022,  69.439,2022-03-07T03,16076,fossil0218,fossil_Mundra_Umpp_powerplant
-861,  23.017,  69.708,2022-03-24T11,16344,fossil0218,fossil_Mundra_Umpp_powerplant
-862,  23.022,  69.439,2022-04-18T10,16731,fossil0218,fossil_Mundra_Umpp_powerplant
-863,  23.017,  69.708,2022-06-05T06,17472,fossil0218,fossil_Mundra_Umpp_powerplant
-864,  23.022,  69.439,2022-06-30T05,17859,fossil0218,fossil_Mundra_Umpp_powerplant
-865,  23.017,  69.708,2022-07-21T11,18188,fossil0218,fossil_Mundra_Umpp_powerplant
-866,  23.022,  69.439,2022-08-22T08,18682,fossil0218,fossil_Mundra_Umpp_powerplant
-867,  23.017,  69.708,2022-09-23T10,19179,fossil0218,fossil_Mundra_Umpp_powerplant
-868,  23.022,  69.439,2022-10-14T11,19505,fossil0218,fossil_Mundra_Umpp_powerplant
-869,  23.017,  69.708,2022-12-05T05,20307,fossil0218,fossil_Mundra_Umpp_powerplant
-870,  23.022,  69.439,2022-12-22T08,20572,fossil0218,fossil_Mundra_Umpp_powerplant
-871,  24.027,  82.792,2021-02-05T05,09961,fossil0219,fossil_Rihand_powerplant
-872,  23.978,  82.628,2021-02-15T10,10119,fossil0220,fossil_Sasan_powerplant
-873,  -7.718, 113.583,2021-05-07T02,11368,fossil0221,fossil_PLTU_Paiton_powerplant
-874,  -7.963, 113.760,2021-10-25T06,14018,fossil0221,fossil_PLTU_Paiton_powerplant
-875,  -7.908, 113.445,2021-11-19T07,14406,fossil0221,fossil_PLTU_Paiton_powerplant
-876,  -7.963, 113.760,2022-01-04T02,15115,fossil0221,fossil_PLTU_Paiton_powerplant
-877,  -7.908, 113.445,2022-01-17T08,15320,fossil0221,fossil_PLTU_Paiton_powerplant
-878,  -7.963, 113.760,2022-02-19T08,15831,fossil0221,fossil_PLTU_Paiton_powerplant
-879,  -7.908, 113.445,2022-04-08T00,16570,fossil0221,fossil_PLTU_Paiton_powerplant
-880,  -7.963, 113.760,2022-04-18T09,16730,fossil0221,fossil_PLTU_Paiton_powerplant
-881,  -7.908, 113.445,2022-05-20T07,17225,fossil0221,fossil_PLTU_Paiton_powerplant
-882,  -7.963, 113.760,2022-06-18T09,17675,fossil0221,fossil_PLTU_Paiton_powerplant
-883,  -7.908, 113.445,2022-07-20T07,18170,fossil0221,fossil_PLTU_Paiton_powerplant
-884,  -7.963, 113.760,2022-08-18T08,18620,fossil0221,fossil_PLTU_Paiton_powerplant
-885,  -7.908, 113.445,2022-09-15T09,19054,fossil0221,fossil_PLTU_Paiton_powerplant
-886,  -7.963, 113.760,2022-11-09T23,19916,fossil0221,fossil_PLTU_Paiton_powerplant
-887,  -7.908, 113.445,2022-11-19T07,20060,fossil0221,fossil_PLTU_Paiton_powerplant
-888,  34.835, 136.961,2021-02-08T01,10005,fossil0222,fossil_Hekinan_powerplant
-889,  35.031, 136.867,2021-10-23T03,13985,fossil0222,fossil_Hekinan_powerplant
-890,  35.023, 137.205,2021-11-29T05,14559,fossil0222,fossil_Hekinan_powerplant
-891,  35.031, 136.867,2022-02-25T01,15920,fossil0222,fossil_Hekinan_powerplant
-892,  35.023, 137.205,2022-03-29T05,16418,fossil0222,fossil_Hekinan_powerplant
-893,  35.031, 136.867,2022-04-12T07,16636,fossil0222,fossil_Hekinan_powerplant
-894,  35.023, 137.205,2022-06-10T00,17546,fossil0222,fossil_Hekinan_powerplant
-895,  35.031, 136.867,2022-06-16T05,17642,fossil0222,fossil_Hekinan_powerplant
-896,  35.023, 137.205,2022-09-28T05,19253,fossil0222,fossil_Hekinan_powerplant
-897,  35.031, 136.867,2022-10-12T06,19471,fossil0222,fossil_Hekinan_powerplant
-898,  35.023, 137.205,2022-12-02T03,20259,fossil0222,fossil_Hekinan_powerplant
-899,  35.031, 136.867,2022-12-20T03,20538,fossil0222,fossil_Hekinan_powerplant
-900, -26.088,  28.969,2021-03-14T14,10540,fossil0223,fossil_Kendal_powerplant
-901,  22.400,  82.695,2021-11-22T10,14454,fossil0224,fossil_Korba_powerplant
-902,  35.502, 129.303,2021-08-31T00,13163,fossil0225,fossil_Tropomi_2_powerplant
-903,  35.660, 129.092,2021-10-26T02,14031,fossil0225,fossil_Tropomi_2_powerplant
-904,  35.442, 129.107,2021-12-02T04,14605,fossil0225,fossil_Tropomi_2_powerplant
-905,  35.660, 129.092,2022-03-03T23,16027,fossil0225,fossil_Tropomi_2_powerplant
-906,  35.442, 129.107,2022-04-05T03,16525,fossil0225,fossil_Tropomi_2_powerplant
-907,  28.696,  48.334,2021-09-01T05,13182,fossil0226,fossil_Az_Zour_powerplant
-908,  28.483,  48.114,2022-01-25T11,15446,fossil0226,fossil_Az_Zour_powerplant
-909,  28.596,  48.234,2022-02-13T12,15741,fossil0226,fossil_Az_Zour_powerplant
-910,  28.483,  48.114,2022-04-08T07,16574,fossil0226,fossil_Az_Zour_powerplant
-911,  28.596,  48.234,2022-05-01T06,16930,fossil0226,fossil_Az_Zour_powerplant
-912,  28.483,  48.114,2022-05-20T14,17229,fossil0226,fossil_Az_Zour_powerplant
-913,  28.596,  48.234,2022-06-12T13,17585,fossil0226,fossil_Az_Zour_powerplant
-914,  28.483,  48.114,2022-06-16T03,17641,fossil0226,fossil_Az_Zour_powerplant
-915,  28.596,  48.234,2022-08-12T13,18530,fossil0226,fossil_Az_Zour_powerplant
-916,  28.483,  48.114,2022-08-16T03,18586,fossil0226,fossil_Az_Zour_powerplant
-917,  28.596,  48.234,2022-10-27T07,19704,fossil0226,fossil_Az_Zour_powerplant
-918,  28.483,  48.114,2022-11-23T12,20125,fossil0226,fossil_Az_Zour_powerplant
-919,  34.899, 127.763,2021-10-17T06,13894,fossil0227,fossil_Gwangyang_powerplant
-920,  38.562, -90.836,2022-01-31T19,15544,fossil0228,fossil_Labadie_powerplant
-921,  36.391, -87.654,2022-01-28T20,15498,fossil0229,fossil_Cumberland_powerplant
-922,  38.699, -83.816,2022-02-13T20,15746,fossil0230,fossil_Spurlock_powerplant
-923,  44.389,-105.462,2022-02-03T20,15591,fossil0231,fossil_Dry_Fork_Station_powerplant
-924,  49.057,-105.482,2022-02-04T21,15607,fossil0232,fossil_Poplar_River_powerplant
-925,  46.525, -84.368,2022-04-01T20,16474,fossil0233,fossil_Algoma_Steel
-926,  39.514,-112.575,2022-11-29T21,20224,fossil0235,fossil_Intermountain_powerplant
-927,  30.082,  31.284,2022-05-21T14,17245,fossil0236,fossil_Cairo_Egypt
-928,  29.471, -95.280,2022-06-04T17,17464,fossil0237,fossil_Houston_GeoCarb_USA
-929,  29.692, -95.214,2022-06-12T22,17591,fossil0237,fossil_Houston_GeoCarb_USA
-930,  29.471, -95.280,2022-06-16T13,17647,fossil0237,fossil_Houston_GeoCarb_USA
-931,  29.692, -95.214,2022-06-16T21,17652,fossil0237,fossil_Houston_GeoCarb_USA
-932,  29.471, -95.280,2022-07-20T23,18180,fossil0237,fossil_Houston_GeoCarb_USA
-933,  29.692, -95.214,2022-08-12T22,18536,fossil0237,fossil_Houston_GeoCarb_USA
-934,  29.471, -95.280,2022-09-22T22,19171,fossil0237,fossil_Houston_GeoCarb_USA
-935,  29.692, -95.214,2022-10-23T18,19649,fossil0237,fossil_Houston_GeoCarb_USA
-936,  48.572, -81.369,2022-06-19T13,17694,fossil0238,fossil_Timmins_Canada
-937,   2.146, -59.006,2019-08-07T13,01479,sif_atto,sif_ATTO_Tower_Manaus_Brazil
-938,  -2.146, -59.005,2020-08-19T20,07338,sif_atto_2,sif_ATTO_Tower_Manaus_Brazil_correct
-939,  42.538, -72.172,2020-02-18T18,04503,sif_hrv,sif_Harvard_Forest_USA
-940,  31.807, 119.217,2020-02-03T04,04262,sif_jro,sif_Jurong_Korea
-941,  10.433, -84.021,2019-09-23T21,02212,sif_laselva,sif_La_Selva_Costa_Rica
-942,  41.165, -96.455,2020-05-28T22,06054,sif_mead,sif_Mead_Cluster_USA
-943,  35.438,-106.238,2019-10-05T19,02397,sif_mpj,sif_Pinyon_Juniper_USA
-944,  38.744, -92.200,2020-04-17T14,05414,sif_mzo,sif_Ozark_USA
-945,  40.033,-105.546,2019-10-15T16,02550,sif_niwot,sif_Niwot_Ridge_Colorado_USA
-946,  34.985, -97.522,2020-04-13T15,05353,sif_oko,sif_KAEFS_USA
-947,  31.821,-110.840,2020-02-08T18,04348,sif_santarita,sif_Santa_Rita_Cluster_USA
-948,  34.520, 115.589,2020-04-15T08,05379,sif_shq,sif_shq
-949,  45.560, -84.714,2019-10-13T16,02519,sif_umb,sif_University_of_Michigan_USA
-950,  37.923, -78.274,2019-10-13T15,02518,sif_uva,sif_University_of_Virginia_USA
-951,  36.624, 126.373,2019-10-08T03,02433,tccon100,val_anmyeondoKo
-952,  -7.947, -14.387,2019-12-06T10,03352,tccon101,val_ascensionIsland
-953,  34.958,-117.882,2019-12-24T20,03637,tccon102,val_drydenCA
-954,  53.104,   8.849,2020-04-25T08,05534,tccon104,val_bremenDe
-955,  18.532, 120.649,2019-10-10T01,02463,tccon105,val_burgosPh
-956,  34.123,-118.073,2019-10-07T19,02428,tccon106,val_caltechCA
-957, -12.375, 130.917,2019-10-08T00,02431,tccon107,val_darwinAu
-958,  28.297, -16.518,2019-10-13T10,02515,tccon112,val_izanaTenerifeEs
-959,  49.100,   8.438,2020-02-20T10,04529,tccon113,val_karlsruheDe
-960,  36.604, -97.485,2019-10-06T19,02412,tccon114,val_lamontOK
-961, -45.002, 169.685,2019-09-20T01,02153,tccon115,val_lauderNz
-962,  47.965,   2.112,2019-08-08T13,01494,tccon122,val_orleansFr
-963,  48.846,   2.356,2019-10-07T13,02424,tccon123,val_parisFr
-964,  45.945, -90.273,2019-10-08T19,02443,tccon124,val_parkFallsWI
-965, -20.901,  55.485,2019-09-14T04,02062,tccon127,val_reunionIsland
-966,  43.452, 143.700,2019-10-09T02,02448,tccon128,val_rikubetsuJp
-967,  33.241, 130.288,2019-08-06T04,01457,tccon130,val_sagaJp
-968,  36.051, 140.122,2019-08-07T03,01472,tccon134,val_tsukubaJp
-969, -34.451, 150.854,2019-09-21T04,02170,tccon135,val_wollongongAu
-970,  35.040,  33.060,2019-08-06T10,01461,tccon136,val_cyprus
-971,  27.809, -97.406,2019-12-26T18,03667,texmex001,campaign_texmex_corpus_christi
-972,  28.010, -97.610,2021-10-30T16,14102,texmex001,campaign_texmex_corpus_christi
-973,  27.879, -97.466,2021-11-23T22,14477,texmex001,campaign_texmex_corpus_christi
-974,  28.010, -97.610,2022-01-01T15,15077,texmex001,campaign_texmex_corpus_christi
-975,  29.004, -95.410,2019-10-08T17,02442,texmex002,campaign_texmex_freeport
-976,  29.954, -93.988,2020-02-23T19,04581,texmex003,campaign_texmex_port_arthur
-977,  30.072, -94.116,2021-11-04T13,14178,texmex003,campaign_texmex_port_arthur
-978,  30.125, -93.316,2020-06-12T15,06282,texmex004,campaign_texmex_lake_charles
-979,  35.299,-101.740,2019-10-13T16,02519,texmex005,campaign_texmex_harrington_station
-980,  29.909, -96.752,2020-04-06T17,05246,texmex006,campaign_texmex_fayette_station
-981,  29.493, -95.683,2020-02-19T20,04520,texmex007,campaign_texmex_WA_parish_station
-982,  31.594, -96.145,2019-10-11T16,02488,texmex008,campaign_texmex_limestone_big_brown_stations
-983,  32.343, -94.532,2020-02-16T21,04474,texmex009,campaign_texmex_martin_lake_pirkey_stations
-984,  30.433, -91.172,2020-03-03T15,04718,texmex010,campaign_texmex_baton_rouge
-985,  30.303, -91.172,2020-07-25T22,06952,texmex010,campaign_texmex_baton_rouge
-986,  32.740, -97.411,2019-10-07T18,02427,texmex012,campaign_texmex_fort_worth
-987,  36.102,-102.132,2019-12-05T19,03342,texmex016,campaign_texmex_amarillo_north02
-988,  31.565,-103.360,2019-10-10T17,02473,texmex019,campaign_texmex_permian01d
-989,  33.001,-102.197,2019-12-02T20,03296,texmex021,campaign_texmex_permian02b
-990,  31.185, -96.485,2020-08-13T23,07247,texmex024,campaign_texmex_oakgrove_powerplant
-991,  39.175,-111.029,2020-07-31T22,07045,texmex025,campaign_texmex_hunters_powerplant
-992,  31.395, -92.716,2020-07-28T21,06998,texmex026,campaign_texmex_brame_powerplant
-993,  36.801,-108.442,2020-07-28T22,06999,texmex027,campaign_texmex_sanjuan_powerplant
-994,  40.463,-107.591,2020-10-16T21,08237,texmex028,campaign_texmex_craig_powerplant
-995,  39.912, 104.242,2021-02-05T05,09961,val001,validation_eastern_colorado
-996,  39.912,-104.242,2021-04-06T19,10899,val001,validation_eastern_colorado
-997,  43.565,   1.502,2022-07-24T17,18238,val002,val_Toulouse_France
-998, -22.990, -67.739,2022-12-21T20,20564,val003_TAO,val_Tokyo_Atacama_Observatory
-999, -16.250, 168.120,2019-09-13T20,02057,volcano0001,v257040_Ambrym
-1000,  19.023, -98.622,2020-05-10T13,05770,volcano0002,v341090_Popocatepetl
-1001,  37.730,  15.000,2020-02-08T10,04343,volcano0003,v211060_Etna
-1002,  -7.560, 110.440,2020-02-03T03,04261,volcano0004,v263250_Merapi
-1003,  19.420,-155.290,2019-10-11T19,02490,volcano0005,v332010_Kilauea_Hawaii
-1004,  19.540,-155.390,2021-11-04T18,14181,volcano0005,v332010_Kilauea_Hawaii
-1005,  19.424,-155.287,2022-01-21T02,15378,volcano0005,v332010_Kilauea_Hawaii
-1006,  19.540,-155.390,2022-02-18T01,15811,volcano0005,v332010_Kilauea_Hawaii
-1007,  19.424,-155.287,2022-04-11T18,16628,volcano0005,v332010_Kilauea_Hawaii
-1008,  19.540,-155.390,2022-05-01T20,16939,volcano0005,v332010_Kilauea_Hawaii
-1009,  19.424,-155.287,2022-05-20T03,17222,volcano0005,v332010_Kilauea_Hawaii
-1010,  19.540,-155.390,2022-06-13T03,17594,volcano0005,v332010_Kilauea_Hawaii
-1011,  19.424,-155.287,2022-07-20T03,18167,volcano0005,v332010_Kilauea_Hawaii
-1012,  19.540,-155.390,2022-08-13T03,18539,volcano0005,v332010_Kilauea_Hawaii
-1013,  19.424,-155.287,2022-09-19T02,19112,volcano0005,v332010_Kilauea_Hawaii
-1014,  19.540,-155.390,2022-10-31T19,19774,volcano0005,v332010_Kilauea_Hawaii
-1015,  19.424,-155.287,2022-11-23T01,20118,volcano0005,v332010_Kilauea_Hawaii
-1016,  38.788,  15.215,2019-10-12T09,02499,volcano0006,v211040_Stromboli
-1017, -15.400, 167.830,2019-11-28T01,03222,volcano0007,v257030_Aoba_Ambae
-1018, -39.420, -71.930,2019-09-13T14,02053,volcano0008,v357120_Villarrica
-1019,  19.480,-155.610,2020-02-20T01,04523,volcano0009,v332020_Mauna_Loa_Hawaii
-1020,  -5.050, 151.330,2019-09-25T04,02232,volcano0010,v252120_Ulawun
-1021,  -5.292, 151.502,2021-12-18T06,14854,volcano0010,v252120_Ulawun
-1022,  -5.110, 151.390,2022-01-15T06,15288,volcano0010,v252120_Ulawun
-1023,  -5.292, 151.502,2022-02-18T05,15814,volcano0010,v252120_Ulawun
-1024,  -5.110, 151.390,2022-05-18T06,17193,volcano0010,v252120_Ulawun
-1025,  -5.292, 151.502,2022-09-01T00,18832,volcano0010,v252120_Ulawun
-1026,  -5.110, 151.390,2022-09-17T05,19083,volcano0010,v252120_Ulawun
-1027,  -5.292, 151.502,2022-11-01T00,19777,volcano0010,v252120_Ulawun
-1028,  -5.110, 151.390,2022-11-17T05,20028,volcano0010,v252120_Ulawun
-1029,  -5.292, 151.502,2023-01-04T23,20783,volcano0010,v252120_Ulawun
-1030,  -5.110, 151.390,2023-01-17T05,20973,volcano0010,v252120_Ulawun
-1031,  13.260,  13.260,2020-05-08T07,05735,volcano0011,v273030_Mayon
-1032,  10.025, -83.767,2020-02-08T14,04346,volcano0012,v345070_Turrialba
-1033, -21.231,  55.713,2019-09-23T10,02205,volcano0013,v233020_Piton_de_la_Fournaise_Reunion
-1034, -21.098,  55.518,2021-10-25T11,14021,volcano0013,v233020_Piton_de_la_Fournaise_Reunion
-1035, -21.161,  55.643,2021-11-19T10,14408,volcano0013,v233020_Piton_de_la_Fournaise_Reunion
-1036,  32.880, 131.110,2021-06-06T03,11833,volcano0014,v282110_Aso
-1037,  14.470, -90.880,2019-10-07T16,02426,volcano0015,v342090_Fuego
-1038,  -4.271, 152.203,2019-11-28T03,03223,volcano0016,v252140_Rabaul_Tarvurvur
-1039,  -4.431, 152.162,2021-10-28T02,14062,volcano0016,v252140_Rabaul_Tarvurvur
-1040,  -4.517, 152.029,2022-08-02T23,18382,volcano0016,v252140_Rabaul_Tarvurvur
-1041,  -4.431, 152.162,2022-08-17T06,18603,volcano0016,v252140_Rabaul_Tarvurvur
-1042, -15.795, -71.860,2019-10-06T14,02409,volcano0017,v354006_Sabancaya
-1043,  31.585, 130.657,2020-04-29T02,05592,volcano0018,v282080_Sakurajima
-1044,  14.008, 120.994,2019-12-25T05,03643,volcano0019,v273070_Taal
-1045,  -1.520,  29.250,2019-10-09T07,02451,volcano0020,v223030_Nyiragongo
-1046,  -6.100, 105.420,2020-05-30T05,06074,volcano0021,v262000_Krakatau_Anak_Krakatau
-1047,  37.631,-119.032,2020-08-31T16,07522,volcano0022,v323150_Mammoth_Mountain_LVC
-1048, -37.520, 177.181,2019-09-15T20,02088,volcano0023,v241040_White_Island
-1049, -19.532, 169.447,2019-09-22T03,02185,volcano0024,v257100_Yasur
-1050,  40.827,  14.139,2020-02-03T12,04267,volcano0025,v2110010_Campi_Flegrei_and_Pisciarelli
-1051, -16.340, -70.900,2019-10-10T12,02470,volcano0026,v354020_Ubinas
-1052,  -4.080, 145.040,2019-10-08T23,02446,volcano0027,v251020_Manam
-1053,   4.895, -75.322,2020-02-19T20,04520,volcano0028,v351020_Nevado_del_Ruiz
-1054,  11.980, -86.160,2019-11-30T18,03264,volcano0029,v344100_Masaya
-1055,  -7.940, 112.950,2019-10-08T01,02432,volcano0030,v263310_Bromo
-1056,  -8.340, 115.510,2019-09-23T07,02203,volcano0031,v264020_Agung
-1057,  38.404,  14.962,2020-06-28T09,06526,volcano0032,v211050_Vulcano
-1058,  -2.764,  35.914,2020-02-29T10,04668,volcano0033,v222120_Oldoinyo_Lengai
-1059,  10.200, -84.233,2020-04-03T17,05199,volcano0034,v345040_Poas
-1060, -39.280, 175.570,2019-09-14T21,02073,volcano0035,v241100_Ruapehu
-1061,  44.400, 110.700,2019-10-07T05,02419,volcano0036,v325010_Yellowstone
-1062,  44.400,-110.700,2021-06-18T20,12030,volcano0036,v325010_Yellowstone
-1063,  -0.370, -91.550,2019-09-23T21,02212,volcano0037,v353010_Fernandina_Galapagos
-1064,  13.600,  40.670,2019-10-09T07,02451,volcano0038,v221080_Erta_Ale
-1065,   1.680, 127.880,2019-09-24T06,02218,volcano0039,v268010_Dukono
-1066, -37.860, -71.160,2020-02-25T21,04613,volcano0040,v357090_Copahue
-1067,  14.382, -90.601,2019-12-25T19,03652,volcano0041,v342110_Pacaya
-1068,  19.275,-154.910,2020-09-29T23,07975,volcano0042,v332010_East_Rift_Zone_Hawaii
-1069,  19.381,-154.998,2021-10-31T20,14120,volcano0042,v332010_East_Rift_Zone_Hawaii
-1070,  36.400, 138.530,2020-04-23T03,05500,volcano0043,v283110_Asama
-1071,  14.757, -91.552,2019-12-21T21,03591,volcano0044,v342030_Santiaguito_Santa_Maria
-1072,  41.980, 128.080,2019-10-07T04,02418,volcano0045,v305060_Changbaishan_CN_Baekdusan_Paekdusan_NK
-1073,   4.211,   9.175,2019-10-13T07,02513,volcano0046,v224010_Mt._Cameroon
-1074,   4.350,   9.274,2021-11-24T13,14487,volcano0046,v224010_Mt._Cameroon
-1075,   4.207,   9.178,2021-12-19T14,14875,volcano0046,v224010_Mt._Cameroon
-1076,   4.350,   9.274,2022-01-18T15,15340,volcano0046,v224010_Mt._Cameroon
-1077,   4.207,   9.178,2022-02-15T15,15774,volcano0046,v224010_Mt._Cameroon
-1078,   4.350,   9.274,2022-04-05T09,16529,volcano0046,v224010_Mt._Cameroon
-1079,   4.207,   9.178,2022-04-29T11,16902,volcano0046,v224010_Mt._Cameroon
-1080,   4.350,   9.274,2022-05-21T14,17245,volcano0046,v224010_Mt._Cameroon
-1081,   4.207,   9.178,2022-08-29T10,18792,volcano0046,v224010_Mt._Cameroon
-1082,   4.350,   9.274,2022-10-01T10,19303,volcano0046,v224010_Mt._Cameroon
-1083,   4.207,   9.178,2022-10-29T10,19737,volcano0046,v224010_Mt._Cameroon
-1084,   4.350,   9.274,2022-12-05T08,20309,volcano0046,v224010_Mt._Cameroon
-1085,  -0.830, -91.170,2020-03-22T21,05016,volcano0047,v353050_Sierra_Negra
-1086,  -1.408,  29.200,2020-01-08T07,03861,volcano0048,v223020_Nyamuragira
-1087,   6.437,  10.298,2019-10-09T08,02452,volcano0049,v224030_Oku_Volcanic_Field_Lake_Nyos
-1088,  -7.930, 112.310,2020-02-25T07,04604,volcano0050,v263280_Kelut
-1089,  -6.090, 155.230,2019-10-10T21,02476,volcano0051,v255020_Bagana
-1090,  12.423, -86.539,2020-05-31T18,06098,volcano0052,v344090_Momotombo
-1091,  29.635, 129.716,2019-10-06T03,02402,volcano0053,v282030_Suwanosejima_Marianas
-1092,  30.789, 130.308,2019-12-25T04,03642,volcano0054,v282060_Satsuma-Iwojima_Kikai
-1093,  13.370,  41.700,2019-09-24T12,02222,volcano0055,v221101_Nabro
-1094,   3.170,  98.391,2019-09-23T09,02204,volcano0056,v261080_Sinabung
-1095,  -1.700, 101.260,2020-02-20T09,04528,volcano0058,v261170_Kerinci
-1096,   1.360, 124.790,2019-10-09T01,02447,volcano0059,v266100_Lokon-Empung_Sulawesi
-1097, -16.294, -71.409,2020-01-13T12,03942,volcano0060,v354010_Misti
-1098,   0.826, -77.964,2020-08-20T21,07354,volcano0061,v351110_Chiles-Cerro_Negro
-1099,   1.113, 124.734,2020-06-01T03,06104,volcano0062,v266030_Soputan
-1100,  34.094, 139.526,2019-10-07T02,02417,volcano0063,v284040_Miyake-jima_Marianas
-1101,  16.720, -62.180,2019-10-11T13,02486,volcano0064,v360050_Soufriere_Hills_Montserrat
-1102,   2.780, 125.410,2020-01-31T04,04215,volcano0065,v267020_Karangetan
-1103,   2.917, -76.034,2019-12-26T18,03667,volcano0066,v351050_Nevado_del_Huila
-1104,  -8.060, 114.240,2019-11-30T04,03255,volcano0067,v263350_Kawah_Ijen_Ijen
-1105,  -5.530, 148.420,2019-10-06T00,02400,volcano0069,v252010_Langila
-1106,   1.200, -77.390,2020-02-22T20,04566,volcano0070,v351080_Galeras
-1107,  15.310, -61.310,2019-12-26T17,03666,volcano0071,v360101_Morne_Watt_Dominica_Island
-1108,  13.853, -89.630,2019-10-11T14,02487,volcano0072,v343020_Santa_Ana
-1109,  -8.509, 124.128,2019-10-10T00,02462,volcano0073,v264270_Sirung_Pantar
-1110,  46.200,-122.180,2020-04-22T19,05495,volcano0074,v321050_Mount_St._Helens
-1111,  35.360, 138.730,2021-05-04T22,11335,volcano0075,v283030_Fuji-san
-1112, -22.270, -67.180,2020-02-29T17,04673,volcano0076,v355838_Uturuncu
-1113,  12.702, -87.004,2020-04-10T14,05306,volcano0077,v344020_San_Cristobal
-1114, -23.370, -67.730,2019-09-13T13,02052,volcano0078,v355100_Lascar
-1115, -25.170, -68.500,2019-10-08T12,02439,volcano0079,v355120_Lastarria
-1116, -36.060, -70.490,2019-09-14T14,02068,volcano0080,v357061_Laguna_del_Maule
-1117,  52.449, 158.196,2020-04-24T22,05528,volcano0082,v300060_Mutnovsky
-1118,  31.911, 130.882,2020-03-01T01,04678,volcano0083,v282090_Shinmoedake_Kirishimayama
-1119,  34.720, 139.390,2020-03-28T06,05099,volcano0085,v284010_Izu-Oshima
-1120,   6.113, 124.892,2019-09-23T07,02203,volcano0086,v271011_Parker
-1121,  -0.077, -77.656,2020-01-10T13,03896,volcano0087,v352010_Reventador
-1122,   0.029, -77.986,2020-07-08T14,06684,volcano0088,v352006_Cayambe
-1123,  24.750, 141.290,2019-12-22T04,03596,volcano0089,v284120_Ioto_Iwo-Jima
-1124, -41.330, -72.610,2019-09-16T14,02099,volcano0091,v358020_Calbuco
-1125,   4.487, -75.389,2021-04-13T12,11003,volcano0092,v351040_Cerro_Machin
-1126, -42.833, -72.646,2019-09-18T18,02133,volcano0093,v358041_Chaiten
-1127, -42.964, -72.382,2021-10-27T20,14058,volcano0093,v358041_Chaiten
-1128, -42.704, -72.388,2021-11-22T16,14458,volcano0093,v358041_Chaiten
-1129, -42.964, -72.382,2022-01-02T18,15094,volcano0093,v358041_Chaiten
-1130, -42.704, -72.388,2022-01-16T18,15311,volcano0093,v358041_Chaiten
-1131, -42.964, -72.382,2022-01-18T11,15338,volcano0093,v358041_Chaiten
-1132, -42.704, -72.388,2022-05-15T19,17155,volcano0093,v358041_Chaiten
-1133, -42.964, -72.382,2022-09-08T15,18950,volcano0093,v358041_Chaiten
-1134, -42.704, -72.388,2022-09-10T20,18984,volcano0093,v358041_Chaiten
-1135, -42.964, -72.382,2022-09-12T14,19011,volcano0093,v358041_Chaiten
-1136, -42.704, -72.388,2022-09-14T18,19045,volcano0093,v358041_Chaiten
-1137, -42.964, -72.382,2022-09-16T12,19072,volcano0093,v358041_Chaiten
-1138, -42.704, -72.388,2022-09-29T13,19274,volcano0093,v358041_Chaiten
-1139, -42.964, -72.382,2022-11-08T15,19895,volcano0093,v358041_Chaiten
-1140, -42.704, -72.388,2022-11-14T18,19990,volcano0093,v358041_Chaiten
-1141, -42.964, -72.382,2022-11-16T12,20017,volcano0093,v358041_Chaiten
-1142, -42.704, -72.388,2022-11-18T17,20051,volcano0093,v358041_Chaiten
-1143, -42.964, -72.382,2022-12-20T22,20550,volcano0093,v358041_Chaiten
-1144, -42.704, -72.388,2023-01-18T17,20996,volcano0093,v358041_Chaiten
+43,  42.711, -80.426,2023-05-01T12,22589,ecostress_ca_tp,ecostress_ca_tp
+44,  46.815,   9.856,2020-06-13T10,06294,ecostress_ch_dav,ecostress_ch_dav
+45,  47.116,   8.538,2020-04-03T14,05197,ecostress_ch_fru,ecostress_ch_fru
+46,  47.478,   8.364,2020-06-11T14,06266,ecostress_ch_lae,ecostress_ch_lae
+47,  10.419, -85.473,2020-02-18T21,04505,ecostress_cr_fsc,ecostress_cr_fsc
+48,  10.842, -85.616,2019-10-08T15,02441,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
+49,  10.969, -85.521,2021-11-19T21,14415,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
+50,  10.707, -85.516,2022-04-22T19,16799,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
+51,  10.969, -85.521,2022-07-20T21,18179,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
+52,  10.707, -85.516,2022-10-18T20,19573,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
+53,  10.969, -85.521,2022-11-19T21,20069,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
+54,  10.707, -85.516,2022-12-26T17,20640,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
+55,  10.969, -85.521,2023-01-19T21,21014,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
+56,  10.707, -85.516,2023-05-02T15,22606,ecostress_cr_srnp_emss,ecostress_cr_srnp_emss
+57,  49.502,  18.537,2020-06-01T14,06111,ecostress_cz_bk1,ecostress_cz_bk1
+58,  50.866,   6.447,2020-04-22T08,05488,ecostress_de_rus,ecostress_de_rus
+59,  50.962,  13.565,2020-04-05T14,05228,ecostress_de_tha,ecostress_de_tha
+60,  48.476,   2.780,2020-06-11T11,06264,ecostress_fr_fon,ecostress_fr_fon
+61,  31.345,  35.052,2020-04-04T10,05210,ecostress_il_yat,ecostress_il_yat
+62,  41.704,  12.357,2020-02-10T10,04374,ecostress_it_cp2,ecostress_it_cp2
+63,  41.814,  12.467,2021-12-18T12,14858,ecostress_it_cp2,ecostress_it_cp2
+64,  41.898,  12.720,2023-05-21T16,22901,ecostress_it_cp2,ecostress_it_cp2
+65,  45.844,   7.578,2020-02-12T10,04405,ecostress_it_tor,ecostress_it_tor
+66,  -3.426,  38.141,2019-10-07T07,02420,ecostress_ke_mak,ecostress_ke_mak
+67,  37.748, 127.162,2020-04-14T07,05363,ecostress_kr_gck,ecostress_kr_gck
+68,  13.648,   2.634,2019-08-08T10,01492,ecostress_ne_waf,ecostress_ne_waf
+69, -43.593, 171.928,2020-05-24T00,05978,ecostress_nz_bfm,ecostress_nz_bfm
+70, -37.388, 175.554,2019-09-22T01,02184,ecostress_nz_kop,ecostress_nz_kop
+71, -43.262, 172.211,2019-09-16T21,02104,ecostress_nz_oxf,ecostress_nz_oxf
+72, -37.460, 175.220,2019-09-18T03,02123,ecostress_nz_sco,ecostress_nz_sco
+73,  51.207,  -2.828,2019-10-12T12,02501,ecostress_sleg,ecostress_sleg
+74,  34.608, -81.722,2020-06-27T16,06515,ecostress_ssh_czo_cal,ecostress_ssh_czo_cal
+75,  40.666, -77.904,2020-04-02T19,05185,ecostress_ssh_czo_shale,ecostress_ssh_czo_shale
+76,  36.606, -97.489,2020-12-26T17,09334,ecostress_us_arm,ecostress_us_arm
+77,  44.065, -71.288,2019-10-08T17,02442,ecostress_us_bar,ecostress_us_bar
+78,  38.102,-121.504,2020-04-04T21,05217,ecostress_us_bi1,ecostress_us_bi1
+79,  43.471,-119.691,2019-10-08T20,02444,ecostress_us_bsg,ecostress_us_bsg
+80,  39.838, -74.379,2021-05-29T20,11720,ecostress_us_ced,ecostress_us_ced
+81,  46.781,-117.082,2020-02-16T21,04474,ecostress_us_cf1,ecostress_us_cf1
+82,  44.103, -89.538,2020-02-12T16,04409,ecostress_us_cs1,ecostress_us_cs1
+83,  37.109,-119.731,2019-10-06T20,02413,ecostress_us_cz1,ecostress_us_cz1
+84,  37.031,-119.256,2020-03-31T22,05156,ecostress_us_cz2,ecostress_us_cz2
+85,  46.409,-119.275,2020-04-11T23,05327,ecostress_us_hn1,ecostress_us_hn1
+86,  46.689,-119.464,2020-06-14T18,06315,ecostress_us_hn2,ecostress_us_hn2
+87,  39.056, -95.191,2019-08-07T18,01482,ecostress_us_kfs,ecostress_us_kfs
+88,  39.082, -96.560,2019-08-06T19,01467,ecostress_us_kon,ecostress_us_kon
+89,  46.083, -89.979,2020-06-09T22,06240,ecostress_us_los,ecostress_us_los
+90,  44.452,-121.557,2019-10-15T18,02551,ecostress_us_me2,ecostress_us_me2
+91,  43.077, -89.403,2020-02-09T17,04363,ecostress_us_men,ecostress_us_men
+92,  39.323, -86.413,2020-03-28T21,05109,ecostress_us_mms,ecostress_us_mms
+93,  44.646,-123.551,2020-04-26T18,05556,ecostress_us_mrf,ecostress_us_mrf
+94,  44.678, -93.072,2020-06-12T21,06286,ecostress_us_ro4,ecostress_us_ro4
+95,  38.558,-121.863,2021-02-07T19,10001,ecostress_us_rr,ecostress_us_rr
+96,  33.610,-116.450,2020-01-30T21,04211,ecostress_us_scc,ecostress_us_scc
+97,  33.734,-117.696,2020-10-11T17,08157,ecostress_us_scs,ecostress_us_scs
+98,  34.335,-106.744,2020-02-12T16,04409,ecostress_us_ses,ecostress_us_ses
+99,  39.914, -74.596,2020-12-14T13,09146,ecostress_us_slt,ecostress_us_slt
+100,  36.235,-119.925,2021-08-10T17,12849,ecostress_us_sp,ecostress_us_sp
+101,  46.242, -89.348,2020-05-02T13,05646,ecostress_us_syv,ecostress_us_syv
+102,  31.480, -96.883,2021-03-06T14,10416,ecostress_us_tx2,ecostress_us_tx2
+103,  27.667, -98.209,2020-02-18T21,04505,ecostress_us_tx6,ecostress_us_tx6
+104,  28.781, -95.614,2019-11-30T20,03265,ecostress_us_tx9,ecostress_us_tx9
+105,  38.413,-120.951,2020-08-19T21,07339,ecostress_us_var,ecostress_us_var
+106,  35.888,-106.532,2019-08-06T19,01467,ecostress_us_vcm,ecostress_us_vcm
+107,  34.425,-105.862,2020-02-26T18,04627,ecostress_us_wjs,ecostress_us_wjs
+108,  31.737,-109.942,2020-08-14T15,07258,ecostress_us_wkg,ecostress_us_wkg
+109,  44.137,-123.182,2020-02-10T19,04380,ecostress_us_wpp,ecostress_us_wpp
+110,  45.109,-122.666,2020-02-15T22,04459,ecostress_us_wwt,ecostress_us_wwt
+111,  37.568, 126.978,2020-06-04T04,06151,fossil0001,fossil_Seoul_South_Korea
+112,  23.117, 113.250,2019-10-12T01,02494,fossil0002,fossil_Guangzhou_China
+113,  23.231, 113.147,2021-10-29T03,14078,fossil0002,fossil_Guangzhou_China
+114,  23.127, 113.240,2021-11-23T08,14468,fossil0002,fossil_Guangzhou_China
+115,  23.231, 113.147,2021-12-31T02,15053,fossil0002,fossil_Guangzhou_China
+116,  23.127, 113.240,2022-01-21T08,15382,fossil0002,fossil_Guangzhou_China
+117,  23.231, 113.147,2022-02-15T08,15769,fossil0002,fossil_Guangzhou_China
+118,  23.127, 113.240,2022-04-08T02,16571,fossil0002,fossil_Guangzhou_China
+119,  23.231, 113.147,2022-04-14T08,16668,fossil0002,fossil_Guangzhou_China
+120,  23.127, 113.240,2022-05-20T09,17226,fossil0002,fossil_Guangzhou_China
+121,  23.231, 113.147,2022-06-14T08,17613,fossil0002,fossil_Guangzhou_China
+122,  23.127, 113.240,2022-06-15T23,17638,fossil0002,fossil_Guangzhou_China
+123,  23.231, 113.147,2022-06-18T07,17674,fossil0002,fossil_Guangzhou_China
+124,  23.127, 113.240,2022-07-20T09,18171,fossil0002,fossil_Guangzhou_China
+125,  23.231, 113.147,2022-08-14T08,18558,fossil0002,fossil_Guangzhou_China
+126,  23.127, 113.240,2022-09-19T09,19116,fossil0002,fossil_Guangzhou_China
+127,  23.231, 113.147,2023-04-16T07,22353,fossil0002,fossil_Guangzhou_China
+128,  23.127, 113.240,2023-05-18T09,22850,fossil0002,fossil_Guangzhou_China
+129,  40.715, -74.007,2020-06-14T20,06316,fossil0003,fossil_New_York_USA
+130,  40.804, -74.163,2021-12-15T19,14816,fossil0003,fossil_New_York_USA
+131,  22.365, 114.134,2019-11-30T06,03256,fossil0004,fossil_Hong_Kong_China
+132,  22.625, 114.044,2021-10-25T04,14017,fossil0004,fossil_Hong_Kong_China
+133,  22.497, 114.131,2022-01-29T05,15504,fossil0004,fossil_Hong_Kong_China
+134,  22.625, 114.044,2022-03-03T01,16013,fossil0004,fossil_Hong_Kong_China
+135,  22.497, 114.131,2022-03-24T07,16342,fossil0004,fossil_Hong_Kong_China
+136,  34.053,-118.245,2020-02-24T19,04597,fossil0005,fossil_Los_Angeles_USA
+137,  31.222, 121.458,2020-02-20T06,04526,fossil0006,fossil_Shanghai_China
+138,  31.252, 121.358,2021-12-18T06,14854,fossil0006,fossil_Shanghai_China
+139,  31.060, 121.276,2022-01-25T07,15443,fossil0006,fossil_Shanghai_China
+140,  31.252, 121.358,2022-02-14T07,15753,fossil0006,fossil_Shanghai_China
+141,  31.060, 121.276,2022-04-08T02,16571,fossil0006,fossil_Shanghai_China
+142,  31.252, 121.358,2022-04-24T04,16820,fossil0006,fossil_Shanghai_China
+143,  31.060, 121.276,2022-05-24T07,17287,fossil0006,fossil_Shanghai_China
+144,  31.252, 121.358,2022-06-13T08,17597,fossil0006,fossil_Shanghai_China
+145,  31.060, 121.276,2022-06-15T23,17638,fossil0006,fossil_Shanghai_China
+146,  31.252, 121.358,2022-06-17T06,17658,fossil0006,fossil_Shanghai_China
+147,  31.060, 121.276,2022-07-20T09,18171,fossil0006,fossil_Shanghai_China
+148,  31.252, 121.358,2022-08-13T07,18542,fossil0006,fossil_Shanghai_China
+149,  31.060, 121.276,2022-08-15T22,18583,fossil0006,fossil_Shanghai_China
+150,  31.252, 121.358,2022-09-01T00,18832,fossil0006,fossil_Shanghai_China
+151,  31.060, 121.276,2022-09-30T05,19284,fossil0006,fossil_Shanghai_China
+152,  31.252, 121.358,2022-10-24T03,19655,fossil0006,fossil_Shanghai_China
+153,  31.060, 121.276,2022-12-08T01,20351,fossil0006,fossil_Shanghai_China
+154,  31.252, 121.358,2023-01-01T00,20722,fossil0006,fossil_Shanghai_China
+155,  31.060, 121.276,2023-01-23T07,21067,fossil0006,fossil_Shanghai_China
+156,  31.252, 121.358,2023-04-15T06,22337,fossil0006,fossil_Shanghai_China
+157,   1.465, 103.757,2019-09-24T08,02219,fossil0007,fossil_Singapore_Singapore
+158,   1.601, 103.661,2021-12-19T08,14871,fossil0007,fossil_Singapore_Singapore
+159,   1.579, 103.837,2022-01-18T09,15336,fossil0007,fossil_Singapore_Singapore
+160,   1.601, 103.661,2022-03-06T02,16060,fossil0007,fossil_Singapore_Singapore
+161,   1.579, 103.837,2022-03-21T08,16296,fossil0007,fossil_Singapore_Singapore
+162,   1.601, 103.661,2022-04-21T08,16776,fossil0007,fossil_Singapore_Singapore
+163,   1.579, 103.837,2022-05-21T08,17241,fossil0007,fossil_Singapore_Singapore
+164,   1.601, 103.661,2022-06-29T04,17843,fossil0007,fossil_Singapore_Singapore
+165,   1.579, 103.837,2022-07-25T06,18247,fossil0007,fossil_Singapore_Singapore
+166,   1.601, 103.661,2022-08-29T04,18788,fossil0007,fossil_Singapore_Singapore
+167,   1.579, 103.837,2022-09-16T09,19070,fossil0007,fossil_Singapore_Singapore
+168,   1.601, 103.661,2022-10-17T09,19550,fossil0007,fossil_Singapore_Singapore
+169,   1.579, 103.837,2022-11-20T08,20076,fossil0007,fossil_Singapore_Singapore
+170,   1.601, 103.661,2022-12-21T07,20556,fossil0007,fossil_Singapore_Singapore
+171,   1.579, 103.837,2023-01-20T08,21021,fossil0007,fossil_Singapore_Singapore
+172,   1.601, 103.661,2023-02-24T05,21562,fossil0007,fossil_Singapore_Singapore
+173,   1.579, 103.837,2023-03-19T08,21920,fossil0007,fossil_Singapore_Singapore
+174,   1.601, 103.661,2023-04-27T05,22522,fossil0007,fossil_Singapore_Singapore
+175,   1.579, 103.837,2023-05-19T08,22865,fossil0007,fossil_Singapore_Singapore
+176,  41.884, -87.632,2019-10-10T17,02473,fossil0008,fossil_Chicago_USA
+177,  35.689, 139.692,2020-06-17T22,06364,fossil0009,fossil_Tokyo_Japan
+178,  24.682,  46.687,2020-05-24T13,05986,fossil0010,fossil_Riyadh_Saudi_Arabia
+179,  25.270,  55.309,2019-10-10T06,02466,fossil0011,fossil_Dubai_UAE
+180,  25.006,  55.557,2021-10-23T09,13989,fossil0011,fossil_Dubai_UAE
+181,  25.130,  55.449,2021-11-29T09,14562,fossil0011,fossil_Dubai_UAE
+182,  25.006,  55.557,2021-12-18T11,14857,fossil0011,fossil_Dubai_UAE
+183,  25.130,  55.449,2022-02-11T04,15705,fossil0011,fossil_Dubai_UAE
+184,  25.006,  55.557,2022-03-05T04,16046,fossil0011,fossil_Dubai_UAE
+185,  25.130,  55.449,2022-04-02T08,16482,fossil0011,fossil_Dubai_UAE
+186,  25.006,  55.557,2022-04-20T10,16762,fossil0011,fossil_Dubai_UAE
+187,  25.130,  55.449,2022-05-22T12,17259,fossil0011,fossil_Dubai_UAE
+188,  25.006,  55.557,2022-07-02T05,17890,fossil0011,fossil_Dubai_UAE
+189,  25.130,  55.449,2022-07-26T10,18265,fossil0011,fossil_Dubai_UAE
+190,  25.006,  55.557,2022-08-24T08,18713,fossil0011,fossil_Dubai_UAE
+191,  25.130,  55.449,2022-09-28T09,19256,fossil0011,fossil_Dubai_UAE
+192,  25.006,  55.557,2022-10-16T11,19536,fossil0011,fossil_Dubai_UAE
+193,  25.130,  55.449,2022-12-02T08,20262,fossil0011,fossil_Dubai_UAE
+194,  25.006,  55.557,2022-12-20T09,20542,fossil0011,fossil_Dubai_UAE
+195,  25.130,  55.449,2023-01-21T11,21039,fossil0011,fossil_Dubai_UAE
+196,  25.006,  55.557,2023-02-23T08,21548,fossil0011,fossil_Dubai_UAE
+197,  25.130,  55.449,2023-04-04T07,22167,fossil0011,fossil_Dubai_UAE
+198,  25.006,  55.557,2023-04-22T09,22447,fossil0011,fossil_Dubai_UAE
+199,  25.130,  55.449,2023-05-31T08,23051,fossil0011,fossil_Dubai_UAE
+200,  31.569, 120.289,2020-05-27T07,06029,fossil0012,fossil_Wuxi_China
+201, -26.205,  28.040,2019-09-19T13,02145,fossil0013,fossil_Johannesburg_South_Africa
+202,  35.694,  51.422,2019-10-11T07,02482,fossil0014,fossil_Tehran_Iran
+203,  51.506,  -0.127,2019-10-15T12,02547,fossil0015,fossil_London_UK
+204,  30.459,  31.179,2019-10-09T08,02452,fossil0016,fossil_Benha_Egypt
+205,  39.907, 116.397,2019-10-09T04,02449,fossil0017,fossil_Beijing_China
+206,  -6.172, 106.826,2019-10-07T02,02417,fossil0018,fossil_Jakarta_Indonesia
+207,  -6.325, 106.936,2021-10-24T07,14003,fossil0018,fossil_Jakarta_Indonesia
+208,  -6.322, 106.719,2021-11-18T08,14391,fossil0018,fossil_Jakarta_Indonesia
+209,  -6.325, 106.936,2022-01-07T01,15161,fossil0018,fossil_Jakarta_Indonesia
+210,  -6.322, 106.719,2022-02-04T02,15595,fossil0018,fossil_Jakarta_Indonesia
+211,  -6.325, 106.936,2022-02-18T08,15816,fossil0018,fossil_Jakarta_Indonesia
+212,  -6.322, 106.719,2022-03-26T06,16372,fossil0018,fossil_Jakarta_Indonesia
+213,  -6.325, 106.936,2022-05-10T01,17066,fossil0018,fossil_Jakarta_Indonesia
+214,  -6.322, 106.719,2022-06-07T01,17500,fossil0018,fossil_Jakarta_Indonesia
+215,  -6.325, 106.936,2022-06-29T05,17843,fossil0018,fossil_Jakarta_Indonesia
+216,  -6.322, 106.719,2022-07-19T08,18155,fossil0018,fossil_Jakarta_Indonesia
+217,  -6.325, 106.936,2022-08-17T09,18605,fossil0018,fossil_Jakarta_Indonesia
+218,  -6.322, 106.719,2022-09-25T05,19207,fossil0018,fossil_Jakarta_Indonesia
+219,  -6.325, 106.936,2022-12-21T07,20556,fossil0018,fossil_Jakarta_Indonesia
+220,  -6.322, 106.719,2023-01-29T03,21158,fossil0018,fossil_Jakarta_Indonesia
+221,  -6.325, 106.936,2023-02-24T05,21562,fossil0018,fossil_Jakarta_Indonesia
+222,  -6.322, 106.719,2023-03-20T08,21935,fossil0018,fossil_Jakarta_Indonesia
+223,  -6.325, 106.936,2023-04-19T08,22400,fossil0018,fossil_Jakarta_Indonesia
+224,  -6.322, 106.719,2023-05-28T04,23002,fossil0018,fossil_Jakarta_Indonesia
+225,  29.094,  48.076,2019-10-08T08,02436,fossil0019,fossil_Al-Ahmadi_Kuwait
+226,  29.177,  47.879,2021-11-04T04,14172,fossil0019,fossil_Al-Ahmadi_Kuwait
+227,  28.922,  47.895,2021-11-27T11,14532,fossil0019,fossil_Al-Ahmadi_Kuwait
+228,  29.177,  47.879,2022-02-25T07,15924,fossil0019,fossil_Al-Ahmadi_Kuwait
+229,  28.922,  47.895,2022-04-04T08,16513,fossil0019,fossil_Al-Ahmadi_Kuwait
+230,  29.177,  47.879,2022-04-12T13,16640,fossil0019,fossil_Al-Ahmadi_Kuwait
+231,  28.922,  47.895,2022-06-12T05,17580,fossil0019,fossil_Al-Ahmadi_Kuwait
+232,  25.775, -80.198,2019-10-07T16,02426,fossil0020,fossil_Miami_USA
+233,  25.775, -80.468,2021-11-30T18,14583,fossil0020,fossil_Miami_USA
+234,  26.040, -80.453,2021-12-15T21,14817,fossil0020,fossil_Miami_USA
+235,  25.775, -80.468,2022-03-26T20,16381,fossil0020,fossil_Miami_USA
+236,  26.040, -80.453,2022-04-21T18,16783,fossil0020,fossil_Miami_USA
+237,  25.775, -80.468,2022-06-07T15,17509,fossil0020,fossil_Miami_USA
+238,  26.040, -80.453,2022-06-10T22,17560,fossil0020,fossil_Miami_USA
+239,  25.775, -80.468,2022-06-11T13,17570,fossil0020,fossil_Miami_USA
+240,  26.040, -80.453,2022-07-03T14,17911,fossil0020,fossil_Miami_USA
+241,  25.775, -80.468,2022-07-19T22,18164,fossil0020,fossil_Miami_USA
+242,  26.040, -80.453,2022-08-10T22,18505,fossil0020,fossil_Miami_USA
+243,  25.775, -80.468,2022-08-11T13,18515,fossil0020,fossil_Miami_USA
+244,  26.040, -80.453,2022-08-29T15,18795,fossil0020,fossil_Miami_USA
+245,  25.775, -80.468,2022-09-25T19,19216,fossil0020,fossil_Miami_USA
+246,  26.040, -80.453,2022-10-17T20,19557,fossil0020,fossil_Miami_USA
+247,  25.775, -80.468,2022-11-29T18,20222,fossil0020,fossil_Miami_USA
+248,  26.040, -80.453,2022-12-25T16,20624,fossil0020,fossil_Miami_USA
+249,  25.775, -80.468,2023-01-29T18,21167,fossil0020,fossil_Miami_USA
+250,  26.040, -80.453,2023-04-27T16,22529,fossil0020,fossil_Miami_USA
+251,  25.775, -80.468,2023-05-28T18,23011,fossil0020,fossil_Miami_USA
+252,  13.599, 100.597,2019-11-29T07,03241,fossil0021,fossil_Samut_Prakan_Thailand
+253,  13.773, 100.465,2021-10-25T06,14018,fossil0021,fossil_Samut_Prakan_Thailand
+254,  13.776, 100.732,2022-01-20T09,15367,fossil0021,fossil_Samut_Prakan_Thailand
+255,  13.773, 100.465,2022-03-03T03,16014,fossil0021,fossil_Samut_Prakan_Thailand
+256,  13.776, 100.732,2022-03-19T10,16266,fossil0021,fossil_Samut_Prakan_Thailand
+257,  13.773, 100.465,2022-04-18T08,16730,fossil0021,fossil_Samut_Prakan_Thailand
+258,  13.776, 100.732,2022-05-19T10,17211,fossil0021,fossil_Samut_Prakan_Thailand
+259,  13.773, 100.465,2022-07-04T02,17919,fossil0021,fossil_Samut_Prakan_Thailand
+260,  13.776, 100.732,2022-07-27T06,18278,fossil0021,fossil_Samut_Prakan_Thailand
+261,  13.773, 100.465,2022-08-22T07,18681,fossil0021,fossil_Samut_Prakan_Thailand
+262,  13.776, 100.732,2022-09-18T09,19101,fossil0021,fossil_Samut_Prakan_Thailand
+263,  13.773, 100.465,2022-10-18T08,19565,fossil0021,fossil_Samut_Prakan_Thailand
+264,  13.776, 100.732,2022-11-22T08,20107,fossil0021,fossil_Samut_Prakan_Thailand
+265,  13.773, 100.465,2022-12-22T06,20571,fossil0021,fossil_Samut_Prakan_Thailand
+266,  13.776, 100.732,2023-01-18T09,20991,fossil0021,fossil_Samut_Prakan_Thailand
+267,  13.773, 100.465,2023-03-01T03,21638,fossil0021,fossil_Samut_Prakan_Thailand
+268,  13.776, 100.732,2023-03-21T08,21951,fossil0021,fossil_Samut_Prakan_Thailand
+269,  13.773, 100.465,2023-04-24T06,22476,fossil0021,fossil_Samut_Prakan_Thailand
+270,  13.776, 100.732,2023-05-21T08,22896,fossil0021,fossil_Samut_Prakan_Thailand
+271,  48.857,   2.341,2020-02-19T11,04514,fossil0022,fossil_Paris_France
+272,  32.778, -96.795,2020-02-10T16,04378,fossil0023,fossil_Dallas_USA
+273,  39.142, 117.177,2019-10-06T05,02403,fossil0024,fossil_Tianjin_China
+274,  41.014,  28.950,2019-10-10T09,02468,fossil0025,fossil_Istanbul_Turkey
+275,  41.073,  29.055,2022-02-11T07,15707,fossil0025,fossil_Istanbul_Turkey
+276,  42.332, -83.048,2019-10-07T18,02427,fossil0026,fossil_Detroit_USA
+277,  39.952, -75.162,2020-02-08T16,04347,fossil0027,fossil_Philadelphia_USA
+278,  37.339,-121.885,2019-08-07T20,01483,fossil0028,fossil_San_Jose_USA
+279,  28.631,  77.217,2019-10-09T05,02450,fossil0029,fossil_New_Delhi_India
+280,  50.942,   6.955,2019-10-13T12,02516,fossil0030,fossil_Cologne_Germany
+281,  29.761, -95.370,2020-04-26T18,05556,fossil0031,fossil_Houston_USA
+282,  21.482,  39.183,2019-10-08T08,02436,fossil0032,fossil_Jeddah_Saudi_Arabia
+283,  21.415,  39.340,2021-10-24T10,14005,fossil0032,fossil_Jeddah_Saudi_Arabia
+284,  21.642,  39.322,2021-11-23T12,14471,fossil0032,fossil_Jeddah_Saudi_Arabia
+285,  21.415,  39.340,2022-02-22T10,15879,fossil0032,fossil_Jeddah_Saudi_Arabia
+286,  21.642,  39.322,2022-03-23T13,16330,fossil0032,fossil_Jeddah_Saudi_Arabia
+287,  21.415,  39.340,2022-04-17T12,16717,fossil0032,fossil_Jeddah_Saudi_Arabia
+288,  21.642,  39.322,2022-06-04T08,17458,fossil0032,fossil_Jeddah_Saudi_Arabia
+289,  21.415,  39.340,2022-06-17T12,17662,fossil0032,fossil_Jeddah_Saudi_Arabia
+290,  21.642,  39.322,2022-07-20T14,18174,fossil0032,fossil_Jeddah_Saudi_Arabia
+291,  21.415,  39.340,2022-08-21T10,18668,fossil0032,fossil_Jeddah_Saudi_Arabia
+292,  21.642,  39.322,2022-09-26T11,19226,fossil0032,fossil_Jeddah_Saudi_Arabia
+293,  21.415,  39.340,2022-10-17T12,19552,fossil0032,fossil_Jeddah_Saudi_Arabia
+294,  21.642,  39.322,2022-11-30T09,20232,fossil0032,fossil_Jeddah_Saudi_Arabia
+295,  21.415,  39.340,2022-12-25T09,20619,fossil0032,fossil_Jeddah_Saudi_Arabia
+296,  21.642,  39.322,2023-01-30T09,21177,fossil0032,fossil_Jeddah_Saudi_Arabia
+297,  21.415,  39.340,2023-02-24T08,21564,fossil0032,fossil_Jeddah_Saudi_Arabia
+298,  21.642,  39.322,2023-03-25T12,22015,fossil0032,fossil_Jeddah_Saudi_Arabia
+299,  21.415,  39.340,2023-04-15T13,22341,fossil0032,fossil_Jeddah_Saudi_Arabia
+300,  21.642,  39.322,2023-05-29T10,23021,fossil0032,fossil_Jeddah_Saudi_Arabia
+301,  38.890, -77.032,2020-05-28T20,06053,fossil0033,fossil_Washington_DC_USA
+302,  34.694, 135.502,2019-10-06T03,02402,fossil0034,fossil_Osaka_Japan
+303, -34.609, -58.373,2019-09-18T18,02133,fossil0035,fossil_Buenos_Aires_Argentina
+304, -34.758, -58.523,2021-11-09T13,14255,fossil0035,fossil_Buenos_Aires_Argentina
+305, -34.861, -58.699,2021-11-14T19,14336,fossil0035,fossil_Buenos_Aires_Argentina
+306, -34.758, -58.523,2021-12-22T20,14925,fossil0035,fossil_Buenos_Aires_Argentina
+307, -34.861, -58.699,2022-01-16T18,15311,fossil0035,fossil_Buenos_Aires_Argentina
+308, -34.758, -58.523,2022-02-22T19,15885,fossil0035,fossil_Buenos_Aires_Argentina
+309, -34.861, -58.699,2022-03-11T20,16149,fossil0035,fossil_Buenos_Aires_Argentina
+310, -34.758, -58.523,2022-05-02T16,16952,fossil0035,fossil_Buenos_Aires_Argentina
+311, -34.861, -58.699,2022-05-15T19,17155,fossil0035,fossil_Buenos_Aires_Argentina
+312, -34.758, -58.523,2022-07-06T15,17958,fossil0035,fossil_Buenos_Aires_Argentina
+313, -34.861, -58.699,2022-07-15T19,18100,fossil0035,fossil_Buenos_Aires_Argentina
+314, -34.758, -58.523,2022-08-24T19,18720,fossil0035,fossil_Buenos_Aires_Argentina
+315, -34.861, -58.699,2022-09-14T18,19045,fossil0035,fossil_Buenos_Aires_Argentina
+316, -34.758, -58.523,2022-10-28T17,19726,fossil0035,fossil_Buenos_Aires_Argentina
+317, -34.861, -58.699,2022-11-14T18,19990,fossil0035,fossil_Buenos_Aires_Argentina
+318, -34.758, -58.523,2023-01-01T16,20732,fossil0035,fossil_Buenos_Aires_Argentina
+319, -34.861, -58.699,2023-01-22T15,21057,fossil0035,fossil_Buenos_Aires_Argentina
+320, -34.758, -58.523,2023-03-07T14,21738,fossil0035,fossil_Buenos_Aires_Argentina
+321, -34.861, -58.699,2023-04-01T12,22124,fossil0035,fossil_Buenos_Aires_Argentina
+322, -34.758, -58.523,2023-05-04T15,22637,fossil0035,fossil_Buenos_Aires_Argentina
+323, -34.861, -58.699,2023-05-17T17,22840,fossil0035,fossil_Buenos_Aires_Argentina
+324,  19.432, -99.133,2020-02-08T16,04347,fossil0036,fossil_Mexico_City_Mexico
+325,   3.092, 101.494,2019-12-24T08,03629,fossil0037,fossil_Shah_Alam_Malaysia
+326,   3.008, 101.614,2021-10-24T07,14003,fossil0037,fossil_Shah_Alam_Malaysia
+327,   3.176, 101.554,2021-11-20T08,14422,fossil0037,fossil_Shah_Alam_Malaysia
+328,   3.008, 101.614,2022-02-26T05,15938,fossil0037,fossil_Shah_Alam_Malaysia
+329,   3.176, 101.554,2022-03-24T07,16342,fossil0037,fossil_Shah_Alam_Malaysia
+330,   3.008, 101.614,2022-04-17T09,16715,fossil0037,fossil_Shah_Alam_Malaysia
+331,   3.176, 101.554,2022-06-05T03,17470,fossil0037,fossil_Shah_Alam_Malaysia
+332,   3.008, 101.614,2022-08-17T09,18605,fossil0037,fossil_Shah_Alam_Malaysia
+333,   3.176, 101.554,2022-09-27T05,19238,fossil0037,fossil_Shah_Alam_Malaysia
+334,   3.008, 101.614,2023-04-19T08,22400,fossil0037,fossil_Shah_Alam_Malaysia
+335,   3.176, 101.554,2023-05-26T06,22972,fossil0037,fossil_Shah_Alam_Malaysia
+336,  25.037, 121.564,2020-08-17T07,07299,fossil0038,fossil_Taipei_Taiwan
+337,  24.892, 121.603,2021-12-17T07,14839,fossil0038,fossil_Taipei_Taiwan
+338,  24.887, 121.422,2022-01-22T07,15397,fossil0038,fossil_Taipei_Taiwan
+339,  24.892, 121.603,2022-02-13T08,15738,fossil0038,fossil_Taipei_Taiwan
+340,  24.887, 121.422,2022-05-21T08,17241,fossil0038,fossil_Taipei_Taiwan
+341,  24.892, 121.603,2022-06-12T08,17582,fossil0038,fossil_Taipei_Taiwan
+342,  24.887, 121.422,2022-07-21T08,18186,fossil0038,fossil_Taipei_Taiwan
+343,  24.892, 121.603,2022-08-12T08,18527,fossil0038,fossil_Taipei_Taiwan
+344,  24.887, 121.422,2022-09-20T08,19131,fossil0038,fossil_Taipei_Taiwan
+345,  24.892, 121.603,2022-10-19T06,19579,fossil0038,fossil_Taipei_Taiwan
+346,  24.887, 121.422,2022-11-24T06,20137,fossil0038,fossil_Taipei_Taiwan
+347,  24.892, 121.603,2022-12-27T02,20646,fossil0038,fossil_Taipei_Taiwan
+348,  24.887, 121.422,2023-01-20T08,21021,fossil0038,fossil_Taipei_Taiwan
+349,  24.892, 121.603,2023-03-05T23,21713,fossil0038,fossil_Taipei_Taiwan
+350,  24.887, 121.422,2023-04-14T22,22332,fossil0038,fossil_Taipei_Taiwan
+351,  24.892, 121.603,2023-05-03T00,22612,fossil0038,fossil_Taipei_Taiwan
+352,  24.887, 121.422,2023-05-19T09,22865,fossil0038,fossil_Taipei_Taiwan
+353,  33.448,-112.076,2019-10-08T19,02443,fossil0039,fossil_Phoenix_USA
+354,  30.644, 114.325,2019-10-11T02,02479,fossil0040,fossil_Wuhan_China
+355,  30.294, 120.161,2019-10-08T03,02433,fossil0041,fossil_Hangzhou_China
+356,  43.649, -79.385,2019-10-11T16,02488,fossil0042,fossil_Toronto_Canada
+357,  32.062, 118.778,2020-06-28T03,06522,fossil0043,fossil_Nanjing_China
+358,  41.792, 123.433,2019-10-10T03,02464,fossil0044,fossil_Shenyang_China
+359, -37.818, 144.967,2019-09-14T00,02059,fossil0045,fossil_Melbourne_Australia
+360,  23.368, 116.715,2020-02-12T00,04399,fossil0046,fossil_Shantou_China
+361,  23.518, 116.565,2021-11-24T07,14483,fossil0046,fossil_Shantou_China
+362,  40.420,  -3.706,2020-05-28T16,06050,fossil0047,fossil_Madrid_Spain
+363,  22.571,  88.371,2019-10-12T03,02495,fossil0048,fossil_Kolkata_India
+364,  35.310, 129.040,2019-10-16T00,02555,fossil0049,fossil_Pusan_South_Korea
+365, -33.870, 151.207,2020-02-24T06,04588,fossil0050,fossil_Sydney_Australia
+366, -33.676, 150.966,2021-10-23T06,13987,fossil0050,fossil_Sydney_Australia
+367, -33.918, 150.968,2021-11-13T06,14312,fossil0050,fossil_Sydney_Australia
+368, -33.676, 150.966,2021-12-30T03,15038,fossil0050,fossil_Sydney_Australia
+369,  34.271, 108.925,2020-02-09T03,04354,fossil0051,fossil_Xian_China
+370,  30.672, 104.076,2020-02-17T08,04481,fossil0052,fossil_Chengdu_China
+371,  25.764, 118.546,2019-12-22T06,03597,fossil0053,fossil_Huhot_China
+372,  42.359, -71.057,2019-10-16T14,02564,fossil0054,fossil_Boston_USA
+373,  42.425, -71.187,2021-10-22T16,13978,fossil0054,fossil_Boston_USA
+374,  42.259, -71.251,2022-04-16T13,16702,fossil0054,fossil_Boston_USA
+375,  42.425, -71.187,2022-04-19T17,16751,fossil0054,fossil_Boston_USA
+376,  42.259, -71.251,2022-04-20T11,16763,fossil0054,fossil_Boston_USA
+377,  42.425, -71.187,2022-04-30T13,16919,fossil0054,fossil_Boston_USA
+378,  42.259, -71.251,2022-07-28T20,18302,fossil0054,fossil_Boston_USA
+379,  42.425, -71.187,2022-08-07T21,18458,fossil0054,fossil_Boston_USA
+380,  42.259, -71.251,2022-10-12T14,19476,fossil0054,fossil_Boston_USA
+381,  42.425, -71.187,2022-10-15T18,19525,fossil0054,fossil_Boston_USA
+382,  42.259, -71.251,2022-10-16T12,19537,fossil0054,fossil_Boston_USA
+383,  42.425, -71.187,2022-12-23T15,20592,fossil0054,fossil_Boston_USA
+384,  40.652, 109.822,2019-10-08T05,02434,fossil0055,fossil_Baotou_China
+385,  37.881, 112.549,2020-06-05T05,06167,fossil0056,fossil_Taiyuan_China
+386,  39.740,-104.992,2019-10-08T19,02443,fossil0057,fossil_Denver_USA
+387,  37.976,  23.736,2020-06-06T10,06186,fossil0058,fossil_Athens_Greece
+388,  38.078,  23.889,2021-11-29T12,14564,fossil0058,fossil_Athens_Greece
+389,  38.135,  23.723,2021-12-15T13,14812,fossil0058,fossil_Athens_Greece
+390,  38.078,  23.889,2023-05-20T16,22885,fossil0058,fossil_Athens_Greece
+391,  33.748, -84.391,2020-05-24T22,05992,fossil0059,fossil_Atlanta_USA
+392,  47.604,-122.329,2019-10-10T20,02475,fossil0060,fossil_Seattle_USA
+393,  38.467, 106.265,2020-06-04T06,06152,fossil0061,fossil_Yinchuan_China
+394, -23.563, -46.655,2019-09-22T17,02194,fossil0062,fossil_Sao_Paulo_Brazil
+395,  44.979, -93.265,2020-04-19T19,05448,fossil0064,fossil_Minneapolis_USA
+396,  34.758, 113.649,2019-10-10T03,02464,fossil0065,fossil_Zhengzhou_China
+397,  29.563, 106.553,2019-10-10T03,02464,fossil0066,fossil_Chongqing_China
+398,  25.295,  51.519,2019-10-13T05,02512,fossil0067,fossil_Doha_Qatar
+399,  25.367,  51.301,2021-12-21T10,14903,fossil0067,fossil_Doha_Qatar
+400,  25.076,  51.313,2022-01-22T12,15400,fossil0067,fossil_Doha_Qatar
+401,  25.367,  51.301,2022-04-27T08,16869,fossil0067,fossil_Doha_Qatar
+402,  25.076,  51.313,2022-05-21T13,17244,fossil0067,fossil_Doha_Qatar
+403,  25.367,  51.301,2022-06-16T11,17646,fossil0067,fossil_Doha_Qatar
+404,  25.076,  51.313,2022-07-25T11,18250,fossil0067,fossil_Doha_Qatar
+405,  25.367,  51.301,2022-08-16T11,18591,fossil0067,fossil_Doha_Qatar
+406,  25.076,  51.313,2022-09-20T13,19134,fossil0067,fossil_Doha_Qatar
+407,  25.367,  51.301,2023-04-14T12,22325,fossil0067,fossil_Doha_Qatar
+408,  25.076,  51.313,2023-05-19T13,22868,fossil0067,fossil_Doha_Qatar
+409,  18.940,  72.835,2019-10-10T04,02465,fossil0068,fossil_Mumbai_India
+410,  19.219,  73.066,2021-11-21T11,14439,fossil0068,fossil_Mumbai_India
+411,  18.909,  73.062,2021-12-28T06,15009,fossil0068,fossil_Mumbai_India
+412,  19.219,  73.066,2022-02-11T02,15704,fossil0068,fossil_Mumbai_India
+413,  18.909,  73.062,2022-04-26T07,16853,fossil0068,fossil_Mumbai_India
+414,  19.219,  73.066,2022-06-06T05,17487,fossil0068,fossil_Mumbai_India
+415,  18.909,  73.062,2022-08-30T05,18804,fossil0068,fossil_Mumbai_India
+416,  19.219,  73.066,2022-09-28T08,19255,fossil0068,fossil_Mumbai_India
+417,  18.909,  73.062,2022-10-18T09,19566,fossil0068,fossil_Mumbai_India
+418,  19.219,  73.066,2022-12-02T06,20261,fossil0068,fossil_Mumbai_India
+419,  18.909,  73.062,2023-01-03T03,20755,fossil0068,fossil_Mumbai_India
+420,  19.219,  73.066,2023-02-01T06,21206,fossil0068,fossil_Mumbai_India
+421,  26.440,  50.060,2019-10-09T07,02451,fossil0069,fossil_Ad_Damman_Saudi_Arabia
+422,  26.183,  49.810,2021-12-02T08,14608,fossil0069,fossil_Ad_Damman_Saudi_Arabia
+423,  26.425,  49.818,2022-04-23T09,16808,fossil0069,fossil_Ad_Damman_Saudi_Arabia
+424,  26.183,  49.810,2022-06-09T06,17534,fossil0069,fossil_Ad_Damman_Saudi_Arabia
+425,  26.425,  49.818,2022-10-23T09,19643,fossil0069,fossil_Ad_Damman_Saudi_Arabia
+426,  26.183,  49.810,2022-12-01T08,20247,fossil0069,fossil_Ad_Damman_Saudi_Arabia
+427,  27.999, 120.667,2019-12-23T05,03612,fossil0070,fossil_Wenzhou_China
+428,  28.180, 120.483,2021-11-04T00,14169,fossil0070,fossil_Wenzhou_China
+429,  28.059, 120.607,2022-01-29T05,15504,fossil0070,fossil_Wenzhou_China
+430,  28.180, 120.483,2022-04-12T08,16637,fossil0070,fossil_Wenzhou_China
+431,  28.059, 120.607,2022-06-01T04,17409,fossil0070,fossil_Wenzhou_China
+432,  28.180, 120.483,2022-06-16T07,17643,fossil0070,fossil_Wenzhou_China
+433,  28.059, 120.607,2022-08-01T04,18354,fossil0070,fossil_Wenzhou_China
+434,  28.180, 120.483,2022-08-16T07,18588,fossil0070,fossil_Wenzhou_China
+435,  28.059, 120.607,2022-09-23T07,19177,fossil0070,fossil_Wenzhou_China
+436,  28.180, 120.483,2023-04-14T07,22322,fossil0070,fossil_Wenzhou_China
+437,  28.059, 120.607,2023-05-26T06,22972,fossil0070,fossil_Wenzhou_China
+438,  24.912, 118.581,2019-10-09T02,02448,fossil0071,fossil_Quanzhou_China
+439,  25.018, 118.481,2022-02-20T05,15845,fossil0071,fossil_Quanzhou_China
+440, -27.468, 153.023,2019-09-13T22,02058,fossil0072,fossil_Brisbane_Australia
+441, -27.646, 152.845,2021-11-25T01,14495,fossil0072,fossil_Brisbane_Australia
+442, -27.458, 152.923,2021-12-31T02,15053,fossil0072,fossil_Brisbane_Australia
+443, -27.646, 152.845,2022-01-22T02,15394,fossil0072,fossil_Brisbane_Australia
+444, -27.458, 152.923,2022-02-19T06,15830,fossil0072,fossil_Brisbane_Australia
+445, -27.646, 152.845,2022-03-17T05,16232,fossil0072,fossil_Brisbane_Australia
+446, -27.458, 152.923,2022-05-03T02,16958,fossil0072,fossil_Brisbane_Australia
+447, -27.646, 152.845,2022-07-29T00,18305,fossil0072,fossil_Brisbane_Australia
+448, -27.458, 152.923,2022-09-02T01,18848,fossil0072,fossil_Brisbane_Australia
+449, -27.646, 152.845,2022-09-16T05,19067,fossil0072,fossil_Brisbane_Australia
+450, -27.458, 152.923,2022-11-02T01,19793,fossil0072,fossil_Brisbane_Australia
+451, -27.646, 152.845,2022-11-20T03,20073,fossil0072,fossil_Brisbane_Australia
+452, -27.458, 152.923,2023-05-05T00,22643,fossil0072,fossil_Brisbane_Australia
+453, -27.646, 152.845,2023-05-19T04,22862,fossil0072,fossil_Brisbane_Australia
+454,  38.912, 121.602,2020-06-14T01,06304,fossil0073,fossil_Dalian_China
+455,  32.086,  34.790,2020-04-12T07,05332,fossil0074,fossil_Tel_Aviv-Yafo_Israel
+456,  32.096,  35.020,2022-01-26T12,15462,fossil0074,fossil_Tel_Aviv-Yafo_Israel
+457,  31.868,  35.042,2022-02-23T09,15894,fossil0074,fossil_Tel_Aviv-Yafo_Israel
+458,  32.096,  35.020,2022-03-25T13,16361,fossil0074,fossil_Tel_Aviv-Yafo_Israel
+459,  31.868,  35.042,2022-04-14T13,16671,fossil0074,fossil_Tel_Aviv-Yafo_Israel
+460,  32.096,  35.020,2022-04-17T04,16712,fossil0074,fossil_Tel_Aviv-Yafo_Israel
+461,  31.868,  35.042,2022-06-18T11,17677,fossil0074,fossil_Tel_Aviv-Yafo_Israel
+462,  32.096,  35.020,2022-08-02T10,18373,fossil0074,fossil_Tel_Aviv-Yafo_Israel
+463,  31.868,  35.042,2022-08-18T11,18622,fossil0074,fossil_Tel_Aviv-Yafo_Israel
+464,  32.096,  35.020,2022-11-24T12,20141,fossil0074,fossil_Tel_Aviv-Yafo_Israel
+465,  31.868,  35.042,2023-04-16T12,22356,fossil0074,fossil_Tel_Aviv-Yafo_Israel
+466,  45.468,   9.182,2019-10-13T10,02515,fossil0075,fossil_Milan_Italy
+467,  24.469,  54.372,2019-12-02T09,03289,fossil0076,fossil_Abu_Dhabi_UAE
+468,  24.212,  54.610,2021-10-31T06,14111,fossil0076,fossil_Abu_Dhabi_UAE
+469,  24.329,  54.512,2023-02-01T07,21207,fossil0076,fossil_Abu_Dhabi_UAE
+470,  39.921,  32.854,2019-10-15T07,02544,fossil0077,fossil_Ankara_Turkey
+471,  36.099, 120.372,2019-10-07T04,02418,fossil0078,fossil_Qingdao_China
+472,  36.209, 120.262,2021-11-30T05,14575,fossil0078,fossil_Qingdao_China
+473,  36.300, 120.095,2022-04-21T04,16774,fossil0078,fossil_Qingdao_China
+474,  36.209, 120.262,2022-06-11T01,17562,fossil0078,fossil_Qingdao_China
+475,  36.300, 120.095,2022-07-06T22,17963,fossil0078,fossil_Qingdao_China
+476,  36.209, 120.262,2022-07-23T08,18217,fossil0078,fossil_Qingdao_China
+477,  36.300, 120.095,2022-08-29T01,18786,fossil0078,fossil_Qingdao_China
+478,  36.209, 120.262,2022-09-29T05,19269,fossil0078,fossil_Qingdao_China
+479,  36.300, 120.095,2022-10-17T06,19548,fossil0078,fossil_Qingdao_China
+480,  36.209, 120.262,2022-12-03T04,20275,fossil0078,fossil_Qingdao_China
+481,  36.300, 120.095,2022-12-25T02,20615,fossil0078,fossil_Qingdao_China
+482,  36.209, 120.262,2023-02-02T04,21220,fossil0078,fossil_Qingdao_China
+483,  36.300, 120.095,2023-02-24T02,21560,fossil0078,fossil_Qingdao_China
+484,  36.209, 120.262,2023-04-05T03,22180,fossil0078,fossil_Qingdao_China
+485,  36.300, 120.095,2023-04-27T02,22520,fossil0078,fossil_Qingdao_China
+486,  35.181, 136.907,2020-02-09T01,04353,fossil0079,fossil_Nagoya_Japan
+487,  45.512, -73.555,2019-10-07T18,02427,fossil0080,fossil_Montreal_Canada
+488,  38.628, -90.200,2020-05-30T20,06084,fossil0081,fossil_St_Louis_USA
+489,  32.716,-117.162,2020-04-06T19,05247,fossil0082,fossil_San_Diego_USA
+490,  32.899,-116.942,2021-12-05T19,14661,fossil0082,fossil_San_Diego_USA
+491,  36.668, 116.997,2019-12-06T04,03348,fossil0083,fossil_Jinan_China
+492, -33.437, -70.650,2019-12-01T14,03277,fossil0084,fossil_Santiago_Chile
+493,  51.923,   4.478,2021-02-06T13,09982,fossil0085,fossil_Rotterdam_Netherlands
+494, -33.919,  18.422,2019-09-14T07,02064,fossil0086,fossil_Cape_Town_South_Africa
+495, -33.977,  18.662,2021-10-25T14,14023,fossil0086,fossil_Cape_Town_South_Africa
+496, -33.729,  18.659,2021-11-19T12,14409,fossil0086,fossil_Cape_Town_South_Africa
+497, -33.977,  18.662,2021-12-31T12,15059,fossil0086,fossil_Cape_Town_South_Africa
+498, -33.729,  18.659,2022-01-17T12,15323,fossil0086,fossil_Cape_Town_South_Africa
+499, -33.977,  18.662,2022-02-19T16,15836,fossil0086,fossil_Cape_Town_South_Africa
+500, -33.729,  18.659,2022-03-27T09,16390,fossil0086,fossil_Cape_Town_South_Africa
+501, -33.977,  18.662,2022-05-03T11,16964,fossil0086,fossil_Cape_Town_South_Africa
+502, -33.729,  18.659,2022-05-16T13,17167,fossil0086,fossil_Cape_Town_South_Africa
+503, -33.977,  18.662,2022-06-26T13,17802,fossil0086,fossil_Cape_Town_South_Africa
+504, -33.729,  18.659,2022-07-24T10,18234,fossil0086,fossil_Cape_Town_South_Africa
+505, -33.977,  18.662,2022-09-02T11,18854,fossil0086,fossil_Cape_Town_South_Africa
+506, -33.729,  18.659,2022-09-11T15,18996,fossil0086,fossil_Cape_Town_South_Africa
+507, -33.977,  18.662,2022-11-02T10,19799,fossil0086,fossil_Cape_Town_South_Africa
+508, -33.729,  18.659,2022-11-19T11,20063,fossil0086,fossil_Cape_Town_South_Africa
+509, -33.977,  18.662,2023-01-10T07,20866,fossil0086,fossil_Cape_Town_South_Africa
+510, -33.729,  18.659,2023-01-15T13,20947,fossil0086,fossil_Cape_Town_South_Africa
+511, -33.977,  18.662,2023-04-24T14,22481,fossil0086,fossil_Cape_Town_South_Africa
+512, -33.729,  18.659,2023-05-14T14,22791,fossil0086,fossil_Cape_Town_South_Africa
+513,  17.395,  78.471,2019-10-11T04,02480,fossil0087,fossil_Hyderabad_India
+514,  10.778, 106.703,2019-12-22T08,03598,fossil0088,fossil_Ho_Chi_Minh_City_Vietnam
+515,  41.388,   2.170,2020-06-09T11,06233,fossil0089,fossil_Barcelona_Spain
+516,  41.518,   2.040,2021-12-07T11,14687,fossil0089,fossil_Barcelona_Spain
+517,  41.599,   1.782,2022-02-12T14,15727,fossil0089,fossil_Barcelona_Spain
+518,  41.518,   2.040,2022-03-25T16,16363,fossil0089,fossil_Barcelona_Spain
+519,  41.599,   1.782,2022-04-11T15,16626,fossil0089,fossil_Barcelona_Spain
+520,  41.518,   2.040,2022-06-02T13,17430,fossil0089,fossil_Barcelona_Spain
+521,  41.599,   1.782,2022-06-11T15,17571,fossil0089,fossil_Barcelona_Spain
+522,  41.518,   2.040,2022-08-02T13,18375,fossil0089,fossil_Barcelona_Spain
+523,  41.599,   1.782,2022-08-11T15,18516,fossil0089,fossil_Barcelona_Spain
+524,  41.518,   2.040,2022-09-24T16,19198,fossil0089,fossil_Barcelona_Spain
+525,  41.599,   1.782,2023-02-10T15,21351,fossil0089,fossil_Barcelona_Spain
+526,  41.518,   2.040,2023-03-27T15,22048,fossil0089,fossil_Barcelona_Spain
+527,  41.599,   1.782,2023-04-09T16,22250,fossil0089,fossil_Barcelona_Spain
+528,  41.518,   2.040,2023-05-27T15,22993,fossil0089,fossil_Barcelona_Spain
+529,  39.291, -76.609,2020-02-12T15,04408,fossil0090,fossil_Baltimore_USA
+530,  39.417, -76.813,2021-10-28T14,14070,fossil0090,fossil_Baltimore_USA
+531,  43.884, 125.304,2019-08-07T04,01473,fossil0091,fossil_Changchun_China
+532,  43.251,  76.888,2019-08-06T08,01460,fossil0092,fossil_Almaty_Kazakhstan
+533,  31.864, 117.281,2020-04-14T00,05359,fossil0094,fossil_Hefei_China
+534,  38.041, 114.479,2020-06-29T02,06537,fossil0095,fossil_Shijiazhuang_China
+535,  45.756, 126.640,2019-10-09T04,02449,fossil0096,fossil_Harbin_China
+536,  41.505, -81.691,2019-10-15T15,02549,fossil0097,fossil_Cleveland_USA
+537, -32.047, 115.754,2019-09-19T07,02141,fossil0098,fossil_Fremantle_Australia
+538, -32.172, 115.979,2021-10-30T05,14095,fossil0098,fossil_Fremantle_Australia
+539, -31.913, 115.979,2021-11-19T06,14405,fossil0098,fossil_Fremantle_Australia
+540, -32.172, 115.979,2021-12-20T09,14887,fossil0098,fossil_Fremantle_Australia
+541, -31.913, 115.979,2022-01-17T06,15319,fossil0098,fossil_Fremantle_Australia
+542, -32.172, 115.979,2022-02-20T09,15847,fossil0098,fossil_Fremantle_Australia
+543, -31.913, 115.979,2022-03-12T09,16157,fossil0098,fossil_Fremantle_Australia
+544, -32.172, 115.979,2022-04-26T07,16853,fossil0098,fossil_Fremantle_Australia
+545, -31.913, 115.979,2022-05-16T07,17163,fossil0098,fossil_Fremantle_Australia
+546, -32.172, 115.979,2022-07-12T01,18042,fossil0098,fossil_Fremantle_Australia
+547, -31.913, 115.979,2022-07-20T06,18169,fossil0098,fossil_Fremantle_Australia
+548, -32.172, 115.979,2022-08-30T05,18804,fossil0098,fossil_Fremantle_Australia
+549, -31.913, 115.979,2022-09-15T07,19053,fossil0098,fossil_Fremantle_Australia
+550, -32.172, 115.979,2022-10-26T07,19688,fossil0098,fossil_Fremantle_Australia
+551, -31.913, 115.979,2022-11-11T08,19937,fossil0098,fossil_Fremantle_Australia
+552, -32.172, 115.979,2023-01-03T03,20755,fossil0098,fossil_Fremantle_Australia
+553, -31.913, 115.979,2023-01-19T05,21004,fossil0098,fossil_Fremantle_Australia
+554, -32.172, 115.979,2023-05-06T03,22660,fossil0098,fossil_Fremantle_Australia
+555, -31.913, 115.979,2023-05-14T08,22787,fossil0098,fossil_Fremantle_Australia
+556, -29.847,  31.026,2019-09-20T12,02160,fossil0099,fossil_Durban_South_Africa
+557, -29.597,  30.758,2021-10-28T11,14068,fossil0099,fossil_Durban_South_Africa
+558, -29.717,  30.906,2022-01-14T13,15277,fossil0099,fossil_Durban_South_Africa
+559, -29.597,  30.758,2022-02-26T12,15942,fossil0099,fossil_Durban_South_Africa
+560, -29.717,  30.906,2022-03-13T14,16176,fossil0099,fossil_Durban_South_Africa
+561, -29.597,  30.758,2022-05-02T10,16948,fossil0099,fossil_Durban_South_Africa
+562, -29.717,  30.906,2022-05-17T13,17182,fossil0099,fossil_Durban_South_Africa
+563, -29.597,  30.758,2022-09-01T10,18838,fossil0099,fossil_Durban_South_Africa
+564, -29.717,  30.906,2022-09-12T14,19011,fossil0099,fossil_Durban_South_Africa
+565, -29.597,  30.758,2022-09-13T05,19021,fossil0099,fossil_Durban_South_Africa
+566, -29.717,  30.906,2022-09-16T12,19072,fossil0099,fossil_Durban_South_Africa
+567, -29.597,  30.758,2022-11-01T10,19783,fossil0099,fossil_Durban_South_Africa
+568, -29.717,  30.906,2022-11-12T14,19956,fossil0099,fossil_Durban_South_Africa
+569, -29.597,  30.758,2023-01-05T08,20789,fossil0099,fossil_Durban_South_Africa
+570, -29.717,  30.906,2023-01-16T12,20962,fossil0099,fossil_Durban_South_Africa
+571, -29.597,  30.758,2023-05-08T07,22694,fossil0099,fossil_Durban_South_Africa
+572, -29.717,  30.906,2023-05-15T13,22806,fossil0099,fossil_Durban_South_Africa
+573,  36.172,-115.140,2020-02-17T22,04490,fossil0100,fossil_Las_Vegas_USA
+574, -12.043, -77.028,2019-09-13T13,02052,fossil0101,fossil_Lima_Peru
+575, -11.953, -76.928,2021-10-24T19,14011,fossil0101,fossil_Lima_Peru
+576, -11.819, -76.860,2022-01-13T22,15267,fossil0101,fossil_Lima_Peru
+577, -11.953, -76.928,2022-02-22T19,15885,fossil0101,fossil_Lima_Peru
+578, -11.819, -76.860,2022-03-16T21,16227,fossil0101,fossil_Lima_Peru
+579, -11.953, -76.928,2022-04-21T20,16784,fossil0101,fossil_Lima_Peru
+580, -11.819, -76.860,2022-06-01T15,17416,fossil0101,fossil_Lima_Peru
+581, -11.953, -76.928,2022-06-29T17,17851,fossil0101,fossil_Lima_Peru
+582, -11.819, -76.860,2022-07-28T16,18300,fossil0101,fossil_Lima_Peru
+583, -11.953, -76.928,2022-08-21T20,18674,fossil0101,fossil_Lima_Peru
+584, -11.819, -76.860,2022-09-15T21,19062,fossil0101,fossil_Lima_Peru
+585, -11.953, -76.928,2022-10-17T21,19558,fossil0101,fossil_Lima_Peru
+586, -11.819, -76.860,2022-11-19T19,20068,fossil0101,fossil_Lima_Peru
+587, -11.953, -76.928,2022-12-21T20,20564,fossil0101,fossil_Lima_Peru
+588, -11.819, -76.860,2023-01-19T19,21013,fossil0101,fossil_Lima_Peru
+589, -11.953, -76.928,2023-02-24T18,21570,fossil0101,fossil_Lima_Peru
+590, -11.819, -76.860,2023-03-14T22,21851,fossil0101,fossil_Lima_Peru
+591, -11.953, -76.928,2023-04-19T21,22408,fossil0101,fossil_Lima_Peru
+592, -11.819, -76.860,2023-05-18T20,22857,fossil0101,fossil_Lima_Peru
+593,  36.316,  59.568,2019-10-16T04,02558,fossil0102,fossil_Mashhad_Iran
+594,  39.103, -94.583,2020-02-17T20,04489,fossil0103,fossil_Kansas_City_USA
+595,  26.572, 106.695,2020-02-10T02,04369,fossil0104,fossil_Guiyang_China
+596,  13.084,  80.283,2019-10-08T04,02434,fossil0105,fossil_Chennai_India
+597,  13.249,  80.125,2021-11-03T03,14156,fossil0105,fossil_Chennai_India
+598,  13.032,  80.148,2021-11-23T09,14469,fossil0105,fossil_Chennai_India
+599,  13.249,  80.125,2022-01-01T04,15070,fossil0105,fossil_Chennai_India
+600,  13.032,  80.148,2022-03-31T07,16450,fossil0105,fossil_Chennai_India
+601,  13.249,  80.125,2022-05-04T04,16975,fossil0105,fossil_Chennai_India
+602,  13.032,  80.148,2022-06-08T03,17517,fossil0105,fossil_Chennai_India
+603,  13.249,  80.125,2022-06-15T11,17630,fossil0105,fossil_Chennai_India
+604,  13.032,  80.148,2022-07-20T10,18172,fossil0105,fossil_Chennai_India
+605,  13.249,  80.125,2022-09-07T02,18926,fossil0105,fossil_Chennai_India
+606,  13.032,  80.148,2022-09-30T06,19285,fossil0105,fossil_Chennai_India
+607,  13.249,  80.125,2022-11-07T02,19871,fossil0105,fossil_Chennai_India
+608,  13.032,  80.148,2022-12-04T04,20291,fossil0105,fossil_Chennai_India
+609,  13.249,  80.125,2023-04-17T10,22370,fossil0105,fossil_Chennai_India
+610,  10.488, -66.879,2019-11-29T17,03248,fossil0106,fossil_Caracas_Venezuela
+611,  10.335, -66.767,2021-12-19T19,14878,fossil0106,fossil_Caracas_Venezuela
+612,  10.324, -67.000,2022-01-20T20,15374,fossil0106,fossil_Caracas_Venezuela
+613,  10.335, -66.767,2022-02-15T20,15777,fossil0106,fossil_Caracas_Venezuela
+614,  10.324, -67.000,2022-03-19T21,16273,fossil0106,fossil_Caracas_Venezuela
+615,  10.335, -66.767,2022-04-25T17,16844,fossil0106,fossil_Caracas_Venezuela
+616,  10.324, -67.000,2022-05-19T21,17218,fossil0106,fossil_Caracas_Venezuela
+617,  10.335, -66.767,2022-06-14T21,17621,fossil0106,fossil_Caracas_Venezuela
+618,  10.324, -67.000,2022-07-27T17,18285,fossil0106,fossil_Caracas_Venezuela
+619,  10.335, -66.767,2022-08-29T15,18795,fossil0106,fossil_Caracas_Venezuela
+620,  10.324, -67.000,2022-09-18T20,19108,fossil0106,fossil_Caracas_Venezuela
+621,  10.335, -66.767,2022-10-21T18,19618,fossil0106,fossil_Caracas_Venezuela
+622,  10.324, -67.000,2022-11-18T20,20053,fossil0106,fossil_Caracas_Venezuela
+623,  10.335, -66.767,2023-01-02T13,20746,fossil0106,fossil_Caracas_Venezuela
+624,  10.324, -67.000,2023-01-18T20,20998,fossil0106,fossil_Caracas_Venezuela
+625,  10.335, -66.767,2023-03-08T11,21752,fossil0106,fossil_Caracas_Venezuela
+626,  10.324, -67.000,2023-03-17T21,21897,fossil0106,fossil_Caracas_Venezuela
+627,  10.335, -66.767,2023-04-27T16,22529,fossil0106,fossil_Caracas_Venezuela
+628,  10.324, -67.000,2023-05-17T21,22842,fossil0106,fossil_Caracas_Venezuela
+629,  12.967,  77.587,2020-02-22T09,04559,fossil0107,fossil_Bangalore_India
+630,  28.538, -81.377,2019-10-10T15,02472,fossil0108,fossil_Orlando_USA
+631,  33.342,  44.393,2019-08-08T08,01491,fossil0109,fossil_Baghdad_Iraq
+632,  38.579,-121.491,2019-10-13T18,02520,fossil0110,fossil_Sacramento_USA
+633,   4.615, -74.069,2019-08-08T14,01495,fossil0111,fossil_Bogota_Colombia
+634,  35.870, 128.591,2019-12-26T03,03657,fossil0112,fossil_Taegu_South_Korea
+635,  43.788,  87.586,2019-10-11T05,02481,fossil0113,fossil_Urumqi_China
+636,  48.203,  16.368,2019-10-12T11,02500,fossil0114,fossil_Vienna_Austria
+637,  14.589, 120.985,2019-10-07T02,02417,fossil0115,fossil_Manila_Philippines
+638,  39.962, -83.003,2020-03-29T21,05124,fossil0116,fossil_Columbus_USA
+639,  32.657,  51.678,2019-12-24T09,03630,fossil0117,fossil_Esfahan_Iran
+640,  45.512,-122.676,2019-10-07T21,02429,fossil0118,fossil_Portland_USA
+641,  39.767, -86.150,2020-07-05T13,06637,fossil0119,fossil_Indianapolis_USA
+642,  36.791, 118.063,2020-02-10T02,04369,fossil0120,fossil_Zibo_China
+643,  29.425, -98.495,2020-07-01T16,06577,fossil0121,fossil_San_Antonio_USA
+644,  36.081, 127.190,2020-08-20T05,07344,fossil0122,fossil_Taejon_South_Korea
+645,  42.272, 118.955,2020-02-08T04,04339,fossil0123,fossil_Chifeng_China
+646,  18.504,  73.853,2019-10-14T03,02526,fossil0125,fossil_Pune_India
+647,  24.207,  55.686,2020-04-19T11,05443,fossil0126,fossil_Al_Ain_UAE
+648,  21.421,  39.822,2019-10-12T06,02497,fossil0127,fossil_Mecca_Saudi_Arabia
+649,  49.260,-123.113,2019-10-09T21,02460,fossil0128,fossil_Vancouver_Canada
+650,  49.361,-122.671,2021-12-06T21,14678,fossil0128,fossil_Vancouver_Canada
+651,  49.174,-122.744,2021-12-15T20,14817,fossil0128,fossil_Vancouver_Canada
+652,  49.361,-122.671,2022-02-02T22,15577,fossil0128,fossil_Vancouver_Canada
+653,  49.174,-122.744,2022-02-11T21,15716,fossil0128,fossil_Vancouver_Canada
+654,  49.361,-122.671,2022-02-13T18,15745,fossil0128,fossil_Vancouver_Canada
+655,  49.174,-122.744,2022-02-15T20,15777,fossil0128,fossil_Vancouver_Canada
+656,  49.361,-122.671,2022-04-01T00,16461,fossil0128,fossil_Vancouver_Canada
+657,  49.174,-122.744,2022-04-07T00,16554,fossil0128,fossil_Vancouver_Canada
+658,  49.361,-122.671,2022-04-08T21,16583,fossil0128,fossil_Vancouver_Canada
+659,  49.174,-122.744,2022-04-10T22,16615,fossil0128,fossil_Vancouver_Canada
+660,  49.361,-122.671,2022-04-11T20,16629,fossil0128,fossil_Vancouver_Canada
+661,  49.174,-122.744,2022-04-14T21,16676,fossil0128,fossil_Vancouver_Canada
+662,  49.361,-122.671,2022-04-16T17,16705,fossil0128,fossil_Vancouver_Canada
+663,  49.174,-122.744,2022-04-18T19,16737,fossil0128,fossil_Vancouver_Canada
+664,  49.361,-122.671,2022-04-19T17,16751,fossil0128,fossil_Vancouver_Canada
+665,  49.174,-122.744,2022-04-21T18,16783,fossil0128,fossil_Vancouver_Canada
+666,  49.361,-122.671,2022-04-23T15,16812,fossil0128,fossil_Vancouver_Canada
+667,  49.174,-122.744,2022-04-25T17,16844,fossil0128,fossil_Vancouver_Canada
+668,  49.361,-122.671,2022-06-01T00,17406,fossil0128,fossil_Vancouver_Canada
+669,  49.174,-122.744,2022-06-03T01,17438,fossil0128,fossil_Vancouver_Canada
+670,  49.361,-122.671,2022-06-04T22,17467,fossil0128,fossil_Vancouver_Canada
+671,  49.174,-122.744,2022-06-07T00,17499,fossil0128,fossil_Vancouver_Canada
+672,  49.361,-122.671,2022-06-08T21,17528,fossil0128,fossil_Vancouver_Canada
+673,  49.174,-122.744,2022-06-10T22,17560,fossil0128,fossil_Vancouver_Canada
+674,  49.361,-122.671,2022-06-12T19,17589,fossil0128,fossil_Vancouver_Canada
+675,  49.174,-122.744,2022-06-14T21,17621,fossil0128,fossil_Vancouver_Canada
+676,  49.361,-122.671,2022-06-16T17,17650,fossil0128,fossil_Vancouver_Canada
+677,  49.174,-122.744,2022-06-18T19,17682,fossil0128,fossil_Vancouver_Canada
+678,  49.361,-122.671,2022-06-23T15,17757,fossil0128,fossil_Vancouver_Canada
+679,  49.174,-122.744,2022-06-26T16,17804,fossil0128,fossil_Vancouver_Canada
+680,  49.361,-122.671,2022-07-28T01,18290,fossil0128,fossil_Vancouver_Canada
+681,  49.174,-122.744,2022-08-03T01,18383,fossil0128,fossil_Vancouver_Canada
+682,  49.361,-122.671,2022-08-04T22,18412,fossil0128,fossil_Vancouver_Canada
+683,  49.174,-122.744,2022-08-07T00,18444,fossil0128,fossil_Vancouver_Canada
+684,  49.361,-122.671,2022-08-08T20,18473,fossil0128,fossil_Vancouver_Canada
+685,  49.174,-122.744,2022-08-10T22,18505,fossil0128,fossil_Vancouver_Canada
+686,  49.361,-122.671,2022-08-12T19,18534,fossil0128,fossil_Vancouver_Canada
+687,  49.174,-122.744,2022-08-14T20,18566,fossil0128,fossil_Vancouver_Canada
+688,  49.361,-122.671,2022-08-15T18,18580,fossil0128,fossil_Vancouver_Canada
+689,  49.174,-122.744,2022-08-18T19,18627,fossil0128,fossil_Vancouver_Canada
+690,  49.361,-122.671,2022-08-20T16,18656,fossil0128,fossil_Vancouver_Canada
+691,  49.174,-122.744,2022-08-29T15,18795,fossil0128,fossil_Vancouver_Canada
+692,  49.361,-122.671,2022-09-30T23,19296,fossil0128,fossil_Vancouver_Canada
+693,  49.174,-122.744,2022-10-06T23,19389,fossil0128,fossil_Vancouver_Canada
+694,  49.361,-122.671,2022-10-07T21,19403,fossil0128,fossil_Vancouver_Canada
+695,  49.174,-122.744,2022-10-10T22,19450,fossil0128,fossil_Vancouver_Canada
+696,  49.361,-122.671,2022-10-12T19,19479,fossil0128,fossil_Vancouver_Canada
+697,  49.174,-122.744,2022-10-14T20,19511,fossil0128,fossil_Vancouver_Canada
+698,  49.361,-122.671,2022-10-15T18,19525,fossil0128,fossil_Vancouver_Canada
+699,  49.174,-122.744,2022-10-17T19,19557,fossil0128,fossil_Vancouver_Canada
+700,  49.361,-122.671,2022-12-08T20,20363,fossil0128,fossil_Vancouver_Canada
+701,  49.174,-122.744,2023-02-06T22,21294,fossil0128,fossil_Vancouver_Canada
+702,  49.361,-122.671,2023-02-07T20,21308,fossil0128,fossil_Vancouver_Canada
+703,  49.174,-122.744,2023-02-09T22,21340,fossil0128,fossil_Vancouver_Canada
+704,  49.361,-122.671,2023-02-10T19,21354,fossil0128,fossil_Vancouver_Canada
+705,  49.174,-122.744,2023-04-05T00,22178,fossil0128,fossil_Vancouver_Canada
+706,  49.361,-122.671,2023-04-06T21,22207,fossil0128,fossil_Vancouver_Canada
+707,  49.174,-122.744,2023-04-08T23,22239,fossil0128,fossil_Vancouver_Canada
+708,  49.361,-122.671,2023-04-14T18,22329,fossil0128,fossil_Vancouver_Canada
+709,  49.174,-122.744,2023-04-16T19,22361,fossil0128,fossil_Vancouver_Canada
+710,  49.361,-122.671,2023-04-18T16,22390,fossil0128,fossil_Vancouver_Canada
+711,  49.174,-122.744,2023-04-20T18,22422,fossil0128,fossil_Vancouver_Canada
+712,  49.361,-122.671,2023-04-22T15,22451,fossil0128,fossil_Vancouver_Canada
+713,  49.174,-122.744,2023-04-24T16,22483,fossil0128,fossil_Vancouver_Canada
+714,  49.361,-122.671,2023-05-27T01,22984,fossil0128,fossil_Vancouver_Canada
+715,  40.094, 113.291,2019-10-16T01,02556,fossil0129,fossil_Datong_Shanxi_China
+716,  24.544, 118.128,2019-12-26T04,03658,fossil0130,fossil_Xiamen_China
+717,  24.726, 117.958,2022-02-16T07,15784,fossil0130,fossil_Xiamen_China
+718,  29.866, 121.539,2020-02-12T01,04399,fossil0131,fossil_Ningbo_China
+719,  29.738, 121.401,2021-12-06T02,14666,fossil0131,fossil_Ningbo_China
+720,  24.163, 120.648,2020-04-22T06,05486,fossil0132,fossil_Taichung_Taiwan
+721,  24.043, 120.759,2022-02-28T02,15967,fossil0132,fossil_Taichung_Taiwan
+722, -22.912, -43.175,2020-01-09T12,03880,fossil0133,fossil_Rio_de_Janeiro_Brazil
+723, -22.711, -43.355,2021-10-24T18,14010,fossil0133,fossil_Rio_de_Janeiro_Brazil
+724, -22.708, -43.163,2021-11-23T15,14473,fossil0133,fossil_Rio_de_Janeiro_Brazil
+725, -22.711, -43.355,2021-12-19T19,14878,fossil0133,fossil_Rio_de_Janeiro_Brazil
+726, -22.708, -43.163,2022-01-28T13,15494,fossil0133,fossil_Rio_de_Janeiro_Brazil
+727, -22.711, -43.355,2022-03-02T15,16006,fossil0133,fossil_Rio_de_Janeiro_Brazil
+728, -22.708, -43.163,2022-03-15T19,16210,fossil0133,fossil_Rio_de_Janeiro_Brazil
+729, -22.711, -43.355,2022-04-21T19,16783,fossil0133,fossil_Rio_de_Janeiro_Brazil
+730, -22.708, -43.163,2022-05-31T13,17399,fossil0133,fossil_Rio_de_Janeiro_Brazil
+731, -22.711, -43.355,2022-06-29T15,17850,fossil0133,fossil_Rio_de_Janeiro_Brazil
+732, -22.708, -43.163,2022-08-04T11,18405,fossil0133,fossil_Rio_de_Janeiro_Brazil
+733, -22.711, -43.355,2022-08-21T18,18673,fossil0133,fossil_Rio_de_Janeiro_Brazil
+734, -22.708, -43.163,2022-09-22T15,19167,fossil0133,fossil_Rio_de_Janeiro_Brazil
+735, -22.711, -43.355,2022-10-21T18,19618,fossil0133,fossil_Rio_de_Janeiro_Brazil
+736, -22.708, -43.163,2022-11-26T14,20173,fossil0133,fossil_Rio_de_Janeiro_Brazil
+737, -22.711, -43.355,2022-12-21T18,20563,fossil0133,fossil_Rio_de_Janeiro_Brazil
+738, -22.708, -43.163,2023-01-26T13,21118,fossil0133,fossil_Rio_de_Janeiro_Brazil
+739, -22.711, -43.355,2023-02-24T16,21569,fossil0133,fossil_Rio_de_Janeiro_Brazil
+740, -22.708, -43.163,2023-03-17T18,21895,fossil0133,fossil_Rio_de_Janeiro_Brazil
+741, -22.711, -43.355,2023-04-23T17,22468,fossil0133,fossil_Rio_de_Janeiro_Brazil
+742,  27.771, -82.639,2019-12-06T17,03356,fossil0134,fossil_St_Petersburg_USA
+743,  27.651, -82.517,2022-02-11T22,15716,fossil0134,fossil_St_Petersburg_USA
+744,  27.888, -82.520,2022-06-14T13,17616,fossil0134,fossil_St_Petersburg_USA
+745,  27.651, -82.517,2022-06-29T15,17850,fossil0134,fossil_St_Petersburg_USA
+746,  27.888, -82.520,2022-12-10T14,20390,fossil0134,fossil_St_Petersburg_USA
+747,  27.651, -82.517,2022-12-21T18,20563,fossil0134,fossil_St_Petersburg_USA
+748,  27.888, -82.520,2023-02-09T14,21335,fossil0134,fossil_St_Petersburg_USA
+749,  27.651, -82.517,2023-02-24T16,21569,fossil0134,fossil_St_Petersburg_USA
+750,  25.671,-100.310,2020-03-29T21,05124,fossil0135,fossil_Monterrey_Mexico
+751,  21.029, 105.855,2019-10-11T02,02479,fossil0136,fossil_Hanoi_Vietnam
+752,  41.903,  12.496,2019-10-07T12,02423,fossil0137,fossil_Rome_Italy
+753,  41.994,  12.668,2021-11-30T13,14580,fossil0137,fossil_Rome_Italy
+754,  41.898,  12.505,2021-12-26T09,14980,fossil0137,fossil_Rome_Italy
+755,  41.994,  12.668,2022-02-04T11,15601,fossil0137,fossil_Rome_Italy
+756,  41.898,  12.505,2022-02-14T13,15757,fossil0137,fossil_Rome_Italy
+757,  41.994,  12.668,2022-03-26T15,16378,fossil0137,fossil_Rome_Italy
+758,  41.898,  12.505,2022-04-09T15,16595,fossil0137,fossil_Rome_Italy
+759,  41.994,  12.668,2022-04-11T09,16622,fossil0137,fossil_Rome_Italy
+760,  41.898,  12.505,2022-04-13T14,16656,fossil0137,fossil_Rome_Italy
+761,  41.994,  12.668,2022-04-15T07,16683,fossil0137,fossil_Rome_Italy
+762,  41.898,  12.505,2022-04-17T12,16717,fossil0137,fossil_Rome_Italy
+763,  41.994,  12.668,2022-05-23T16,17277,fossil0137,fossil_Rome_Italy
+764,  41.898,  12.505,2022-06-09T15,17540,fossil0137,fossil_Rome_Italy
+765,  41.994,  12.668,2022-06-11T09,17567,fossil0137,fossil_Rome_Italy
+766,  41.898,  12.505,2022-06-13T14,17601,fossil0137,fossil_Rome_Italy
+767,  41.994,  12.668,2022-06-15T07,17628,fossil0137,fossil_Rome_Italy
+768,  41.898,  12.505,2022-06-17T12,17662,fossil0137,fossil_Rome_Italy
+769,  41.994,  12.668,2022-06-19T06,17689,fossil0137,fossil_Rome_Italy
+770,  41.898,  12.505,2022-06-29T07,17845,fossil0137,fossil_Rome_Italy
+771,  41.994,  12.668,2022-07-27T14,18283,fossil0137,fossil_Rome_Italy
+772,  41.898,  12.505,2022-08-13T14,18546,fossil0137,fossil_Rome_Italy
+773,  41.994,  12.668,2022-08-15T07,18573,fossil0137,fossil_Rome_Italy
+774,  41.898,  12.505,2022-08-17T12,18607,fossil0137,fossil_Rome_Italy
+775,  41.994,  12.668,2022-08-19T05,18634,fossil0137,fossil_Rome_Italy
+776,  41.898,  12.505,2022-08-21T10,18668,fossil0137,fossil_Rome_Italy
+777,  41.994,  12.668,2022-09-25T15,19213,fossil0137,fossil_Rome_Italy
+778,  41.898,  12.505,2022-12-13T13,20436,fossil0137,fossil_Rome_Italy
+779,  41.994,  12.668,2023-01-29T13,21164,fossil0137,fossil_Rome_Italy
+780,  41.898,  12.505,2023-02-24T08,21564,fossil0137,fossil_Rome_Italy
+781,  41.994,  12.668,2023-03-28T14,22063,fossil0137,fossil_Rome_Italy
+782,  41.898,  12.505,2023-04-15T13,22341,fossil0137,fossil_Rome_Italy
+783,  41.994,  12.668,2023-04-17T06,22368,fossil0137,fossil_Rome_Italy
+784,  41.898,  12.505,2023-04-19T11,22402,fossil0137,fossil_Rome_Italy
+785,  41.994,  12.668,2023-05-28T14,23008,fossil0137,fossil_Rome_Italy
+786,  29.954, -90.078,2020-08-14T14,07257,fossil0138,fossil_New_Orleans_USA
+787,  25.368,  49.588,2020-02-23T09,04575,fossil0139,fossil_Al_Hofuf_Saudi_Arabia
+788,  40.192,  29.047,2020-02-10T08,04373,fossil0140,fossil_Chios_Turkey
+789,  40.840,  14.252,2019-10-08T11,02438,fossil0141,fossil_Naples_Italy
+790,  40.999,  14.533,2021-12-01T12,14595,fossil0141,fossil_Naples_Italy
+791,  40.970,  14.372,2022-05-06T05,17007,fossil0141,fossil_Naples_Italy
+792,  40.999,  14.533,2022-05-31T13,17399,fossil0141,fossil_Naples_Italy
+793,  40.970,  14.372,2023-02-28T07,21625,fossil0141,fossil_Naples_Italy
+794,  40.999,  14.533,2023-03-25T15,22017,fossil0141,fossil_Naples_Italy
+795,  20.688,-103.351,2019-10-08T17,02442,fossil0142,fossil_Guadalajara_Mexico
+796,  22.620, 120.312,2020-01-03T01,03780,fossil0143,fossil_Kaoshsiung_Taiwan
+797,  22.863, 120.538,2021-12-07T01,14681,fossil0143,fossil_Kaoshsiung_Taiwan
+798,  22.750, 120.442,2022-01-05T00,15129,fossil0143,fossil_Kaoshsiung_Taiwan
+799,  22.863, 120.538,2022-02-03T03,15580,fossil0143,fossil_Kaoshsiung_Taiwan
+800,  23.713,  90.400,2020-06-08T04,06213,fossil0144,fossil_Dhaka_Bangladesh
+801,  51.045,-114.063,2019-10-15T19,02552,fossil0145,fossil_Calgary_Canada
+802,  40.439, -79.997,2019-10-08T17,02442,fossil0146,fossil_Pittsburgh_USA
+803,  30.264, -97.739,2023-04-29T15,22560,fossil0147,fossil_Austin_USA
+804,  31.952,  35.940,2020-02-09T08,04357,fossil0148,fossil_Amman_Jordan
+805,  40.760,-111.888,2020-06-27T17,06516,fossil0149,fossil_Salt_Lake_City_USA
+806,  24.467,  39.606,2019-10-15T05,02543,fossil0150,fossil_Medina_Saudi_Arabia
+807, -34.926, 138.600,2019-09-23T04,02201,fossil0151,fossil_Adelaide_Australia
+808, -35.055, 138.768,2021-11-02T03,14140,fossil0151,fossil_Adelaide_Australia
+809, -34.797, 138.767,2021-12-01T23,14602,fossil0151,fossil_Adelaide_Australia
+810, -35.055, 138.768,2022-01-04T02,15115,fossil0151,fossil_Adelaide_Australia
+811, -34.797, 138.767,2022-01-17T05,15318,fossil0151,fossil_Adelaide_Australia
+812, -35.055, 138.768,2022-02-23T06,15892,fossil0151,fossil_Adelaide_Australia
+813, -34.797, 138.767,2022-03-12T07,16156,fossil0151,fossil_Adelaide_Australia
+814, -35.055, 138.768,2022-05-07T02,17020,fossil0151,fossil_Adelaide_Australia
+815, -34.797, 138.767,2022-05-16T06,17162,fossil0151,fossil_Adelaide_Australia
+816, -35.055, 138.768,2022-09-06T01,18910,fossil0151,fossil_Adelaide_Australia
+817, -34.797, 138.767,2022-09-15T05,19052,fossil0151,fossil_Adelaide_Australia
+818, -35.055, 138.768,2022-11-13T22,19977,fossil0151,fossil_Adelaide_Australia
+819, -34.797, 138.767,2022-11-19T04,20058,fossil0151,fossil_Adelaide_Australia
+820, -35.055, 138.768,2023-04-24T06,22476,fossil0151,fossil_Adelaide_Australia
+821, -34.797, 138.767,2023-05-18T04,22847,fossil0151,fossil_Adelaide_Australia
+822,  52.236,  21.010,2020-04-25T06,05533,fossil0152,fossil_Warsaw_Poland
+823,  51.128,  71.428,2019-10-12T08,02498,fossil0154,fossil_Astana_Kazakhstan
+824,  36.390, 139.063,2020-04-04T04,05206,fossil0155,fossil_Maebashi_Japan
+825,  38.080,  46.292,2019-10-10T08,02467,fossil0156,fossil_Tabriz_Iran
+826,  23.028,  72.600,2019-12-22T09,03599,fossil0157,fossil_Ahmadabad_India
+827,  26.555,  31.695,2019-10-10T08,02467,fossil0158,fossil_Sohag_Egypt
+828,  48.136,  11.578,2019-10-08T12,02439,fossil0159,fossil_Munich_Germany
+829,  31.320,  48.669,2020-06-16T04,06337,fossil0160,fossil_Ahvaz_Iran
+830,  34.515,  35.968,2019-12-26T09,03661,fossil0161,fossil_Baabda_Lebanon
+831,  34.288,  36.256,2021-10-26T08,14035,fossil0161,fossil_Baabda_Lebanon
+832,  34.395,  36.088,2022-04-05T09,16529,fossil0161,fossil_Baabda_Lebanon
+833,  34.288,  36.256,2022-04-11T14,16625,fossil0161,fossil_Baabda_Lebanon
+834,  47.227,  39.717,2019-10-06T11,02407,fossil0162,fossil_Rostov-on-Don_Russia
+835,  50.079,  14.433,2019-10-11T12,02485,fossil0163,fossil_Prague_Czech_Republic
+836,  18.417, -70.100,2019-08-07T15,01480,fossil0164,fossil_San_Cristobal_Dominican_Republic
+837,  18.640, -70.283,2021-10-25T17,14025,fossil0164,fossil_San_Cristobal_Dominican_Republic
+838,  18.517, -70.200,2021-11-25T18,14506,fossil0164,fossil_San_Cristobal_Dominican_Republic
+839,  18.640, -70.283,2022-02-23T17,15899,fossil0164,fossil_San_Cristobal_Dominican_Republic
+840,  18.517, -70.200,2022-03-21T21,16304,fossil0164,fossil_San_Cristobal_Dominican_Republic
+841,  18.640, -70.283,2022-04-14T21,16676,fossil0164,fossil_San_Cristobal_Dominican_Republic
+842,  18.517, -70.200,2022-06-06T14,17493,fossil0164,fossil_San_Cristobal_Dominican_Republic
+843,  18.640, -70.283,2022-06-26T16,17804,fossil0164,fossil_San_Cristobal_Dominican_Republic
+844,  18.517, -70.200,2022-07-18T21,18148,fossil0164,fossil_San_Cristobal_Dominican_Republic
+845,  18.640, -70.283,2022-08-18T19,18627,fossil0164,fossil_San_Cristobal_Dominican_Republic
+846,  18.517, -70.200,2022-09-24T19,19200,fossil0164,fossil_San_Cristobal_Dominican_Republic
+847,  18.640, -70.283,2022-10-14T20,19511,fossil0164,fossil_San_Cristobal_Dominican_Republic
+848,  18.517, -70.200,2022-11-28T17,20206,fossil0164,fossil_San_Cristobal_Dominican_Republic
+849,  18.640, -70.283,2022-12-22T17,20578,fossil0164,fossil_San_Cristobal_Dominican_Republic
+850,  18.517, -70.200,2023-01-28T17,21151,fossil0164,fossil_San_Cristobal_Dominican_Republic
+851,  18.640, -70.283,2023-03-01T14,21645,fossil0164,fossil_San_Cristobal_Dominican_Republic
+852,  18.517, -70.200,2023-03-23T19,21989,fossil0164,fossil_San_Cristobal_Dominican_Republic
+853,  18.640, -70.283,2023-04-16T20,22361,fossil0164,fossil_San_Cristobal_Dominican_Republic
+854,  18.517, -70.200,2023-05-27T18,22995,fossil0164,fossil_San_Cristobal_Dominican_Republic
+855,  44.434,  26.103,2019-10-12T09,02499,fossil0166,fossil_Bucharest_Romania
+856,  10.688, -71.598,2020-07-27T18,06981,fossil0167,fossil_Maracaibo_Venezuela
+857,  10.806, -71.791,2021-12-30T15,15046,fossil0167,fossil_Maracaibo_Venezuela
+858,  10.698, -71.738,2022-01-31T16,15542,fossil0167,fossil_Maracaibo_Venezuela
+859,  10.806, -71.791,2022-02-14T21,15762,fossil0167,fossil_Maracaibo_Venezuela
+860,  10.698, -71.738,2022-03-22T20,16319,fossil0167,fossil_Maracaibo_Venezuela
+861,  10.806, -71.791,2022-05-02T14,16951,fossil0167,fossil_Maracaibo_Venezuela
+862,  10.698, -71.738,2022-05-30T17,17386,fossil0167,fossil_Maracaibo_Venezuela
+863,  10.806, -71.791,2022-06-17T20,17667,fossil0167,fossil_Maracaibo_Venezuela
+864,  10.698, -71.738,2022-07-30T16,18331,fossil0167,fossil_Maracaibo_Venezuela
+865,  10.806, -71.791,2022-08-13T21,18551,fossil0167,fossil_Maracaibo_Venezuela
+866,  10.698, -71.738,2022-09-17T21,19093,fossil0167,fossil_Maracaibo_Venezuela
+867,  10.806, -71.791,2022-11-01T14,19786,fossil0167,fossil_Maracaibo_Venezuela
+868,  10.698, -71.738,2022-11-21T19,20099,fossil0167,fossil_Maracaibo_Venezuela
+869,  10.806, -71.791,2023-04-15T20,22346,fossil0167,fossil_Maracaibo_Venezuela
+870,  10.698, -71.738,2023-05-20T20,22888,fossil0167,fossil_Maracaibo_Venezuela
+871,  31.550,  74.344,2019-10-08T06,02435,fossil0168,fossil_Lahore_Pakistan
+872,  47.500,  19.055,2019-10-10T11,02469,fossil0169,fossil_Budapest_Hungary
+873,  37.950,  58.383,2019-10-08T08,02436,fossil0170,fossil_Ashgabat_Turkmenistan
+874,  50.844,   4.356,2020-04-08T15,05275,fossil0171,fossil_Brussels_Belgium
+875,  50.256,  19.031,2020-06-07T14,06204,fossil0172,fossil_Katowice_Poland
+876,  24.906,  67.082,2019-10-08T06,02435,fossil0174,fossil_Karachi_Pakistan
+877,  25.066,  67.233,2021-11-23T11,14470,fossil0174,fossil_Karachi_Pakistan
+878,  24.916,  67.182,2021-12-28T06,15009,fossil0174,fossil_Karachi_Pakistan
+879,  25.066,  67.233,2022-01-21T11,15384,fossil0174,fossil_Karachi_Pakistan
+880,  24.916,  67.182,2022-03-03T04,16015,fossil0174,fossil_Karachi_Pakistan
+881,  25.066,  67.233,2022-04-04T07,16512,fossil0174,fossil_Karachi_Pakistan
+882,  24.916,  67.182,2022-04-26T07,16853,fossil0174,fossil_Karachi_Pakistan
+883,  25.066,  67.233,2022-05-20T12,17228,fossil0174,fossil_Karachi_Pakistan
+884,  24.916,  67.182,2022-08-30T05,18804,fossil0174,fossil_Karachi_Pakistan
+885,  25.066,  67.233,2022-09-30T08,19286,fossil0174,fossil_Karachi_Pakistan
+886,  24.916,  67.182,2022-10-18T09,19566,fossil0174,fossil_Karachi_Pakistan
+887,  25.066,  67.233,2022-12-04T06,20292,fossil0174,fossil_Karachi_Pakistan
+888,   6.455,   3.389,2019-10-08T09,02437,fossil0175,fossil_Lagos_Nigeria
+889,   6.649,   3.250,2021-10-24T13,14007,fossil0175,fossil_Lagos_Nigeria
+890,   6.649,   3.528,2021-11-19T15,14411,fossil0175,fossil_Lagos_Nigeria
+891,   6.649,   3.250,2022-01-07T07,15165,fossil0175,fossil_Lagos_Nigeria
+892,   6.649,   3.528,2022-02-05T09,15615,fossil0175,fossil_Lagos_Nigeria
+893,   6.649,   3.250,2022-02-18T15,15820,fossil0175,fossil_Lagos_Nigeria
+894,   6.649,   3.528,2022-03-23T14,16331,fossil0175,fossil_Lagos_Nigeria
+895,   6.649,   3.250,2022-04-17T15,16719,fossil0175,fossil_Lagos_Nigeria
+896,   6.649,   3.528,2022-06-04T10,17459,fossil0175,fossil_Lagos_Nigeria
+897,   6.649,   3.250,2022-06-17T15,17664,fossil0175,fossil_Lagos_Nigeria
+898,   6.649,   3.528,2022-07-20T15,18175,fossil0175,fossil_Lagos_Nigeria
+899,   6.649,   3.250,2022-08-17T15,18609,fossil0175,fossil_Lagos_Nigeria
+900,   6.649,   3.528,2022-09-22T14,19166,fossil0175,fossil_Lagos_Nigeria
+901,   6.649,   3.250,2022-12-21T13,20560,fossil0175,fossil_Lagos_Nigeria
+902,   6.649,   3.528,2023-01-30T10,21178,fossil0175,fossil_Lagos_Nigeria
+903,   6.649,   3.250,2023-04-19T14,22404,fossil0175,fossil_Lagos_Nigeria
+904,  -8.816,  13.233,2019-09-22T14,02192,fossil0176,fossil_Luanda_Angola
+905,  -9.096,  13.437,2021-11-05T08,14190,fossil0176,fossil_Luanda_Angola
+906,  -8.806,  13.453,2022-01-16T15,15309,fossil0176,fossil_Luanda_Angola
+907,  -9.096,  13.437,2022-02-18T15,15820,fossil0176,fossil_Luanda_Angola
+908,  -8.806,  13.453,2022-03-19T14,16269,fossil0176,fossil_Luanda_Angola
+909,  -9.096,  13.437,2022-05-02T10,16948,fossil0176,fossil_Luanda_Angola
+910,  -8.806,  13.453,2022-05-19T14,17214,fossil0176,fossil_Luanda_Angola
+911,  -9.096,  13.437,2022-08-17T15,18609,fossil0176,fossil_Luanda_Angola
+912,  -8.806,  13.453,2022-09-18T14,19104,fossil0176,fossil_Luanda_Angola
+913,  -9.096,  13.437,2022-11-05T08,19844,fossil0176,fossil_Luanda_Angola
+914,  -8.806,  13.453,2022-11-18T14,20049,fossil0176,fossil_Luanda_Angola
+915,  -9.096,  13.437,2023-01-09T06,20850,fossil0176,fossil_Luanda_Angola
+916,  -8.806,  13.453,2023-01-18T14,20994,fossil0176,fossil_Luanda_Angola
+917,  -9.096,  13.437,2023-04-19T14,22404,fossil0176,fossil_Luanda_Angola
+918,  -8.806,  13.453,2023-05-17T15,22838,fossil0176,fossil_Luanda_Angola
+919,  34.008,  71.578,2019-10-11T05,02481,fossil0177,fossil_Peshawar_Pakistan
+920,  15.501,  32.560,2019-12-22T12,03601,fossil0178,fossil_Khartoum_Sudan
+921,  -1.292,  36.822,2020-02-25T11,04607,fossil0179,fossil_Nairobi_Kenya
+922,  33.640, -87.120,2019-12-25T18,03651,fossil0180,fossil_Miller_Power_Plant_USA
+923, -29.950,  29.560,2020-01-12T07,03923,fossil0181,fossil_Tutuka_and_Majuba_Powerplant
+924, -26.950,  29.560,2020-03-18T13,04949,fossil0181,fossil_Tutuka_and_Majuba_Powerplant
+925,  51.620,  14.500,2020-06-12T12,06280,fossil0182,fossil_Janschwalde_Germany
+926,  45.882,-106.611,2020-02-09T18,04364,fossil0183,fossil_Colstrip_powerplant
+927,  41.895, -83.342,2020-04-13T15,05353,fossil0184,fossil_Monroe_powerplant
+928,  38.200,-104.580,2020-02-19T20,04520,fossil0185,fossil_Comanche_powerplant
+929,  40.415, -80.560,2020-02-16T19,04473,fossil0186,fossil_Sammis_Cardinal_Mansfield_powerplants
+930,  40.513, -79.194,2020-06-16T13,06343,fossil0187,fossil_Keystone_HomerCity_Conemaugh_Powerplants
+931,  34.124, -84.922,2020-02-08T16,04347,fossil0188,fossil_Bowen_powerplant
+932,  33.061, -83.810,2020-02-12T14,04408,fossil0189,fossil_Scherer_powerplant
+933,  49.096,-103.031,2020-02-16T19,04473,fossil0190,fossil_Boundary_Dam_powerplant
+934,  51.532,-111.786,2020-04-06T22,05249,fossil0191,fossil_Sheerness_powerplant
+935,  43.260, -79.811,2020-02-10T16,04378,fossil0192,fossil_Dofasco_powerplant
+936,  51.268,  19.331,2020-02-19T09,04513,fossil0193,fossil_Belchatow_powerplant
+937,  37.057, 126.511,2020-08-12T08,07222,fossil0194,fossil_Dangjin_Yonghungdo_Taean_powerplants
+938,  36.844, 126.815,2022-10-11T07,19456,fossil0194,fossil_Dangjin_Yonghungdo_Taean_powerplants
+939,  20.663,  39.555,2020-03-25T13,05057,fossil0195,fossil_Shaiba_powerplant
+940,  20.673,  39.775,2022-02-18T11,15818,fossil0195,fossil_Shaiba_powerplant
+941,  20.884,  39.744,2022-05-20T14,17229,fossil0195,fossil_Shaiba_powerplant
+942,  20.673,  39.775,2022-08-13T14,18546,fossil0195,fossil_Shaiba_powerplant
+943,  20.884,  39.744,2023-05-18T14,22853,fossil0195,fossil_Shaiba_powerplant
+944,  25.844,  50.126,2020-02-19T11,04514,fossil0196,fossil_AlQurayyah_powerplant
+945,  25.854,  49.916,2022-07-09T03,17997,fossil0196,fossil_AlQurayyah_powerplant
+946, -26.033,  29.611,2020-03-26T10,05071,fossil0197,fossil_Arnot_Duvha_Hendrina_powerplants
+947, -25.878,  29.175,2020-04-28T12,05583,fossil0198,fossil_Duvha_Kendal_Kriel_Matla_powerplants
+948,  24.097,  82.674,2020-02-20T09,04528,fossil0199,fossil_Vindhyachal_Sasan_Singrauli_Rihand_powerplants
+949,  32.686, 116.901,2020-03-28T07,05100,fossil0200,fossil_Pingwei_Tianji_Bengbu_Fengtai_Luohe_powerplants
+950, -38.264, 146.395,2020-07-12T00,06737,fossil0201,fossil_Hazelwood_Yallourn_Loy_Yang_powerplants
+951, -23.511, 150.318,2020-01-31T00,04213,fossil0202,fossil_Stanwell_powerplant
+952,  37.739,-122.185,2020-06-13T17,06299,fossil0203,fossil_San_Francisco_USA
+953,  39.178, -76.527,2021-02-07T16,09999,fossil0204,fossil_Wagner_powerplant
+954,  39.210, -77.464,2021-02-11T21,10064,fossil0205,fossil_Dickerson_powerplant
+955,  41.495, -88.124,2021-02-08T16,10015,fossil0206,fossil_Joliet_powerplant
+956,  43.359, -78.605,2021-02-05T17,09969,fossil0207,fossil_Somerset_Operating_powerplant
+957,  41.633, -88.063,2021-02-14T20,10110,fossil0208,fossil_Will_County_powerplant
+958,  34.253, -85.346,2021-03-26T21,10730,fossil0209,fossil_Hammond_powerplant
+959,  41.505, -82.055,2021-02-13T14,10091,fossil0210,fossil_Avon_Lake_powerplant
+960,  40.881,-117.152,2021-02-13T22,10096,fossil0211,fossil_North_Valmy_powerplant
+961,  38.402, -90.336,2021-02-05T17,09969,fossil0212,fossil_Meramec_powerplant
+962,  35.190, -81.012,2021-04-14T21,11024,fossil0213,fossil_GG_Allen_powerplant
+963,  40.195, 111.359,2021-02-06T04,09976,fossil0214,fossil_Datang_Tuoketuo_powerplant
+964,  31.354, 121.600,2021-02-27T02,10300,fossil0215,fossil_Waigaoqiao_powerplant
+965,  31.476, 121.461,2022-02-22T04,15875,fossil0215,fossil_Waigaoqiao_powerplant
+966,  50.993,   6.669,2021-02-15T10,10119,fossil0217,fossil_Niederaussem_powerplant
+967,  22.816,  69.528,2021-02-07T05,09992,fossil0218,fossil_Mundra_Umpp_powerplant
+968,  23.017,  69.708,2021-11-24T10,14485,fossil0218,fossil_Mundra_Umpp_powerplant
+969,  23.022,  69.439,2021-12-16T11,14826,fossil0218,fossil_Mundra_Umpp_powerplant
+970,  23.017,  69.708,2022-02-02T06,15567,fossil0218,fossil_Mundra_Umpp_powerplant
+971,  23.022,  69.439,2022-03-07T03,16076,fossil0218,fossil_Mundra_Umpp_powerplant
+972,  23.017,  69.708,2022-03-24T11,16344,fossil0218,fossil_Mundra_Umpp_powerplant
+973,  23.022,  69.439,2022-04-18T10,16731,fossil0218,fossil_Mundra_Umpp_powerplant
+974,  23.017,  69.708,2022-06-05T06,17472,fossil0218,fossil_Mundra_Umpp_powerplant
+975,  23.022,  69.439,2022-06-30T05,17859,fossil0218,fossil_Mundra_Umpp_powerplant
+976,  23.017,  69.708,2022-07-21T11,18188,fossil0218,fossil_Mundra_Umpp_powerplant
+977,  23.022,  69.439,2022-08-22T08,18682,fossil0218,fossil_Mundra_Umpp_powerplant
+978,  23.017,  69.708,2022-09-23T10,19179,fossil0218,fossil_Mundra_Umpp_powerplant
+979,  23.022,  69.439,2022-10-14T11,19505,fossil0218,fossil_Mundra_Umpp_powerplant
+980,  23.017,  69.708,2022-12-05T05,20307,fossil0218,fossil_Mundra_Umpp_powerplant
+981,  23.022,  69.439,2022-12-22T08,20572,fossil0218,fossil_Mundra_Umpp_powerplant
+982,  23.017,  69.708,2023-02-04T05,21252,fossil0218,fossil_Mundra_Umpp_powerplant
+983,  23.022,  69.439,2023-03-01T05,21639,fossil0218,fossil_Mundra_Umpp_powerplant
+984,  23.017,  69.708,2023-03-22T11,21968,fossil0218,fossil_Mundra_Umpp_powerplant
+985,  23.022,  69.439,2023-04-24T07,22477,fossil0218,fossil_Mundra_Umpp_powerplant
+986,  23.017,  69.708,2023-05-26T09,22974,fossil0218,fossil_Mundra_Umpp_powerplant
+987,  24.027,  82.792,2021-02-05T05,09961,fossil0219,fossil_Rihand_powerplant
+988,  23.978,  82.628,2021-02-15T10,10119,fossil0220,fossil_Sasan_powerplant
+989,  -7.718, 113.583,2021-05-07T02,11368,fossil0221,fossil_PLTU_Paiton_powerplant
+990,  -7.963, 113.760,2021-10-25T06,14018,fossil0221,fossil_PLTU_Paiton_powerplant
+991,  -7.908, 113.445,2021-11-19T07,14406,fossil0221,fossil_PLTU_Paiton_powerplant
+992,  -7.963, 113.760,2022-01-04T02,15115,fossil0221,fossil_PLTU_Paiton_powerplant
+993,  -7.908, 113.445,2022-01-17T08,15320,fossil0221,fossil_PLTU_Paiton_powerplant
+994,  -7.963, 113.760,2022-02-19T08,15831,fossil0221,fossil_PLTU_Paiton_powerplant
+995,  -7.908, 113.445,2022-04-08T00,16570,fossil0221,fossil_PLTU_Paiton_powerplant
+996,  -7.963, 113.760,2022-04-18T09,16730,fossil0221,fossil_PLTU_Paiton_powerplant
+997,  -7.908, 113.445,2022-05-20T07,17225,fossil0221,fossil_PLTU_Paiton_powerplant
+998,  -7.963, 113.760,2022-06-18T09,17675,fossil0221,fossil_PLTU_Paiton_powerplant
+999,  -7.908, 113.445,2022-07-20T07,18170,fossil0221,fossil_PLTU_Paiton_powerplant
+1000,  -7.963, 113.760,2022-08-18T08,18620,fossil0221,fossil_PLTU_Paiton_powerplant
+1001,  -7.908, 113.445,2022-09-15T09,19054,fossil0221,fossil_PLTU_Paiton_powerplant
+1002,  -7.963, 113.760,2022-11-09T23,19916,fossil0221,fossil_PLTU_Paiton_powerplant
+1003,  -7.908, 113.445,2022-11-19T07,20060,fossil0221,fossil_PLTU_Paiton_powerplant
+1004,  -7.963, 113.760,2023-04-20T07,22415,fossil0221,fossil_PLTU_Paiton_powerplant
+1005,  -7.908, 113.445,2023-05-18T08,22849,fossil0221,fossil_PLTU_Paiton_powerplant
+1006,  34.835, 136.961,2021-02-08T01,10005,fossil0222,fossil_Hekinan_powerplant
+1007,  35.031, 136.867,2021-10-23T03,13985,fossil0222,fossil_Hekinan_powerplant
+1008,  35.023, 137.205,2021-11-29T05,14559,fossil0222,fossil_Hekinan_powerplant
+1009,  35.031, 136.867,2022-02-25T01,15920,fossil0222,fossil_Hekinan_powerplant
+1010,  35.023, 137.205,2022-03-29T05,16418,fossil0222,fossil_Hekinan_powerplant
+1011,  35.031, 136.867,2022-04-12T07,16636,fossil0222,fossil_Hekinan_powerplant
+1012,  35.023, 137.205,2022-06-10T00,17546,fossil0222,fossil_Hekinan_powerplant
+1013,  35.031, 136.867,2022-06-16T05,17642,fossil0222,fossil_Hekinan_powerplant
+1014,  35.023, 137.205,2022-09-28T05,19253,fossil0222,fossil_Hekinan_powerplant
+1015,  35.031, 136.867,2022-10-12T06,19471,fossil0222,fossil_Hekinan_powerplant
+1016,  35.023, 137.205,2022-12-02T03,20259,fossil0222,fossil_Hekinan_powerplant
+1017,  35.031, 136.867,2022-12-20T03,20538,fossil0222,fossil_Hekinan_powerplant
+1018,  35.023, 137.205,2023-02-01T03,21204,fossil0222,fossil_Hekinan_powerplant
+1019,  35.031, 136.867,2023-02-15T05,21422,fossil0222,fossil_Hekinan_powerplant
+1020,  35.023, 137.205,2023-03-27T05,22042,fossil0222,fossil_Hekinan_powerplant
+1021,  35.031, 136.867,2023-04-14T06,22321,fossil0222,fossil_Hekinan_powerplant
+1022,  35.023, 137.205,2023-05-31T04,23048,fossil0222,fossil_Hekinan_powerplant
+1023, -26.088,  28.969,2021-03-14T14,10540,fossil0223,fossil_Kendal_powerplant
+1024,  22.400,  82.695,2021-11-22T10,14454,fossil0224,fossil_Korba_powerplant
+1025,  35.502, 129.303,2021-08-31T00,13163,fossil0225,fossil_Tropomi_2_powerplant
+1026,  35.660, 129.092,2021-10-26T02,14031,fossil0225,fossil_Tropomi_2_powerplant
+1027,  35.442, 129.107,2021-12-02T04,14605,fossil0225,fossil_Tropomi_2_powerplant
+1028,  35.660, 129.092,2022-03-03T23,16027,fossil0225,fossil_Tropomi_2_powerplant
+1029,  35.442, 129.107,2022-04-05T03,16525,fossil0225,fossil_Tropomi_2_powerplant
+1030,  28.696,  48.334,2021-09-01T05,13182,fossil0226,fossil_Az_Zour_powerplant
+1031,  28.483,  48.114,2022-01-25T11,15446,fossil0226,fossil_Az_Zour_powerplant
+1032,  28.596,  48.234,2022-02-13T12,15741,fossil0226,fossil_Az_Zour_powerplant
+1033,  28.483,  48.114,2022-04-08T07,16574,fossil0226,fossil_Az_Zour_powerplant
+1034,  28.596,  48.234,2022-05-01T06,16930,fossil0226,fossil_Az_Zour_powerplant
+1035,  28.483,  48.114,2022-05-20T14,17229,fossil0226,fossil_Az_Zour_powerplant
+1036,  28.596,  48.234,2022-06-12T13,17585,fossil0226,fossil_Az_Zour_powerplant
+1037,  28.483,  48.114,2022-06-16T03,17641,fossil0226,fossil_Az_Zour_powerplant
+1038,  28.596,  48.234,2022-08-12T13,18530,fossil0226,fossil_Az_Zour_powerplant
+1039,  28.483,  48.114,2022-08-16T03,18586,fossil0226,fossil_Az_Zour_powerplant
+1040,  28.596,  48.234,2022-10-27T07,19704,fossil0226,fossil_Az_Zour_powerplant
+1041,  28.483,  48.114,2022-11-23T12,20125,fossil0226,fossil_Az_Zour_powerplant
+1042,  28.596,  48.234,2023-04-18T10,22386,fossil0226,fossil_Az_Zour_powerplant
+1043,  34.899, 127.763,2021-10-17T06,13894,fossil0227,fossil_Gwangyang_powerplant
+1044,  35.013, 127.615,2023-03-01T00,21636,fossil0227,fossil_Gwangyang_powerplant
+1045,  38.562, -90.836,2022-01-31T19,15544,fossil0228,fossil_Labadie_powerplant
+1046,  36.391, -87.654,2022-01-28T20,15498,fossil0229,fossil_Cumberland_powerplant
+1047,  38.699, -83.816,2022-02-13T20,15746,fossil0230,fossil_Spurlock_powerplant
+1048,  44.389,-105.462,2022-02-03T20,15591,fossil0231,fossil_Dry_Fork_Station_powerplant
+1049,  49.057,-105.482,2022-02-04T21,15607,fossil0232,fossil_Poplar_River_powerplant
+1050,  46.525, -84.368,2022-04-01T20,16474,fossil0233,fossil_Algoma_Steel
+1051,  39.514,-112.575,2022-11-29T21,20224,fossil0235,fossil_Intermountain_powerplant
+1052,  30.082,  31.284,2022-05-21T14,17245,fossil0236,fossil_Cairo_Egypt
+1053,  29.471, -95.280,2022-06-04T17,17464,fossil0237,fossil_Houston_GeoCarb_USA
+1054,  29.692, -95.214,2022-06-12T22,17591,fossil0237,fossil_Houston_GeoCarb_USA
+1055,  29.471, -95.280,2022-06-16T13,17647,fossil0237,fossil_Houston_GeoCarb_USA
+1056,  29.692, -95.214,2022-06-16T21,17652,fossil0237,fossil_Houston_GeoCarb_USA
+1057,  29.471, -95.280,2022-07-20T23,18180,fossil0237,fossil_Houston_GeoCarb_USA
+1058,  29.692, -95.214,2022-08-12T22,18536,fossil0237,fossil_Houston_GeoCarb_USA
+1059,  29.471, -95.280,2022-09-22T22,19171,fossil0237,fossil_Houston_GeoCarb_USA
+1060,  29.692, -95.214,2022-10-23T18,19649,fossil0237,fossil_Houston_GeoCarb_USA
+1061,  48.572, -81.369,2022-06-19T13,17694,fossil0238,fossil_Timmins_Canada
+1062,   2.146, -59.006,2019-08-07T13,01479,sif_atto,sif_ATTO_Tower_Manaus_Brazil
+1063,  -2.146, -59.005,2020-08-19T20,07338,sif_atto_2,sif_ATTO_Tower_Manaus_Brazil_correct
+1064,   9.104, -79.796,2023-03-23T19,21989,sif_barro_colorado,sif_Barro_Colorado_Panama
+1065,  18.210, -66.870,2023-03-20T20,21943,sif_guanika,sif_Guanika_Peurto_Rico
+1066,  42.538, -72.172,2020-02-18T18,04503,sif_hrv,sif_Harvard_Forest_USA
+1067,  31.807, 119.217,2020-02-03T04,04262,sif_jro,sif_Jurong_Korea
+1068,  -2.605, -60.207,2023-04-08T11,22232,sif_k34,sif_k34_Brazil
+1069,  -2.853, -54.956,2023-04-05T12,22186,sif_k67,sif_k67_Brazil
+1070,   4.107, 114.097,2023-03-24T06,21996,sif_lambir,sif_Lambir_Malaysia
+1071,   4.006, 114.197,2023-04-25T05,22491,sif_lambir,sif_Lambir_Malaysia
+1072,   4.107, 114.097,2023-05-28T04,23002,sif_lambir,sif_Lambir_Malaysia
+1073,  10.433, -84.021,2019-09-23T21,02212,sif_laselva,sif_La_Selva_Costa_Rica
+1074,  41.165, -96.455,2020-05-28T22,06054,sif_mead,sif_Mead_Cluster_USA
+1075,  35.438,-106.238,2019-10-05T19,02397,sif_mpj,sif_Pinyon_Juniper_USA
+1076,  38.744, -92.200,2020-04-17T14,05414,sif_mzo,sif_Ozark_USA
+1077,  40.033,-105.546,2019-10-15T16,02550,sif_niwot,sif_Niwot_Ridge_Colorado_USA
+1078,  34.985, -97.522,2020-04-13T15,05353,sif_oko,sif_KAEFS_USA
+1079,   2.986, 102.316,2023-04-03T03,22149,sif_pasoh,sif_Pasoh_Malaysia
+1080,  31.821,-110.840,2020-02-08T18,04348,sif_santarita,sif_Santa_Rita_Cluster_USA
+1081,  34.520, 115.589,2020-04-15T08,05379,sif_shq,sif_shq
+1082,  45.560, -84.714,2019-10-13T16,02519,sif_umb,sif_University_of_Michigan_USA
+1083,  37.923, -78.274,2019-10-13T15,02518,sif_uva,sif_University_of_Virginia_USA
+1084,  36.624, 126.373,2019-10-08T03,02433,tccon100,val_anmyeondoKo
+1085,  -7.947, -14.387,2019-12-06T10,03352,tccon101,val_ascensionIsland
+1086,  34.958,-117.882,2019-12-24T20,03637,tccon102,val_drydenCA
+1087,  53.104,   8.849,2020-04-25T08,05534,tccon104,val_bremenDe
+1088,  18.532, 120.649,2019-10-10T01,02463,tccon105,val_burgosPh
+1089,  34.123,-118.073,2019-10-07T19,02428,tccon106,val_caltechCA
+1090, -12.375, 130.917,2019-10-08T00,02431,tccon107,val_darwinAu
+1091,  28.297, -16.518,2019-10-13T10,02515,tccon112,val_izanaTenerifeEs
+1092,  49.100,   8.438,2020-02-20T10,04529,tccon113,val_karlsruheDe
+1093,  36.604, -97.485,2019-10-06T19,02412,tccon114,val_lamontOK
+1094, -45.002, 169.685,2019-09-20T01,02153,tccon115,val_lauderNz
+1095,  47.965,   2.112,2019-08-08T13,01494,tccon122,val_orleansFr
+1096,  48.846,   2.356,2019-10-07T13,02424,tccon123,val_parisFr
+1097,  45.945, -90.273,2019-10-08T19,02443,tccon124,val_parkFallsWI
+1098, -20.901,  55.485,2019-09-14T04,02062,tccon127,val_reunionIsland
+1099,  43.452, 143.700,2019-10-09T02,02448,tccon128,val_rikubetsuJp
+1100,  33.241, 130.288,2019-08-06T04,01457,tccon130,val_sagaJp
+1101,  36.051, 140.122,2019-08-07T03,01472,tccon134,val_tsukubaJp
+1102, -34.451, 150.854,2019-09-21T04,02170,tccon135,val_wollongongAu
+1103,  35.040,  33.060,2019-08-06T10,01461,tccon136,val_cyprus
+1104,  27.809, -97.406,2019-12-26T18,03667,texmex001,campaign_texmex_corpus_christi
+1105,  28.010, -97.610,2021-10-30T16,14102,texmex001,campaign_texmex_corpus_christi
+1106,  27.879, -97.466,2021-11-23T22,14477,texmex001,campaign_texmex_corpus_christi
+1107,  28.010, -97.610,2022-01-01T15,15077,texmex001,campaign_texmex_corpus_christi
+1108,  29.004, -95.410,2019-10-08T17,02442,texmex002,campaign_texmex_freeport
+1109,  29.209, -95.626,2023-05-03T14,22621,texmex002,campaign_texmex_freeport
+1110,  29.954, -93.988,2020-02-23T19,04581,texmex003,campaign_texmex_port_arthur
+1111,  30.072, -94.116,2021-11-04T13,14178,texmex003,campaign_texmex_port_arthur
+1112,  30.125, -93.316,2020-06-12T15,06282,texmex004,campaign_texmex_lake_charles
+1113,  35.299,-101.740,2019-10-13T16,02519,texmex005,campaign_texmex_harrington_station
+1114,  29.909, -96.752,2020-04-06T17,05246,texmex006,campaign_texmex_fayette_station
+1115,  29.493, -95.683,2020-02-19T20,04520,texmex007,campaign_texmex_WA_parish_station
+1116,  31.594, -96.145,2019-10-11T16,02488,texmex008,campaign_texmex_limestone_big_brown_stations
+1117,  32.343, -94.532,2020-02-16T21,04474,texmex009,campaign_texmex_martin_lake_pirkey_stations
+1118,  30.433, -91.172,2020-03-03T15,04718,texmex010,campaign_texmex_baton_rouge
+1119,  30.303, -91.172,2020-07-25T22,06952,texmex010,campaign_texmex_baton_rouge
+1120,  32.740, -97.411,2019-10-07T18,02427,texmex012,campaign_texmex_fort_worth
+1121,  36.102,-102.132,2019-12-05T19,03342,texmex016,campaign_texmex_amarillo_north02
+1122,  31.565,-103.360,2019-10-10T17,02473,texmex019,campaign_texmex_permian01d
+1123,  33.001,-102.197,2019-12-02T20,03296,texmex021,campaign_texmex_permian02b
+1124,  31.185, -96.485,2020-08-13T23,07247,texmex024,campaign_texmex_oakgrove_powerplant
+1125,  39.175,-111.029,2020-07-31T22,07045,texmex025,campaign_texmex_hunters_powerplant
+1126,  31.395, -92.716,2020-07-28T21,06998,texmex026,campaign_texmex_brame_powerplant
+1127,  36.801,-108.442,2020-07-28T22,06999,texmex027,campaign_texmex_sanjuan_powerplant
+1128,  40.463,-107.591,2020-10-16T21,08237,texmex028,campaign_texmex_craig_powerplant
+1129,  39.912, 104.242,2021-02-05T05,09961,val001,validation_eastern_colorado
+1130,  39.912,-104.242,2021-04-06T19,10899,val001,validation_eastern_colorado
+1131,  43.565,   1.502,2022-07-24T17,18238,val002,val_Toulouse_France
+1132, -22.990, -67.739,2022-12-21T20,20564,val003_TAO,val_Tokyo_Atacama_Observatory
+1133,  22.966,  88.527,2023-04-06T04,22196,val004,val_Kolkata_Vertex70_site
+1134, -16.250, 168.120,2019-09-13T20,02057,volcano0001,v257040_Ambrym
+1135,  19.023, -98.622,2020-05-10T13,05770,volcano0002,v341090_Popocatepetl
+1136,  37.730,  15.000,2020-02-08T10,04343,volcano0003,v211060_Etna
+1137,  -7.560, 110.440,2020-02-03T03,04261,volcano0004,v263250_Merapi
+1138,  19.420,-155.290,2019-10-11T19,02490,volcano0005,v332010_Kilauea_Hawaii
+1139,  19.540,-155.390,2021-11-04T18,14181,volcano0005,v332010_Kilauea_Hawaii
+1140,  19.424,-155.287,2022-01-21T02,15378,volcano0005,v332010_Kilauea_Hawaii
+1141,  19.540,-155.390,2022-02-18T01,15811,volcano0005,v332010_Kilauea_Hawaii
+1142,  19.424,-155.287,2022-04-11T18,16628,volcano0005,v332010_Kilauea_Hawaii
+1143,  19.540,-155.390,2022-05-01T20,16939,volcano0005,v332010_Kilauea_Hawaii
+1144,  19.424,-155.287,2022-05-20T03,17222,volcano0005,v332010_Kilauea_Hawaii
+1145,  19.540,-155.390,2022-06-13T03,17594,volcano0005,v332010_Kilauea_Hawaii
+1146,  19.424,-155.287,2022-07-20T03,18167,volcano0005,v332010_Kilauea_Hawaii
+1147,  19.540,-155.390,2022-08-13T03,18539,volcano0005,v332010_Kilauea_Hawaii
+1148,  19.424,-155.287,2022-09-19T02,19112,volcano0005,v332010_Kilauea_Hawaii
+1149,  19.540,-155.390,2022-10-31T19,19774,volcano0005,v332010_Kilauea_Hawaii
+1150,  19.424,-155.287,2022-11-23T01,20118,volcano0005,v332010_Kilauea_Hawaii
+1151,  19.540,-155.390,2023-04-15T02,22334,volcano0005,v332010_Kilauea_Hawaii
+1152,  19.424,-155.287,2023-05-18T03,22846,volcano0005,v332010_Kilauea_Hawaii
+1153,  38.788,  15.215,2019-10-12T09,02499,volcano0006,v211040_Stromboli
+1154, -15.400, 167.830,2019-11-28T01,03222,volcano0007,v257030_Aoba_Ambae
+1155, -39.420, -71.930,2019-09-13T14,02053,volcano0008,v357120_Villarrica
+1156,  19.480,-155.610,2020-02-20T01,04523,volcano0009,v332020_Mauna_Loa_Hawaii
+1157,  -5.050, 151.330,2019-09-25T04,02232,volcano0010,v252120_Ulawun
+1158,  -5.292, 151.502,2021-12-18T06,14854,volcano0010,v252120_Ulawun
+1159,  -5.110, 151.390,2022-01-15T06,15288,volcano0010,v252120_Ulawun
+1160,  -5.292, 151.502,2022-02-18T05,15814,volcano0010,v252120_Ulawun
+1161,  -5.110, 151.390,2022-05-18T06,17193,volcano0010,v252120_Ulawun
+1162,  -5.292, 151.502,2022-09-01T00,18832,volcano0010,v252120_Ulawun
+1163,  -5.110, 151.390,2022-09-17T05,19083,volcano0010,v252120_Ulawun
+1164,  -5.292, 151.502,2022-11-01T00,19777,volcano0010,v252120_Ulawun
+1165,  -5.110, 151.390,2022-11-17T05,20028,volcano0010,v252120_Ulawun
+1166,  -5.292, 151.502,2023-01-04T23,20783,volcano0010,v252120_Ulawun
+1167,  -5.110, 151.390,2023-01-17T05,20973,volcano0010,v252120_Ulawun
+1168,  13.260,  13.260,2020-05-08T07,05735,volcano0011,v273030_Mayon
+1169,  10.025, -83.767,2020-02-08T14,04346,volcano0012,v345070_Turrialba
+1170, -21.231,  55.713,2019-09-23T10,02205,volcano0013,v233020_Piton_de_la_Fournaise_Reunion
+1171, -21.098,  55.518,2021-10-25T11,14021,volcano0013,v233020_Piton_de_la_Fournaise_Reunion
+1172, -21.161,  55.643,2021-11-19T10,14408,volcano0013,v233020_Piton_de_la_Fournaise_Reunion
+1173,  32.880, 131.110,2021-06-06T03,11833,volcano0014,v282110_Aso
+1174,  14.470, -90.880,2019-10-07T16,02426,volcano0015,v342090_Fuego
+1175,  -4.271, 152.203,2019-11-28T03,03223,volcano0016,v252140_Rabaul_Tarvurvur
+1176,  -4.431, 152.162,2021-10-28T02,14062,volcano0016,v252140_Rabaul_Tarvurvur
+1177,  -4.517, 152.029,2022-08-02T23,18382,volcano0016,v252140_Rabaul_Tarvurvur
+1178,  -4.431, 152.162,2022-08-17T06,18603,volcano0016,v252140_Rabaul_Tarvurvur
+1179, -15.795, -71.860,2019-10-06T14,02409,volcano0017,v354006_Sabancaya
+1180,  31.585, 130.657,2020-04-29T02,05592,volcano0018,v282080_Sakurajima
+1181,  14.008, 120.994,2019-12-25T05,03643,volcano0019,v273070_Taal
+1182,  -1.520,  29.250,2019-10-09T07,02451,volcano0020,v223030_Nyiragongo
+1183,  -6.100, 105.420,2020-05-30T05,06074,volcano0021,v262000_Krakatau_Anak_Krakatau
+1184,  37.631,-119.032,2020-08-31T16,07522,volcano0022,v323150_Mammoth_Mountain_LVC
+1185, -37.520, 177.181,2019-09-15T20,02088,volcano0023,v241040_White_Island
+1186, -19.532, 169.447,2019-09-22T03,02185,volcano0024,v257100_Yasur
+1187,  40.827,  14.139,2020-02-03T12,04267,volcano0025,v2110010_Campi_Flegrei_and_Pisciarelli
+1188, -16.340, -70.900,2019-10-10T12,02470,volcano0026,v354020_Ubinas
+1189,  -4.080, 145.040,2019-10-08T23,02446,volcano0027,v251020_Manam
+1190,   4.895, -75.322,2020-02-19T20,04520,volcano0028,v351020_Nevado_del_Ruiz
+1191,  11.980, -86.160,2019-11-30T18,03264,volcano0029,v344100_Masaya
+1192,  -7.940, 112.950,2019-10-08T01,02432,volcano0030,v263310_Bromo
+1193,  -8.340, 115.510,2019-09-23T07,02203,volcano0031,v264020_Agung
+1194,  38.404,  14.962,2020-06-28T09,06526,volcano0032,v211050_Vulcano
+1195,  -2.764,  35.914,2020-02-29T10,04668,volcano0033,v222120_Oldoinyo_Lengai
+1196,  10.200, -84.233,2020-04-03T17,05199,volcano0034,v345040_Poas
+1197, -39.280, 175.570,2019-09-14T21,02073,volcano0035,v241100_Ruapehu
+1198,  44.400, 110.700,2019-10-07T05,02419,volcano0036,v325010_Yellowstone
+1199,  44.400,-110.700,2021-06-18T20,12030,volcano0036,v325010_Yellowstone
+1200,  -0.370, -91.550,2019-09-23T21,02212,volcano0037,v353010_Fernandina_Galapagos
+1201,  13.600,  40.670,2019-10-09T07,02451,volcano0038,v221080_Erta_Ale
+1202,   1.680, 127.880,2019-09-24T06,02218,volcano0039,v268010_Dukono
+1203, -37.860, -71.160,2020-02-25T21,04613,volcano0040,v357090_Copahue
+1204,  14.382, -90.601,2019-12-25T19,03652,volcano0041,v342110_Pacaya
+1205,  19.275,-154.910,2020-09-29T23,07975,volcano0042,v332010_East_Rift_Zone_Hawaii
+1206,  19.381,-154.998,2021-10-31T20,14120,volcano0042,v332010_East_Rift_Zone_Hawaii
+1207,  36.400, 138.530,2020-04-23T03,05500,volcano0043,v283110_Asama
+1208,  14.757, -91.552,2019-12-21T21,03591,volcano0044,v342030_Santiaguito_Santa_Maria
+1209,  41.980, 128.080,2019-10-07T04,02418,volcano0045,v305060_Changbaishan_CN_Baekdusan_Paekdusan_NK
+1210,   4.211,   9.175,2019-10-13T07,02513,volcano0046,v224010_Mt._Cameroon
+1211,   4.350,   9.274,2021-11-24T13,14487,volcano0046,v224010_Mt._Cameroon
+1212,   4.207,   9.178,2021-12-19T14,14875,volcano0046,v224010_Mt._Cameroon
+1213,   4.350,   9.274,2022-01-18T15,15340,volcano0046,v224010_Mt._Cameroon
+1214,   4.207,   9.178,2022-02-15T15,15774,volcano0046,v224010_Mt._Cameroon
+1215,   4.350,   9.274,2022-04-05T09,16529,volcano0046,v224010_Mt._Cameroon
+1216,   4.207,   9.178,2022-04-29T11,16902,volcano0046,v224010_Mt._Cameroon
+1217,   4.350,   9.274,2022-05-21T14,17245,volcano0046,v224010_Mt._Cameroon
+1218,   4.207,   9.178,2022-08-29T10,18792,volcano0046,v224010_Mt._Cameroon
+1219,   4.350,   9.274,2022-10-01T10,19303,volcano0046,v224010_Mt._Cameroon
+1220,   4.207,   9.178,2022-10-29T10,19737,volcano0046,v224010_Mt._Cameroon
+1221,   4.350,   9.274,2022-12-05T08,20309,volcano0046,v224010_Mt._Cameroon
+1222,  -0.830, -91.170,2020-03-22T21,05016,volcano0047,v353050_Sierra_Negra
+1223,  -1.408,  29.200,2020-01-08T07,03861,volcano0048,v223020_Nyamuragira
+1224,   6.437,  10.298,2019-10-09T08,02452,volcano0049,v224030_Oku_Volcanic_Field_Lake_Nyos
+1225,  -7.930, 112.310,2020-02-25T07,04604,volcano0050,v263280_Kelut
+1226,  -6.090, 155.230,2019-10-10T21,02476,volcano0051,v255020_Bagana
+1227,  12.423, -86.539,2020-05-31T18,06098,volcano0052,v344090_Momotombo
+1228,  29.635, 129.716,2019-10-06T03,02402,volcano0053,v282030_Suwanosejima_Marianas
+1229,  30.789, 130.308,2019-12-25T04,03642,volcano0054,v282060_Satsuma-Iwojima_Kikai
+1230,  13.370,  41.700,2019-09-24T12,02222,volcano0055,v221101_Nabro
+1231,   3.170,  98.391,2019-09-23T09,02204,volcano0056,v261080_Sinabung
+1232,  -1.700, 101.260,2020-02-20T09,04528,volcano0058,v261170_Kerinci
+1233,   1.360, 124.790,2019-10-09T01,02447,volcano0059,v266100_Lokon-Empung_Sulawesi
+1234, -16.294, -71.409,2020-01-13T12,03942,volcano0060,v354010_Misti
+1235,   0.826, -77.964,2020-08-20T21,07354,volcano0061,v351110_Chiles-Cerro_Negro
+1236,   1.113, 124.734,2020-06-01T03,06104,volcano0062,v266030_Soputan
+1237,  34.094, 139.526,2019-10-07T02,02417,volcano0063,v284040_Miyake-jima_Marianas
+1238,  16.720, -62.180,2019-10-11T13,02486,volcano0064,v360050_Soufriere_Hills_Montserrat
+1239,   2.780, 125.410,2020-01-31T04,04215,volcano0065,v267020_Karangetan
+1240,   2.917, -76.034,2019-12-26T18,03667,volcano0066,v351050_Nevado_del_Huila
+1241,  -8.060, 114.240,2019-11-30T04,03255,volcano0067,v263350_Kawah_Ijen_Ijen
+1242,  -5.530, 148.420,2019-10-06T00,02400,volcano0069,v252010_Langila
+1243,   1.200, -77.390,2020-02-22T20,04566,volcano0070,v351080_Galeras
+1244,  15.310, -61.310,2019-12-26T17,03666,volcano0071,v360101_Morne_Watt_Dominica_Island
+1245,  13.853, -89.630,2019-10-11T14,02487,volcano0072,v343020_Santa_Ana
+1246,  -8.509, 124.128,2019-10-10T00,02462,volcano0073,v264270_Sirung_Pantar
+1247,  46.200,-122.180,2020-04-22T19,05495,volcano0074,v321050_Mount_St._Helens
+1248,  35.360, 138.730,2021-05-04T22,11335,volcano0075,v283030_Fuji-san
+1249, -22.270, -67.180,2020-02-29T17,04673,volcano0076,v355838_Uturuncu
+1250,  12.702, -87.004,2020-04-10T14,05306,volcano0077,v344020_San_Cristobal
+1251, -23.370, -67.730,2019-09-13T13,02052,volcano0078,v355100_Lascar
+1252, -25.170, -68.500,2019-10-08T12,02439,volcano0079,v355120_Lastarria
+1253, -36.060, -70.490,2019-09-14T14,02068,volcano0080,v357061_Laguna_del_Maule
+1254,  52.449, 158.196,2020-04-24T22,05528,volcano0082,v300060_Mutnovsky
+1255,  31.911, 130.882,2020-03-01T01,04678,volcano0083,v282090_Shinmoedake_Kirishimayama
+1256,  34.720, 139.390,2020-03-28T06,05099,volcano0085,v284010_Izu-Oshima
+1257,   6.113, 124.892,2019-09-23T07,02203,volcano0086,v271011_Parker
+1258,  -0.077, -77.656,2020-01-10T13,03896,volcano0087,v352010_Reventador
+1259,   0.029, -77.986,2020-07-08T14,06684,volcano0088,v352006_Cayambe
+1260,  24.750, 141.290,2019-12-22T04,03596,volcano0089,v284120_Ioto_Iwo-Jima
+1261, -41.330, -72.610,2019-09-16T14,02099,volcano0091,v358020_Calbuco
+1262,   4.487, -75.389,2021-04-13T12,11003,volcano0092,v351040_Cerro_Machin
+1263, -42.833, -72.646,2019-09-18T18,02133,volcano0093,v358041_Chaiten
+1264, -42.964, -72.382,2021-10-27T20,14058,volcano0093,v358041_Chaiten
+1265, -42.704, -72.388,2021-11-22T16,14458,volcano0093,v358041_Chaiten
+1266, -42.964, -72.382,2022-01-02T18,15094,volcano0093,v358041_Chaiten
+1267, -42.704, -72.388,2022-01-16T18,15311,volcano0093,v358041_Chaiten
+1268, -42.964, -72.382,2022-01-18T11,15338,volcano0093,v358041_Chaiten
+1269, -42.704, -72.388,2022-05-15T19,17155,volcano0093,v358041_Chaiten
+1270, -42.964, -72.382,2022-09-08T15,18950,volcano0093,v358041_Chaiten
+1271, -42.704, -72.388,2022-09-10T20,18984,volcano0093,v358041_Chaiten
+1272, -42.964, -72.382,2022-09-12T14,19011,volcano0093,v358041_Chaiten
+1273, -42.704, -72.388,2022-09-14T18,19045,volcano0093,v358041_Chaiten
+1274, -42.964, -72.382,2022-09-16T12,19072,volcano0093,v358041_Chaiten
+1275, -42.704, -72.388,2022-09-29T13,19274,volcano0093,v358041_Chaiten
+1276, -42.964, -72.382,2022-11-08T15,19895,volcano0093,v358041_Chaiten
+1277, -42.704, -72.388,2022-11-14T18,19990,volcano0093,v358041_Chaiten
+1278, -42.964, -72.382,2022-11-16T12,20017,volcano0093,v358041_Chaiten
+1279, -42.704, -72.388,2022-11-18T17,20051,volcano0093,v358041_Chaiten
+1280, -42.964, -72.382,2022-12-20T22,20550,volcano0093,v358041_Chaiten
+1281, -42.704, -72.388,2023-01-18T17,20996,volcano0093,v358041_Chaiten
+1282, -42.964, -72.382,2023-05-07T16,22684,volcano0093,v358041_Chaiten
+1283, -42.704, -72.388,2023-05-13T19,22779,volcano0093,v358041_Chaiten
+1284,  10.830, -85.324,2023-03-01T15,21646,volcano0094,v345020_Rincon_de_la_Vieja
