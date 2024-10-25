@@ -382,7 +382,7 @@ def determine_optimal_geo_satellite(lons, lats, obs_datetime, zenith_limit=None)
 
     Returns
     -------
-    selected_sensor : str
+    selected_sensor : str or None
         a string sensor name, among the following choices (these are
         the string ID names needed for the vistool functions)
         Himawari-08
@@ -390,6 +390,9 @@ def determine_optimal_geo_satellite(lons, lats, obs_datetime, zenith_limit=None)
         GOES16_ABI_C, GOES16_ABI_F
         GOES17_ABI_C, GOES17_ABI_F
         GOES18_ABI_C, GOES18_ABI_F
+
+       If none of the geo satellites can view the requested location,
+       None is returned.
     """
 
     llpairs = list(zip(lons, lats))

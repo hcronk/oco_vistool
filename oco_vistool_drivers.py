@@ -6,7 +6,7 @@ from datetime import datetime
 
 import numpy as np
 
-from geo_imager_visibility import determine_optimal_satellite
+from geo_imager_visibility import determine_optimal_geo_satellite
 from oco_vistool import load_OCO2_Lite_overlay_data
 from satpy_overlay_plots import nonworldview_overlay_plot
 
@@ -62,7 +62,7 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
     lons = [latlon_ul[1], latlon_ul[1], latlon_lr[1], latlon_lr[1]]
     lats = [latlon_ul[0], latlon_lr[0], latlon_lr[0], latlon_ul[0]]
 
-    selected_sensor = determine_optimal_satellite(
+    selected_sensor = determine_optimal_geo_satellite(
         lons, lats, obs_datetime, zenith_limit = zenith_limit )
 
     # if None is returned, this position is not viewable from the geo imagers.
