@@ -790,6 +790,7 @@ def nonworldview_overlay_plot(
     returns a dictionary, containing all the axis objects created;
         this is generally most useful for testing or debugging.
         the dictionary contents are:
+    fig : the MPL figure object
     image_ax: the MPL axis object containing the image
     cb_ax: the MPL axis object for the colorbar. This will be set to
         invisible if the colorbar was not needed.
@@ -897,7 +898,7 @@ def nonworldview_overlay_plot(
         print("\nFigure saved at "+ out_plot_name + "\n")
 
     ax_dict = dict(
-        image_ax = ax, cb_ax = cb_ax,
+        fig = fig, image_ax = ax, cb_ax = cb_ax,
     )
 
     return ax_dict
