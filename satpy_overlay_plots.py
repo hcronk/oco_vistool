@@ -46,7 +46,7 @@ import vistool_lib as vl
 # code is located).
 _code_dir = os.path.dirname(os.path.realpath(__file__))
 
-def _get_view_zenith(scn, obs_lon, obs_lat):
+def _get_view_zenith(scn, obs_lon, obs_lat, lon_0=None, alt=None):
     """
     helper function to compute the view zenith angle to a observed lat/lon
     point (at zero altitude) for the given satellite.
@@ -66,9 +66,9 @@ def _get_view_zenith(scn, obs_lon, obs_lat):
         sat_lat = orb_pars['satellite_nominal_latitude']
         sat_alt = orb_pars['satellite_nominal_altitude']
     else:
-        sat_lon = scn['true_color'].attrs['satellite_longitude']
+        sat_lon = lon_0
         sat_lat = 0.0
-        sat_alt = scn['true_color'].attrs['satellite_altitude']
+        sat_alt = alt
 
     # in scn object, this is units [m], need [km] for pyorbital function.
     sat_alt *= 1e-3
@@ -377,7 +377,7 @@ def get_aws_AHI_files(datetime_utc, platform, offsets, bands_list, resolutions_l
     s3.meta.client.meta.events.register('choose-signer.s3.*', disable_signing)
     if platform == 'Himawari-08':
         hima_bucket = s3.Bucket('noaa-himawari8')
-        hima_num = 9
+        hima_num = 8
     elif platform == 'Himawari-09':
         hima_bucket = s3.Bucket('noaa-himawari9')
         hima_num = 9
@@ -574,6 +574,10 @@ def get_scene_obj(file_list, latlon_extent, sensor, width=750, height=750,
     else:
         tmp_scn = scn
 
+    #Grab lon_0 and alt from the metadata here. For some reason resampling sets them to 0.
+    lon_0_temp = tmp_scn["true_color"].attrs["area"].proj_dict.get('lon_0')
+    alt_temp = tmp_scn["true_color"].attrs["area"].proj_dict.get('h')
+
     # this would split the second string str1_str2,
     # or just return the str if there is no underscore.
     # thus, it should be the resample method after the
@@ -581,7 +585,7 @@ def get_scene_obj(file_list, latlon_extent, sensor, width=750, height=750,
     method = resample_method.split('_')[-1]
     new_scn = tmp_scn.resample(my_area, resampler=method)
 
-    return new_scn
+    return new_scn, lon_0_temp, alt_temp
 
 
 def _setup_axes(fignum, crs, figsize=(10,8), create_colorbar_axis=True):
@@ -827,11 +831,11 @@ def nonworldview_overlay_plot(
 
     # getting the scene by the background files
     if (cfg_d['sensor'].startswith('GOES')):
-        scn = get_scene_obj(file_list, latlon_extent, 'abi_l1b',
+        scn, lon_0, alt = get_scene_obj(file_list, latlon_extent, 'abi_l1b',
                             width=image_size[0], height=image_size[1],
                             resample_method=cfg_d['resample_method'])
     else:
-        scn = get_scene_obj(file_list, latlon_extent, 'ahi_hsd',
+        scn, lon_0, alt = get_scene_obj(file_list, latlon_extent, 'ahi_hsd',
                             width=image_size[0], height=image_size[1],
                             resample_method=cfg_d['resample_method'])
     crs = scn['true_color'].attrs['area'].to_cartopy_crs()
@@ -880,13 +884,21 @@ def nonworldview_overlay_plot(
         title_string = vl.create_plot_title_string(cfg_d, ovr_d, odat)
         # add some specific information for Geo backgrounds:
         # view zenith of Geo, and the time offset.
-        view_zenith = _get_view_zenith(scn, center_lon, center_lat)
+        view_zenith = _get_view_zenith(scn, center_lon, center_lat, lon_0=lon_0, alt=alt)
         extra_title_info = (
             ' (Zenith = {:2.0f}$^\\circ$, '.format(view_zenith) +
             '$\\Delta$t = {:4.1f} min.)'.format(time_offset) )
-        title_string_lines = title_string.split('\n')
-        title_string_lines[0] = title_string_lines[0] + extra_title_info
-        title_string = '\n'.join(title_string_lines)
+
+        #Long title so had to rework the title a bit
+        if ovr_d is not None:
+          title_string_lines = title_string.split('\n')
+          title_string_lines[1] = title_string_lines[1] + extra_title_info
+          title_string = '\n'.join(title_string_lines)
+        else:
+          title_string_lines = title_string.split('\n')
+          title_string_lines[0] = title_string_lines[0] + extra_title_info
+          title_string = '\n'.join(title_string_lines)
+
     else:
         title_string = cfg_d['out_plot_title']
 
