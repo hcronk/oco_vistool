@@ -182,7 +182,8 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
 
 def sample_geo_run():
 
-    L2_Lite_file = 'oco3_LtCO2_231001_B10401Br_231128044453s.nc4'
+    #Specify the full path to the OCO-3 Lite file
+    L2_Lite_file = '/data/oco3/scf/product/Lite_B10400Br_r02/2023/10/01/LtCO2/oco3_LtCO2_231001_B10401Br_231128044453s.nc4'
 
     # info here was manually extracted by looking at:
     # https://ocov3.jpl.nasa.gov/sams/plots.php?sID=35569
