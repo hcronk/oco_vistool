@@ -11,7 +11,7 @@ from oco_vistool import load_OCO2_Lite_overlay_data
 from satpy_overlay_plots import nonworldview_overlay_plot
 
 def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
-                   orbit, target_id, data_rev,
+                   orbit, target_id, data_rev, out_dir_temp,
                    download_dir = '.', L2_Lite_file=None):
     """
     make an image using true color geostationary data as the background.
@@ -70,7 +70,7 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
         return ''
 
     output_plot_file_fstr = (
-        '{sensor:s}{geo_sensor:s}_Lite_{data_rev:s}_{var_name:s}_'+
+        '{sensor:s}{geo_sensor:s}_{data_rev:s}_{var_name:s}_'+
         '{ymd:s}_{orbit:s}_{target_id:s}.png' )
 
     # a mapping between the geostationary sensor name (needed for satpy_overlay_plots
@@ -108,7 +108,7 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
         sensor = 'OCO-3',
         var_file = L2_Lite_file,
         var_name = 'xco2',
-        var_title_string = 'xco2',
+        var_title_string = 'Bias Corrected and Quality Flagged '+r'$X_{CO_2}$',
         lat_name = 'vertex_latitude',
         lon_name = 'vertex_longitude',
         lite_quality = 'good',
@@ -152,7 +152,7 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
             odat['var_data'], [10.0, 90.0], interpolation='nearest').tolist()
         sensor = 'OCO3-'
         var_name = 'xco2_bc_qf'
-        cbar_name = 'XCO2 [ppm]'
+        cbar_name = r'$X_{CO_2}$'+' [ppm]'
     else:
         odat = None
         ovr_d = None
@@ -175,7 +175,7 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
         return ''
 
     # could be altered here
-    objs['fig'].savefig(output_plot_file)
+    objs['fig'].savefig(out_dir_temp+"/"+output_plot_file) #Give the full path
 
     return output_plot_file
 
@@ -194,17 +194,18 @@ def sample_geo_run():
     target_id = 'fossil0035'
     data_rev = 'B10401Br_r02'
     download_dir = './tmp'
+    out_dir = './' #Now specifying the output directory
 
     t0 = datetime.now()
     output_plot_file = make_geo_image(
-        obs_datetime, latlon_ul, latlon_lr, orbit, target_id, data_rev,
+        obs_datetime, latlon_ul, latlon_lr, orbit, target_id, data_rev, out_dir,
         download_dir = download_dir, L2_Lite_file=None)
     print('Made background image : ' + output_plot_file)
     print('Elapsed time: ' + str(datetime.now()-t0))
 
     t0 = datetime.now()
     output_plot_file = make_geo_image(
-        obs_datetime, latlon_ul, latlon_lr, orbit, target_id, data_rev,
+        obs_datetime, latlon_ul, latlon_lr, orbit, target_id, data_rev, out_dir,
         download_dir = download_dir, L2_Lite_file=L2_Lite_file)
     print('Made overlay image    : ' + output_plot_file)
     print('Elapsed time: ' + str(datetime.now()-t0))
