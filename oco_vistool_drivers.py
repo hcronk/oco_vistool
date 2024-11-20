@@ -2,6 +2,11 @@
 example driver functions to call vistool from other python code.
 """
 
+import os
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["DASK_NUM_WORKERS"] = "1"
+os.environ["DASK_ARRAY__CHUNK_SIZE"] = "16MiB"
+
 from datetime import datetime
 
 import numpy as np
