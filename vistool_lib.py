@@ -18,7 +18,6 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-import calendar
 
 def get_image_size(latlon_extent, proj_string, img_xsize = 2000):
     """
@@ -233,9 +232,6 @@ def setup_axes(latlon_extent, crs, fignum=1,
 
     #Coastlines in the globe inset
     ax2.coastlines(color="0.25")
-
-    #Time stamp
-    plt.text(0.99,0.01,"Created "+str(datetime.now().day)+' '+calendar.month_abbr[datetime.now().month]+' '+str(datetime.now().year)+"\nSource: NASA/JPL-Caltech",ha='right', va='bottom', transform=ax1.transAxes,color='1.0',size=18)
 
     return fig, ax1, ax2, cbax, layer_cbax, fig_scalefactor
 

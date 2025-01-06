@@ -11,6 +11,8 @@ from datetime import datetime
 
 import numpy as np
 
+import calendar
+
 from geo_imager_visibility import determine_optimal_geo_satellite
 from oco_vistool import load_OCO2_Lite_overlay_data
 from satpy_overlay_plots import nonworldview_overlay_plot
@@ -178,6 +180,9 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
     except ValueError:
         print('Image file failed, possibly due to geo imager data gap')
         return ''
+
+    # Time/creation stamp
+    objs['image_ax'].text(0.99,0.01,"Created "+str(datetime.now().day)+' '+calendar.month_abbr[datetime.now().month]+' '+str(datetime.now().year)+"\nSource: NASA/JPL-Caltech",ha='right', va='bottom', transform=objs['image_ax'].transAxes, color='1.0',size=18)
 
     # could be altered here
     objs['fig'].savefig(out_dir_temp+"/"+output_plot_file) #Give the full path
