@@ -805,7 +805,7 @@ def load_OCO2_L1L2_overlay_data(ovr_d, load_view_geom=False):
         timestamps = hgrp['retrieval_time_tai93'][:][frame_slice,np.newaxis]
         # in this case, there are no sounding_QF>1 (bad) samples, those
         # are not sent to L2Std for processing.
-        sounding_qf = np.zeros(sounding_id.shape, np.bool)
+        sounding_qf = np.zeros(sounding_id.shape, bool)
 
         if load_view_geom:
             hgrp = h5['RetrievalGeometry']
@@ -1038,7 +1038,7 @@ def load_OCO2_Lite_overlay_data(ovr_d):
         elif ovr_d['lite_quality'] == 'bad':
             qf_msk = lite_qf == 1
         else:
-            qf_msk = np.ones(lite_qf.shape, np.bool)
+            qf_msk = np.ones(lite_qf.shape, bool)
         msk_list.append(qf_msk)
 
         if ovr_d['warn']:
