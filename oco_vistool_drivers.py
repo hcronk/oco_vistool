@@ -190,7 +190,7 @@ def make_geo_image(obs_datetime, latlon_ul, latlon_lr,
     return output_plot_file
 
 
-def sample_geo_run():
+def sample_goes_run():
 
     #Specify the full path to the OCO-3 Lite file
     L2_Lite_file = '/data/oco3/scf/product/Lite_B10400Br_r02/2023/10/01/LtCO2/oco3_LtCO2_231001_B10401Br_231128044453s.nc4'
@@ -221,6 +221,38 @@ def sample_geo_run():
     print('Made overlay image    : ' + output_plot_file)
     print('Elapsed time: ' + str(datetime.now()-t0))
 
+def sample_himawari_run():
+
+    #Specify the full path to the OCO-3 Lite file
+    L2_Lite_file = '/data/oco3/scf/product/Lite_B10400Br_r02/2023/10/01/LtCO2/oco3_LtCO2_231001_B10401Br_231128044453s.nc4'
+
+    # info here was manually extracted by looking at:
+    # https://ocov3.jpl.nasa.gov/sams/plots.php?sID=35557
+    obs_datetime = datetime(2023, 10, 1, 4, 41)
+    lat0, lon0 = 35.8, 119.8
+    latlon_ul = (lat0 + 1.5, lon0 - 1.5/np.cos(np.deg2rad(lat0)))
+    latlon_lr = (lat0 - 1.5, lon0 + 1.5/np.cos(np.deg2rad(lat0)))
+    orbit = 24954
+    target_id = 'fossil0078'
+    data_rev = 'B10401Br_r02'
+    download_dir = './tmp'
+    out_dir = './' #Now specifying the output directory
+
+    t0 = datetime.now()
+    output_plot_file = make_geo_image(
+        obs_datetime, latlon_ul, latlon_lr, orbit, target_id, data_rev, out_dir,
+        download_dir = download_dir, L2_Lite_file=None)
+    print('Made background image : ' + output_plot_file)
+    print('Elapsed time: ' + str(datetime.now()-t0))
+
+    t0 = datetime.now()
+    output_plot_file = make_geo_image(
+        obs_datetime, latlon_ul, latlon_lr, orbit, target_id, data_rev, out_dir,
+        download_dir = download_dir, L2_Lite_file=L2_Lite_file)
+    print('Made overlay image    : ' + output_plot_file)
+    print('Elapsed time: ' + str(datetime.now()-t0))
+
 
 if __name__ == "__main__":
-    sample_geo_run()
+    sample_goes_run()
+    sample_himawari_run()
