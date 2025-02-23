@@ -397,13 +397,33 @@ def _process_overlay_dict(input_dict):
 
     return ovr_d
 
-def construct_target_box(target, infoType, delta_degree = 1.5):
+def construct_target_box(input_datetime, target, infoType, delta_degree = 1.5):
     targets = pd.read_csv(code_dir + '/targets.csv', index_col = 0)
     if (target not in targets[infoType].values):
         raise ValueError('Cannot find this target. Provide a valid ' + infoType)
-        
-    center_lon = targets[targets[infoType] == target]['target_lon'].values[0]
-    center_lat = targets[targets[infoType] == target]['target_lat'].values[0]
+
+    target_positions = targets[targets[infoType] == target]
+    num_target_positions = len(target_positions)
+    if num_target_positions > 1:
+        target_positions.sort_values(by='orbit')
+        target_position_datetimes = [
+            datetime.datetime.strptime(dtstring, '%Y-%m-%dT%H')
+            for dtstring in target_positions['YMDH']]
+        if input_datetime < target_position_datetimes[0]:
+            raise ValueError('No position defined for target ' + target +
+                             ' at orbit: ' + str(input_datetime))
+        # match_k will be the index of the most recent target position
+        # that occurs before the input datetime
+        match_k = 0
+        for k in range(1,num_target_positions):
+            if input_datetime < target_position_datetimes[k]:
+                break
+            match_k += 1
+        center_lon = target_positions['target_lon'].values[match_k]
+        center_lat = target_positions['target_lat'].values[match_k]
+    else:
+        center_lon = target_positions['target_lon'].values[0]
+        center_lat = target_positions['target_lat'].values[0]
     
     geo_upper_left = [center_lat + delta_degree, center_lon - delta_degree/(np.cos(np.deg2rad(center_lat)))]
     geo_lower_right = [center_lat - delta_degree, center_lon + delta_degree/(np.cos(np.deg2rad(center_lat)))]
@@ -476,6 +496,15 @@ def process_config_dict(input_dict):
     # values.
     cfg_d['date'] = input_dict['date']
     cfg_d['straight_up_date'] = cfg_d['date'].replace("-", "").replace(":",'').replace(" ","_")
+
+    try:
+        if len(cfg_d['date']) == 10:
+            cfg_d['datetime'] = datetime.datetime.strptime(cfg_d['date'], '%Y-%m-%d')
+        else:
+            cfg_d['datetime'] = datetime.datetime.strptime(cfg_d['date'], '%Y-%m-%d %H:%M:%S')
+    except:
+        raise ValueError('input field "date" has incorrect format, '+
+                         'expecting "YYYY-MM-DD" or "YYYY-MM-DD hh:mm:ss"')
     
     if (('geo_upper_left' in input_dict or 'geo_lower_right' in input_dict) and ('target_id' in input_dict or 'target_name' in input_dict)):
         raise ValueError('Only one of: corner coordinates, target ID or target name should be provided')
@@ -489,16 +518,19 @@ def process_config_dict(input_dict):
     if ('geo_upper_left' in input_dict and 'geo_lower_right' in input_dict):
         cfg_d['geo_upper_left'] = input_dict['geo_upper_left']
         cfg_d['geo_lower_right'] = input_dict['geo_lower_right']
-    
+
     if ('target_id' in input_dict):
-        cfg_d['geo_upper_left'], cfg_d['geo_lower_right'] = construct_target_box(input_dict['target_id'], 'target_id')
+        cfg_d['geo_upper_left'], cfg_d['geo_lower_right'] = construct_target_box(cfg_d['datetime'], input_dict['target_id'], 'target_id')
     
     if ('target_name' in input_dict):
-        cfg_d['geo_upper_left'], cfg_d['geo_lower_right'] = construct_target_box(input_dict['target_name'], 'target_name')
+        cfg_d['geo_upper_left'], cfg_d['geo_lower_right'] = construct_target_box(cfg_d['datetime'], input_dict['target_name'], 'target_name')
     
     cfg_d['sensor'] = input_dict.get('sensor')
-    valid_sensor_names = ('Worldview', 'GOES16_ABI_C', 'GOES16_ABI_F',
-                          'GOES17_ABI_C', 'GOES17_ABI_F', 'Himawari-08',)
+    valid_sensor_names = ('Worldview',
+                          'GOES16_ABI_C', 'GOES16_ABI_F',
+                          'GOES17_ABI_C', 'GOES17_ABI_F',
+                          'GOES18_ABI_C', 'GOES18_ABI_F',
+                          'Himawari-08', 'Himawari-09')
 
     if cfg_d['sensor'] not in valid_sensor_names:
         raise ValueError('sensor name: ' + cfg_d['sensor'] + ' is not valid')
@@ -553,15 +585,6 @@ def process_config_dict(input_dict):
     cfg_d['out_data_name'] = input_dict.get('out_data_name', '')
 
     # now do various checks.
-    try:
-        if len(cfg_d['date']) == 10:
-            cfg_d['datetime'] = datetime.datetime.strptime(cfg_d['date'], '%Y-%m-%d')
-        else:
-            cfg_d['datetime'] = datetime.datetime.strptime(cfg_d['date'], '%Y-%m-%d %H:%M:%S')
-    except:
-        raise ValueError('input field "date" has incorrect format, '+
-                         'expecting "YYYY-MM-DD" or "YYYY-MM-DD hh:mm:ss"')
-
     
     if cfg_d['ground_site']:
         cfg_d['ground_site'] = float(cfg_d['ground_site'][0]), float(cfg_d['ground_site'][1])
@@ -1535,10 +1558,10 @@ if __name__ == "__main__":
         # image regardless of the input setting; we have no way to know the
         # desired background time in this case.
         else:
+            print("There is no valid data in the target box after applying filters.")
             if ovr_d['make_background_image']:
-                print('No overlay data present in the target box after applying filters. '+
-                      'stopping background image creation')
-                make_background_image = False
+                print('No overlay data present, stopping background image creation')
+            make_background_image = False
     else:
         # otherwise, if NO overlay dictionary was specified in the input config,
         # then this is automatically a background-only run.

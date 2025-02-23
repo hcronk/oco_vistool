@@ -46,7 +46,7 @@ import vistool_lib as vl
 # code is located).
 _code_dir = os.path.dirname(os.path.realpath(__file__))
 
-def _get_view_zenith(scn, obs_lon, obs_lat):
+def _get_view_zenith(scn, obs_lon, obs_lat, lon_0=None, alt=None):
     """
     helper function to compute the view zenith angle to a observed lat/lon
     point (at zero altitude) for the given satellite.
@@ -55,7 +55,7 @@ def _get_view_zenith(scn, obs_lon, obs_lat):
     after the true_color composite is loaded.
     """
 
-    obs_datetime = scn.attrs['start_time']
+    obs_datetime = scn['true_color'].attrs['start_time']
     obs_alt = 0.0
 
     # orbital parameters are stored in different keys for
@@ -66,9 +66,9 @@ def _get_view_zenith(scn, obs_lon, obs_lat):
         sat_lat = orb_pars['satellite_nominal_latitude']
         sat_alt = orb_pars['satellite_nominal_altitude']
     else:
-        sat_lon = scn['true_color'].attrs['satellite_longitude']
+        sat_lon = lon_0
         sat_lat = 0.0
-        sat_alt = scn['true_color'].attrs['satellite_altitude']
+        sat_alt = alt
 
     # in scn object, this is units [m], need [km] for pyorbital function.
     sat_alt *= 1e-3
@@ -174,8 +174,12 @@ def get_aws_ABI_files(datetime_utc, domain, platform, hour_offsets, bands_list, 
     
     if (platform[-2:] == '16'):
         g_bucket = s3.Bucket('noaa-goes16')
-    else:
+    elif (platform[-2:] == '17'):
         g_bucket = s3.Bucket('noaa-goes17')
+    elif (platform[-2:] == '18'):
+        g_bucket = s3.Bucket('noaa-goes18')
+    else:
+        raise ValueError('unknown platform: ', platform)
         
     flists = collections.defaultdict(list)
     
@@ -259,10 +263,10 @@ def get_ABI_files(datetime_utc, center_lat,
     valid_domains = 'C', 'F'
     if domain not in valid_domains:
         raise ValueError('domain must be in '+str(valid_domains))
-    valid_platforms = 'GOES16', 'GOES17'
+    valid_platforms = 'GOES16', 'GOES17', 'GOES18'
     if platform not in valid_platforms:
         raise ValueError('platform must be in '+str(valid_platforms))
-    # code used in filename is G16 or G17 for GOES16, GOES17.
+    # code used in filename is G16,G17,G18 for GOES16, GOES17, GOES18
     platform = platform.replace('GOES','G')
 
     # search within hour of input datetime, and +/-1 hour
@@ -344,7 +348,7 @@ def get_loc_AHI_files(datetime_utc, data_home, offsets, bands_list):
 
     return files
 
-def get_aws_AHI_files(datetime_utc, offsets, bands_list, resolutions_list):
+def get_aws_AHI_files(datetime_utc, platform, offsets, bands_list, resolutions_list):
     """
     Helper function for accessing the paths of relevant AWS Himawari background files.
 
@@ -352,6 +356,7 @@ def get_aws_AHI_files(datetime_utc, offsets, bands_list, resolutions_list):
     
     inputs:
     datetime_utc: datetime object for the needed timeslot
+    platform: string specifying which platform (himawari-08 or himawari-09)
     offsets: different time offsets to iterate
     bands_list: list of needed bands
     resolutions_list: list of desired image resolutions, same length as bands_list
@@ -370,20 +375,29 @@ def get_aws_AHI_files(datetime_utc, offsets, bands_list, resolutions_list):
     
     # See https://stackoverflow.com/questions/34865927/can-i-use-boto3-anonymously for reference
     s3.meta.client.meta.events.register('choose-signer.s3.*', disable_signing)
-    hima_bucket = s3.Bucket('noaa-himawari8')
+    if platform == 'Himawari-08':
+        hima_bucket = s3.Bucket('noaa-himawari8')
+        hima_num = 8
+    elif platform == 'Himawari-09':
+        hima_bucket = s3.Bucket('noaa-himawari9')
+        hima_num = 9
+    else:
+        raise ValueError('unknown platform: ', platform)
     
     # known AWS Hima filepath format
-    strftime_template = 'AHI-L1b-FLDK/%Y/%m/%d/%H%M/'
+    # prefix path and full path.
+    hima_ppath_template = 'AHI-L1b-FLDK/%Y/%m/%d/%H%M/'
+    hima_fpath_template = hima_ppath_template + 'HS_H{0:02d}_%Y%m%d_%H%M_B{1:02d}_FLDK_R{2:02d}_S??10.DAT.bz2'
 
     for offset, (band, res) in itertools.product(offsets, zip(bands_list, resolutions_list)):
         offset_dt = rounded_datetime_utc + datetime.timedelta(minutes=offset)
 
         # access the background files by the known path format
-        hima_files = hima_bucket.objects.filter(Prefix=offset_dt.strftime(strftime_template))
+        hima_files = hima_bucket.objects.filter(Prefix=offset_dt.strftime(hima_ppath_template))
 
         # searches for files with the selected band Bnn, at specified
         # resolution Rnn and use S??10 (ignore the not-segmented file)
-        glob_str = offset_dt.strftime(strftime_template + 'HS_H08_%Y%m%d_%H%M') + '_B{0:02d}_FLDK_R{1:02d}_S??10.DAT.bz2'.format(band,res)
+        glob_str = offset_dt.strftime(hima_fpath_template).format(hima_num,band,res)
 
         # record the AWS files by the needed format
         keys = list()
@@ -436,7 +450,7 @@ def download_aws_AHI_files(flist, hima_bucket, data_home):
     flist = list(set(files))
     return flist
 
-def get_AHI_files(datetime_utc, center_lat, files_loc, data_home):
+def get_AHI_files(datetime_utc, center_lat, platform, files_loc, data_home):
     """
     Using the helpers above, accesses the needed Himawari files by date & time and downloads them (if needed).
     
@@ -445,6 +459,7 @@ def get_AHI_files(datetime_utc, center_lat, files_loc, data_home):
     inputs:
     datetime_utc: datetime object for the needed point of time
     center_lat: center latitude of the background image
+    platform: string specifying which platform (himawari-08 or himawari-09)
     files_loc: if the background images are local or on AWS
     data_home: origin directory for the background files 
     """
@@ -459,7 +474,7 @@ def get_AHI_files(datetime_utc, center_lat, files_loc, data_home):
     # accessing the Himawari files paths and bucket from AWS
     if (files_loc == 'aws'):
         files, hima_bucket = get_aws_AHI_files(
-            datetime_utc, offsets, bands_list, resolutions_list)
+            datetime_utc, platform, offsets, bands_list, resolutions_list)
 
     # accessing the local files
     else:
@@ -559,6 +574,10 @@ def get_scene_obj(file_list, latlon_extent, sensor, width=750, height=750,
     else:
         tmp_scn = scn
 
+    #Grab lon_0 and alt from the metadata here. For some reason resampling sets them to 0.
+    lon_0_temp = tmp_scn["true_color"].attrs["area"].proj_dict.get('lon_0')
+    alt_temp = tmp_scn["true_color"].attrs["area"].proj_dict.get('h')
+
     # this would split the second string str1_str2,
     # or just return the str if there is no underscore.
     # thus, it should be the resample method after the
@@ -566,7 +585,7 @@ def get_scene_obj(file_list, latlon_extent, sensor, width=750, height=750,
     method = resample_method.split('_')[-1]
     new_scn = tmp_scn.resample(my_area, resampler=method)
 
-    return new_scn
+    return new_scn, lon_0_temp, alt_temp
 
 
 def _setup_axes(fignum, crs, figsize=(10,8), create_colorbar_axis=True):
@@ -775,6 +794,7 @@ def nonworldview_overlay_plot(
     returns a dictionary, containing all the axis objects created;
         this is generally most useful for testing or debugging.
         the dictionary contents are:
+    fig : the MPL figure object
     image_ax: the MPL axis object containing the image
     cb_ax: the MPL axis object for the colorbar. This will be set to
         invisible if the colorbar was not needed.
@@ -796,7 +816,7 @@ def nonworldview_overlay_plot(
         time_offset = np.mean(time_offsets)/60.0
     else:
         file_list, time_offsets = get_AHI_files(
-            dt, center_lat, cfg_d['files_loc'], cfg_d['data_home'])
+            dt, center_lat, cfg_d['sensor'], cfg_d['files_loc'], cfg_d['data_home'])
         time_offset = np.mean(time_offsets)/60.0
         
     if len(file_list) == 0:
@@ -811,11 +831,11 @@ def nonworldview_overlay_plot(
 
     # getting the scene by the background files
     if (cfg_d['sensor'].startswith('GOES')):
-        scn = get_scene_obj(file_list, latlon_extent, 'abi_l1b',
+        scn, lon_0, alt = get_scene_obj(file_list, latlon_extent, 'abi_l1b',
                             width=image_size[0], height=image_size[1],
                             resample_method=cfg_d['resample_method'])
     else:
-        scn = get_scene_obj(file_list, latlon_extent, 'ahi_hsd',
+        scn, lon_0, alt = get_scene_obj(file_list, latlon_extent, 'ahi_hsd',
                             width=image_size[0], height=image_size[1],
                             resample_method=cfg_d['resample_method'])
     crs = scn['true_color'].attrs['area'].to_cartopy_crs()
@@ -864,13 +884,21 @@ def nonworldview_overlay_plot(
         title_string = vl.create_plot_title_string(cfg_d, ovr_d, odat)
         # add some specific information for Geo backgrounds:
         # view zenith of Geo, and the time offset.
-        view_zenith = _get_view_zenith(scn, center_lon, center_lat)
+        view_zenith = _get_view_zenith(scn, center_lon, center_lat, lon_0=lon_0, alt=alt)
         extra_title_info = (
             ' (Zenith = {:2.0f}$^\\circ$, '.format(view_zenith) +
             '$\\Delta$t = {:4.1f} min.)'.format(time_offset) )
-        title_string_lines = title_string.split('\n')
-        title_string_lines[0] = title_string_lines[0] + extra_title_info
-        title_string = '\n'.join(title_string_lines)
+
+        #Long title so had to rework the title a bit
+        if ovr_d is not None:
+          title_string_lines = title_string.split('\n')
+          title_string_lines[1] = title_string_lines[1] + extra_title_info
+          title_string = '\n'.join(title_string_lines)
+        else:
+          title_string_lines = title_string.split('\n')
+          title_string_lines[0] = title_string_lines[0] + extra_title_info
+          title_string = '\n'.join(title_string_lines)
+
     else:
         title_string = cfg_d['out_plot_title']
 
@@ -882,7 +910,7 @@ def nonworldview_overlay_plot(
         print("\nFigure saved at "+ out_plot_name + "\n")
 
     ax_dict = dict(
-        image_ax = ax, cb_ax = cb_ax,
+        fig = fig, image_ax = ax, cb_ax = cb_ax,
     )
 
     return ax_dict

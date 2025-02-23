@@ -124,7 +124,7 @@ def add_coastlines(latlon_extent, ax):
     tree = STRtree([plotting_box])
     coasts_in_box = []
     for i in range(len(coastlines)):
-        if tree.query(coastlines[i]): coasts_in_box.append(coastlines[i])
+        if len(tree.query(coastlines[i])) > 0: coasts_in_box.append(coastlines[i])
     ax.add_geometries(coasts_in_box, ccrs.PlateCarree(),
                        facecolor='None', edgecolor='k')
 
@@ -228,7 +228,10 @@ def setup_axes(latlon_extent, crs, fignum=1,
     ax2.set_global()
     ax2.scatter(((W+E)/2.),((N+S)/2.),c='r',s=inset_marker_size,
                 marker='*',transform=ccrs.PlateCarree())
-    ax2.background_img(name='ne_shaded', resolution='low')
+    ax2.stock_img(name='ne_shaded')
+
+    #Coastlines in the globe inset
+    ax2.coastlines(color="0.25")
 
     return fig, ax1, ax2, cbax, layer_cbax, fig_scalefactor
 
@@ -244,8 +247,8 @@ def create_plot_title_string(cfg_d, ovr_d, odat):
 
     title = ''
     if ovr_d is not None:
-        title += ovr_d['sensor'] + ' ' + ovr_d['var_title_string'] + ', '
-    title += 'background from ' + cfg_d['sensor'] + '\n'
+        title += ovr_d['sensor'] + ' ' + ovr_d['var_title_string'] + '\n'
+    title += 'Background from ' + cfg_d['sensor'] + '\n'
 
     if odat is not None:
         title += odat['operation_mode'] + ' Mode'
@@ -258,10 +261,10 @@ def create_plot_title_string(cfg_d, ovr_d, odat):
         title += odat['data_version'] + '\n'
 
     if odat is not None:
-        dt = datetime.fromtimestamp(odat['time'][0])
-        time_string = dt.strftime('%H:%M UTC %d %b %Y')
+        dt = datetime.utcfromtimestamp(odat['time'][0])
+        time_string = dt.strftime('%H:%M UTC %-d %b %Y')
     else:
-        time_string = cfg_d['datetime'].strftime('%H:%M UTC %d %b %Y')
+        time_string = cfg_d['datetime'].strftime('%H:%M UTC %-d %b %Y')
 
     title += time_string
 
